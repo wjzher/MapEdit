@@ -10,12 +10,14 @@ Rectangle {
     property int cellH: ((height + numberMargins) / rows);
     property real scaleGrid: 1.0;
     clip: true;
+
     GridView {
         id: pathGrid;
         width: root.width * root.scaleGrid;
         height: root.height * root.scaleGrid;
         anchors.margins: 0;
         //        anchors.centerIn: parent;
+
         clip: true
         model: (rows * columns);
         delegate: numberDelegate
@@ -25,6 +27,13 @@ Rectangle {
         Component.onCompleted: {
             console.log("w = ", root.width, " h = ", root.height);
             console.log("cw = " + root.cellW, " ch = ", root.cellH);
+        }
+        MouseArea {
+            id: gridMa;
+            anchors.fill: parent;
+            drag.target: pathGrid;      // drag path Grid
+            drag.axis: Drag.XAndYAxis;
+            acceptedButtons: Qt.RightButton;    // right button is valid
         }
     }
     Component {
@@ -37,9 +46,16 @@ Rectangle {
             border.color: "black";
             border.width: wrapper.GridView.isCurrentItem ? 2 : 0;
             Text {
-                anchors.centerIn: parent
-                font.pixelSize: 10
-                text: index
+                anchors.centerIn: parent;
+                font.pixelSize: 10;
+                text: index;
+            }
+            MouseArea {
+                id: wrapperMa;
+                anchors.fill: parent;
+                onClicked: {
+                    console.log("wrapperMa " + index + " clicked.");
+                }
             }
         }
     }
