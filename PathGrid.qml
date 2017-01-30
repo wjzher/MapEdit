@@ -10,7 +10,17 @@ Rectangle {
     property int cellH: ((height + numberMargins) / rows);
     property real scaleGrid: 1.0;
     clip: true;
-
+    MouseArea {
+        anchors.fill: parent;
+        onWheel: {
+            console.log("Wheel " + wheel.angleDelta.y + " " + wheel.angleDelta.x);
+            if (wheel.angleDelta.y > 0) {
+                root.scaleGrid += 0.1;
+            } else if (wheel.angleDelta.y < 0) {
+                root.scaleGrid -= 0.1;
+            }
+        }
+    }
     GridView {
         id: pathGrid;
         width: root.width * root.scaleGrid;
