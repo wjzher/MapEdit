@@ -12,12 +12,20 @@ Window {
 
     onWidthChanged: {
     }
-    PathGrid {
-        anchors.centerIn: parent;
+    LineItem {
+        width: 40;
+        height: 24;
+        anchors.left: parent.left;
+        anchors.top: parent.top;
+        anchors.margins: 4;
+    }
+    MapGrid {
         width: 600;
         height: 600;
+        anchors.centerIn: parent;
         rows: 20;
         columns: 20;
         scaleGrid: 1.5;
     }
+
 }
