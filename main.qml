@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
+import Qt.MapItemType 1.0
 
 Window {
     visible: true
@@ -12,12 +13,14 @@ Window {
 
     onWidthChanged: {
     }
-    LineItem {
-        width: 40;
-        height: 24;
+    MapItem {
+        length: 100;
         anchors.left: parent.left;
         anchors.top: parent.top;
         anchors.margins: 4;
+        type: MapItemType.MapItemXLine;
+        Component.onCompleted: {
+        }
     }
     MapGrid {
         width: 600;
@@ -27,5 +30,4 @@ Window {
         columns: 20;
         scaleGrid: 1.5;
     }
-
 }

@@ -1,4 +1,5 @@
 import QtQuick 2.5
+import Qt.MapItemType 1.0
 
 Rectangle {
     id: root;
@@ -47,24 +48,17 @@ Rectangle {
     }
     Component {
         id: numberDelegate;
-        Rectangle {
+        MapItem {
             id: wrapper;
+            type: MapItemType.MapItemNULL;
             width: (root.cellW - numberMargins) * root.scaleGrid;
             height: (root.cellH - numberMargins) * root.scaleGrid;
             color: "lightGreen";
             border.color: "black";
             border.width: wrapper.GridView.isCurrentItem ? 2 : 0;
-            Text {
-                anchors.centerIn: parent;
-                font.pixelSize: 10;
-                text: index;
-            }
-            MouseArea {
-                id: wrapperMa;
-                anchors.fill: parent;
-                onClicked: {
-                    console.log("wrapperMa " + index + " clicked.");
-                }
+            text: index;
+            onClicked: {
+                console.log("wrapper " + index + " clicked.");
             }
         }
     }
