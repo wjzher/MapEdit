@@ -18,7 +18,8 @@ Window {
         anchors.left: parent.left;
         anchors.top: parent.top;
         anchors.margins: 4;
-        type: MapItemType.MapItemCross;
+        type: MapItemType.MapItemYUStop;
+        color: "red";
         Component.onCompleted: {
         }
         onClicked: {

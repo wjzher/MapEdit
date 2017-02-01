@@ -17,8 +17,8 @@ public:
         MapItemCross,
         MapItemXLStop,
         MapItemXRStop,
-        MapItemYLStop,
-        MapItemYRStop
+        MapItemYUStop,
+        MapItemYDStop
     };
 
 signals:
