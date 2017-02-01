@@ -44,7 +44,6 @@ Window {
             text: "NULL";
             onTriggered: {
                 mapItem.type = MapItemType.MapItemNULL;
-                mapItem.canvas.requestPaint();
             }
         }
 
@@ -52,7 +51,6 @@ Window {
             text: "XLine";
             onTriggered: {
                 mapItem.type = MapItemType.MapItemXLine;
-                mapItem.canvas.requestPaint();
             }
         }
 
@@ -60,7 +58,6 @@ Window {
             text: "YLine";
             onTriggered: {
                 mapItem.type = MapItemType.MapItemYLine;
-                mapItem.canvas.requestPaint();
             }
         }
 
@@ -68,7 +65,6 @@ Window {
             text: "Cross";
             onTriggered: {
                 mapItem.type = MapItemType.MapItemCross;
-                mapItem.canvas.requestPaint();
             }
         }
 

@@ -8,10 +8,16 @@ Rectangle {
     property int type: MapItemType.MapItemXLine;
     property bool isCard: false;
     property var cardPos: [length / 2, length / 2];
-    property alias canvas: canvas;
     signal clicked;
     width: length;
     height: length;
+    function rePaint() {
+        canvas.requestPaint();
+    }
+    onTypeChanged: rePaint();
+    onIsCardChanged: rePaint();
+    onCardPosChanged: rePaint();
+
     Canvas {
         id: canvas;
         anchors.fill: parent;
