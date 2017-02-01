@@ -18,8 +18,11 @@ Window {
         anchors.left: parent.left;
         anchors.top: parent.top;
         anchors.margins: 4;
-        type: MapItemType.MapItemXLine;
+        type: MapItemType.MapItemCross;
         Component.onCompleted: {
+        }
+        onClicked: {
+            contentMenu.popup();
         }
     }
     MapGrid {
@@ -29,5 +32,28 @@ Window {
         rows: 20;
         columns: 20;
         scaleGrid: 1.5;
+    }
+    Menu {
+        id: contentMenu;
+        MenuItem {
+            text: "Add";
+            onTriggered: {
+                console.log("Trig Add.");
+            }
+        }
+        Menu {
+            title: "del";
+            MenuItem {
+                text: "del2";
+
+            }
+                MenuItem {
+                    text: "delabc";
+                    onTriggered: {
+
+                    }
+                }
+         }
+
     }
 }

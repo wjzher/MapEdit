@@ -15,7 +15,10 @@ public:
         MapItemXLine,
         MapItemYLine,
         MapItemCross,
-        MapItemStop
+        MapItemXLStop,
+        MapItemXRStop,
+        MapItemYLStop,
+        MapItemYRStop
     };
 
 signals:

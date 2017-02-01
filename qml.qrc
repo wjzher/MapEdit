@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>ColorPicker.qml</file>
-        <file>LineItem.qml</file>
         <file>MapItem.qml</file>
         <file>MapGrid.qml</file>
     </qresource>

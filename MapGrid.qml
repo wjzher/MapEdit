@@ -13,7 +13,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent;
         onWheel: {
-            console.log("Wheel " + wheel.angleDelta.y + " " + wheel.angleDelta.x);
+//            console.log("Wheel " + wheel.angleDelta.y + " " + wheel.angleDelta.x);
             if (wheel.angleDelta.y > 0) {
                 root.scaleGrid += 0.1;
             } else if (wheel.angleDelta.y < 0) {
@@ -35,8 +35,8 @@ Rectangle {
         cellWidth: root.cellH * root.scaleGrid;
         focus: true;
         Component.onCompleted: {
-            console.log("w = ", root.width, " h = ", root.height);
-            console.log("cw = " + root.cellW, " ch = ", root.cellH);
+//            console.log("w = ", root.width, " h = ", root.height);
+//            console.log("cw = " + root.cellW, " ch = ", root.cellH);
         }
         MouseArea {
             id: gridMa;

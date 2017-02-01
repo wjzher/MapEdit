@@ -26,6 +26,28 @@ Rectangle {
                 ctx.lineTo(width, (height + (height / div)) / 2)
                 ctx.stroke();
                 break;
+            case MapItemType.MapItemYLine:
+                ctx.beginPath();
+                ctx.moveTo((width - (width / div)) / 2, 0);
+                ctx.lineTo((width - (width / div)) / 2, height);
+                ctx.moveTo((width + (width / div)) / 2, 0);
+                ctx.lineTo((width + (width / div)) / 2, height)
+                ctx.stroke();
+                break;
+            case MapItemType.MapItemCross:
+                ctx.beginPath();
+                ctx.moveTo(0, (height - (height / div)) / 2);
+                ctx.lineTo(width, (height - (height / div)) / 2);
+                ctx.moveTo(0, (height + (height / div)) / 2);
+                ctx.lineTo(width, (height + (height / div)) / 2)
+                ctx.moveTo((width - (width / div)) / 2, 0);
+                ctx.lineTo((width - (width / div)) / 2, height);
+                ctx.moveTo((width + (width / div)) / 2, 0);
+                ctx.lineTo((width + (width / div)) / 2, height)
+                ctx.stroke();
+                break;
+            case MapItemType.MapItemXLStop:
+                break;
             case MapItemType.MapItemNULL:
                 break;
             default:
