@@ -14,12 +14,16 @@ Window {
     onWidthChanged: {
     }
     MapItem {
+        id: mapItem;
         length: 100;
         anchors.left: parent.left;
         anchors.top: parent.top;
         anchors.margins: 4;
-        type: MapItemType.MapItemYUStop;
+        type: MapItemType.MapItemYUMStop;
         color: "red";
+        isCard: true;
+        text: "248";
+        cardPos: [length * 0.3, length * 0.5];
         Component.onCompleted: {
         }
         onClicked: {
@@ -37,11 +41,37 @@ Window {
     Menu {
         id: contentMenu;
         MenuItem {
-            text: "Add";
+            text: "NULL";
             onTriggered: {
-                console.log("Trig Add.");
+                mapItem.type = MapItemType.MapItemNULL;
+                mapItem.canvas.requestPaint();
             }
         }
+
+        MenuItem {
+            text: "XLine";
+            onTriggered: {
+                mapItem.type = MapItemType.MapItemXLine;
+                mapItem.canvas.requestPaint();
+            }
+        }
+
+        MenuItem {
+            text: "YLine";
+            onTriggered: {
+                mapItem.type = MapItemType.MapItemYLine;
+                mapItem.canvas.requestPaint();
+            }
+        }
+
+        MenuItem {
+            text: "Cross";
+            onTriggered: {
+                mapItem.type = MapItemType.MapItemCross;
+                mapItem.canvas.requestPaint();
+            }
+        }
+
         Menu {
             title: "del";
             MenuItem {
