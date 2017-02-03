@@ -9,6 +9,8 @@ Rectangle {
     property int cellW: ((width + numberMargins) / columns);
     property int cellH: ((height + numberMargins) / rows);
     property real scaleGrid: 1.0;
+    property alias mapGrid: mapGrid;
+    signal currentIndexChanged;
     clip: true;
     MouseArea {
         anchors.fill: parent;
@@ -45,6 +47,9 @@ Rectangle {
             drag.axis: Drag.XAndYAxis;
             acceptedButtons: Qt.RightButton;    // right button is valid
         }
+        onCurrentIndexChanged: {
+            root.currentIndexChanged();
+        }
     }
     Component {
         id: numberDelegate;
@@ -59,6 +64,7 @@ Rectangle {
             text: index;
             onClicked: {
                 console.log("wrapper " + index + " clicked.");
+                wrapper.GridView.view.currentIndex = index;
             }
         }
     }

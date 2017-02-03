@@ -7,7 +7,9 @@ Rectangle {
     property alias text: itemText.text;
     property int type: MapItemType.MapItemXLine;
     property bool isCard: false;
-    property var cardPos: [length / 2, length / 2];
+    property var cardPos: [length / 2, length / 2];     // card坐标
+    property bool isArc: false;
+    property var arcParam: [];      //
     signal clicked;
     width: length;
     height: length;
@@ -26,7 +28,7 @@ Rectangle {
         property real divStopLine: 2.5;     // 边长/stopLine
         property real divMStopLine: (50 / 18);
         onPaint: {
-            console.log("GridItem Paint. (" + root.x + ", " + root.y + ")");
+//            console.log("GridItem Paint. (" + root.x + ", " + root.y + ") card: ", root.isCard);
             var ctx = getContext("2d");
             ctx.lineWidth = length / div;
             ctx.strokeStyle = "black";
