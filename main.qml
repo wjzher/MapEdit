@@ -76,7 +76,22 @@ Window {
                 mapGrid.mapGrid.currentItem.type = type;
             }
             function setItemIsCard(isCard) {
+                mapGrid.mapGrid.currentItem.cardPos[0] = Number(cardIDPosX.text);
+                mapGrid.mapGrid.currentItem.cardPos[1] = Number(cardIDPosY.text);
                 mapGrid.mapGrid.currentItem.isCard = isCard;
+            }
+            function setItemCardID(id) {
+                mapGrid.mapGrid.currentItem.cardID = Number(id);
+            }
+            function setItemCardPosX(x) {
+                var pos = mapGrid.mapGrid.currentItem.cardPos;
+                pos[0] = x;
+                mapGrid.mapGrid.currentItem.cardPos = pos;
+            }
+            function setItemCardPosY(x) {
+                var pos = mapGrid.mapGrid.currentItem.cardPos;
+                pos[1] = x;
+                mapGrid.mapGrid.currentItem.cardPos = pos;
             }
 
             function showItemSettings() {
@@ -91,8 +106,8 @@ Window {
                     radioTypeXLine.forceActiveFocus();
                     break;
                 case MapItemType.MapItemYLine:
-                    radioTypeYline.checked = true;
-                    radioTypeYline.forceActiveFocus();
+                    radioTypeYLine.checked = true;
+                    radioTypeYLine.forceActiveFocus();
                     break;
                 case MapItemType.MapItemCross:
                     radioTypeCross.checked = true;
@@ -136,11 +151,18 @@ Window {
                 } else {
                     cardCheck.checked = false;
                 }
+//                console.log("show " + mapGrid.mapGrid.currentIndex + " : " + item.cardID);
+                if (item.cardID != 0) {
+                    cardIDText.text = item.cardID;
+                } else {
+                    cardIDText.text = "";
+                }
+
                 cardIDPosX.text = item.cardPos[0];
                 cardIDPosY.text = item.cardPos[1];
             }
             onCurrentIndexChanged: {
-                console.log("mapGrid index changed. " + mapGrid.mapGrid.currentIndex);
+//                console.log("mapGrid index changed. " + mapGrid.mapGrid.currentIndex);
                 showItemSettings();
             }
         }
@@ -288,7 +310,7 @@ Window {
                 anchors.topMargin: 8;
                 text: "Card Exsit?";
                 onClicked: {
-                    console.log("is Card clicked. ", checked);
+//                    console.log("is Card clicked. ", checked);
                     mapGrid.setItemIsCard(checked);
                 }
             }
@@ -312,7 +334,8 @@ Window {
                     }
                 }
                 onEditingFinished: {
-                    console.log("carID editing finished.");
+                    console.log("Card ID onEditingFinished. ", cardIDText.text);
+                    mapGrid.setItemCardID(cardIDText.text);
                 }
             }
 
@@ -333,6 +356,9 @@ Window {
                         selectAll();
                     }
                 }
+                onEditingFinished: {
+                    mapGrid.setItemCardPosX(Number(cardIDPosX.text));
+                }
             }
             TextField {
                 id: cardIDPosY;
@@ -350,6 +376,9 @@ Window {
                     if (focus) {
                         selectAll();
                     }
+                }
+                onEditingFinished: {
+                    mapGrid.setItemCardPosY(Number(cardIDPosY.text));
                 }
             }
 

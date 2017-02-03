@@ -6,6 +6,7 @@ Rectangle {
     property int length: 50;
     property alias text: itemText.text;
     property int type: MapItemType.MapItemXLine;
+    property int cardID: 0;
     property bool isCard: false;
     property var cardPos: [length / 2, length / 2];     // card坐标
     property bool isArc: false;
@@ -115,9 +116,11 @@ Rectangle {
                 break;
             }
             if (root.isCard) {
+                var vx = root.length / root.cardPos[0];
+                var vy = root.length / root.cardPos[1];
                 ctx.fillStyle = "blue";
                 ctx.beginPath();
-                ctx.arc(root.cardPos[0], root.cardPos[1], length / div / 2,
+                ctx.arc(root.width / vx, root.height / vy, length / div / 2,
                         0, 2 * Math.PI, false);
                 ctx.fill();
             }
