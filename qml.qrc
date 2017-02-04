@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>MapItem.qml</file>
         <file>MapGrid.qml</file>
+        <file>ScaleSlide.qml</file>
     </qresource>
 </RCC>

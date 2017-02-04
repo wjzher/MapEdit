@@ -17,9 +17,15 @@ Rectangle {
         onWheel: {
 //            console.log("Wheel " + wheel.angleDelta.y + " " + wheel.angleDelta.x);
             if (wheel.angleDelta.y > 0) {
-                root.scaleGrid += 0.1;
+                root.scaleGrid += 0.2;
+                if (root.scaleGrid >= 4) {
+                    root.scaleGrid = 4;
+                }
             } else if (wheel.angleDelta.y < 0) {
-                root.scaleGrid -= 0.1;
+                root.scaleGrid -= 0.2;
+                if (root.scaleGrid <= 0) {
+                    root.scaleGrid = 0.2;
+                }
             }
         }
     }

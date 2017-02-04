@@ -13,7 +13,7 @@ Window {
     height: 600;
     id: rootItem;
     color: "#EEEEEE";
-    title: qsTr("Hello World")
+    title: qsTr("MapEditor")
 
     Component {
         id: radioStyle;
@@ -72,6 +72,11 @@ Window {
             rows: 20;
             columns: 20;
             scaleGrid: 1.5;
+            onScaleGridChanged: {
+                scaleSlide.slideValue = scaleGrid;
+                console.log("set scale slide value.")
+            }
+
             function setItemType(type) {
                 mapGrid.mapGrid.currentItem.type = type;
             }
@@ -166,288 +171,309 @@ Window {
                 showItemSettings();
             }
         }
-        GroupBox {
-            id: mapItemSettingsGroup;
-            title: "Item Settings";
-//            anchors.right: parent.right;
-//            anchors.top: parent.top;
-//            anchors.topMargin: 8;
-//            anchors.rightMargin: 8;
+        Column {
+            id: column;
+            spacing: 4;
             width: 280;
-            height: 200;
-            ExclusiveGroup {
-                id: itemTypeGroup;
-            }
+            GroupBox {
+                id: globalSettingsGroup;
+                title: "Global Settings";
+                width: 280;
+                height: 100;
 
-            GridLayout {
-                id: radioGridLayout;
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top;
-                anchors.topMargin: 4;
-                width: parent.width;
-                rows: 4;
-                columns: 3;
-                rowSpacing: 4;
-                columnSpacing: 4;
-                flow: GridLayout.TopToBottom;
-                property real widthGrid: ((width - 8) / columns);
-                Component.onCompleted: {
-                    console.log("Layout ", width / columns, " ", width);
-                }
-                RadioButton {
-                    id: radioTypeNULL;
-                    text: "NULL";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemNULL);
-                }
-                RadioButton {
-                    id: radioTypeXLine;
-                    text: "XLine";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemXLine);
-                }
-                RadioButton {
-                    id: radioTypeYLine;
-                    text: "YLine";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemYLine);
-                }
-                RadioButton {
-                    id: radioTypeCross;
-                    text: "Cross";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemCross);
-                }
-                RadioButton {
-                    id: radioTypeXLStop;
-                    text: "XLStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemXLStop);
-                }
-                RadioButton {
-                    id: radioTypeXRStop;
-                    text: "XRStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemXRStop);
-                }
-                RadioButton {
-                    id: radioTypeYUStop;
-                    text: "YUStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemYUStop);
-                }
-                RadioButton {
-                    id: radioTypeYDStop;
-                    text: "YDStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemYDStop);
-                }
-                RadioButton {
-                    id: radioTypeXLMStop;
-                    text: "XLMStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemXLMStop);
-                }
-                RadioButton {
-                    id: radioTypeXRMStop;
-                    text: "XRMStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemXRMStop);
-                }
-                RadioButton {
-                    id: radioTypeYUMStop;
-                    text: "YUMStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemYUMStop);
-                }
-                RadioButton {
-                    id: radioTypeYDMStop;
-                    text: "YDMStop";
-                    exclusiveGroup: itemTypeGroup;
-                    Layout.preferredWidth: parent.widthGrid;
-                    activeFocusOnPress: true;
-                    style: radioStyle;
-                    onClicked: mapGrid.setItemType(MapItemType.MapItemYDMStop);
-                }
-            }
-
-            CheckBox {
-                id: cardCheck;
-                anchors.top: radioGridLayout.bottom;
-                anchors.topMargin: 8;
-                text: "Card Exsit?";
-                onClicked: {
-//                    console.log("is Card clicked. ", checked);
-                    mapGrid.setItemIsCard(checked);
-                }
-            }
-
-            TextField {
-                id: cardIDText;
-                anchors.left: cardCheck.right;
-                anchors.leftMargin: 4;
-                anchors.top: cardCheck.top;
-                anchors.topMargin: -2;
-                width: 75
-                height: 20;
-                placeholderText: qsTr("Card ID");
-                selectByMouse: true;
-                textColor: "blue";
-                focus: true;
-                validator: IntValidator {}
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
-                    }
-                }
-                onEditingFinished: {
-                    console.log("Card ID onEditingFinished. ", cardIDText.text);
-                    mapGrid.setItemCardID(cardIDText.text);
-                }
-            }
-
-            TextField {
-                id: cardIDPosX;
-                anchors.left: cardIDText.right;
-                anchors.leftMargin: 4;
-                anchors.top: cardIDText.top;
-                width: 34;
-                height: 20;
-                selectByMouse: true;
-                textColor: "green";
-                text: "0.0";
-                validator: DoubleValidator {
-                }
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
-                    }
-                }
-                onEditingFinished: {
-                    mapGrid.setItemCardPosX(Number(cardIDPosX.text));
-                }
-            }
-            TextField {
-                id: cardIDPosY;
-                anchors.left: cardIDPosX.right;
-                anchors.leftMargin: 4;
-                anchors.top: cardIDText.top;
-                width: 34;
-                height: 20;
-                selectByMouse: true;
-                textColor: "green";
-                text: "0.0";
-                validator: DoubleValidator {
-                }
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
-                    }
-                }
-                onEditingFinished: {
-                    mapGrid.setItemCardPosY(Number(cardIDPosY.text));
-                }
-            }
-
-            CheckBox {
-                id: arcCheck;
-                anchors.top: cardCheck.bottom;
-                anchors.topMargin: 8;
-                text: "Arc Exsit?";
-                onClicked: {
-                    console.log("is Arc clicked. ", checked);
-                }
-            }
-
-            TextField {
-                id: arcRadiusText;
-                anchors.left: cardIDText.left;
-                anchors.leftMargin: 0;
-                anchors.top: arcCheck.top;
-                anchors.topMargin: -2;
-                width: 60;
-                height: 20;
-                placeholderText: qsTr("Radius");
-                selectByMouse: true;
-                textColor: "blue";
-                focus: true;
-                validator: DoubleValidator {}
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
+                ScaleSlide {
+                    id: scaleSlide;
+                    slideValue: mapGrid.scaleGrid;
+                    onSlideChanged: {
+                        mapGrid.scaleGrid = slideValue.toFixed(1);
+                        console.log("set mapGrid scaleGrid.")
                     }
                 }
             }
-            TextField {
-                id: arcPosX;
-                anchors.left: cardIDPosX.left;
-                anchors.leftMargin: 0;
-                anchors.top: arcRadiusText.top;
-                width: 34;
-                height: 20;
-                selectByMouse: true;
-                textColor: "green";
-                text: "0.0";
-                validator: DoubleValidator {
+
+            GroupBox {
+                id: mapItemSettingsGroup;
+                title: "Item Settings";
+    //            anchors.right: parent.right;
+    //            anchors.top: parent.top;
+    //            anchors.topMargin: 8;
+    //            anchors.rightMargin: 8;
+                width: 280;
+                height: 200;
+                ExclusiveGroup {
+                    id: itemTypeGroup;
                 }
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
+
+                GridLayout {
+                    id: radioGridLayout;
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top;
+                    anchors.topMargin: 4;
+                    width: parent.width;
+                    rows: 4;
+                    columns: 3;
+                    rowSpacing: 4;
+                    columnSpacing: 4;
+                    flow: GridLayout.TopToBottom;
+                    property real widthGrid: ((width - 8) / columns);
+                    Component.onCompleted: {
+                        console.log("Layout ", width / columns, " ", width);
+                    }
+                    RadioButton {
+                        id: radioTypeNULL;
+                        text: "NULL";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemNULL);
+                    }
+                    RadioButton {
+                        id: radioTypeXLine;
+                        text: "XLine";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemXLine);
+                    }
+                    RadioButton {
+                        id: radioTypeYLine;
+                        text: "YLine";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemYLine);
+                    }
+                    RadioButton {
+                        id: radioTypeCross;
+                        text: "Cross";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemCross);
+                    }
+                    RadioButton {
+                        id: radioTypeXLStop;
+                        text: "XLStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemXLStop);
+                    }
+                    RadioButton {
+                        id: radioTypeXRStop;
+                        text: "XRStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemXRStop);
+                    }
+                    RadioButton {
+                        id: radioTypeYUStop;
+                        text: "YUStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemYUStop);
+                    }
+                    RadioButton {
+                        id: radioTypeYDStop;
+                        text: "YDStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemYDStop);
+                    }
+                    RadioButton {
+                        id: radioTypeXLMStop;
+                        text: "XLMStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemXLMStop);
+                    }
+                    RadioButton {
+                        id: radioTypeXRMStop;
+                        text: "XRMStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemXRMStop);
+                    }
+                    RadioButton {
+                        id: radioTypeYUMStop;
+                        text: "YUMStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemYUMStop);
+                    }
+                    RadioButton {
+                        id: radioTypeYDMStop;
+                        text: "YDMStop";
+                        exclusiveGroup: itemTypeGroup;
+                        Layout.preferredWidth: parent.widthGrid;
+                        activeFocusOnPress: true;
+                        style: radioStyle;
+                        onClicked: mapGrid.setItemType(MapItemType.MapItemYDMStop);
+                    }
+                }
+
+                CheckBox {
+                    id: cardCheck;
+                    anchors.top: radioGridLayout.bottom;
+                    anchors.topMargin: 8;
+                    text: "Card Exsit?";
+                    onClicked: {
+                        mapGrid.setItemIsCard(checked);
+                    }
+                }
+
+                TextField {
+                    id: cardIDText;
+                    anchors.left: cardCheck.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: cardCheck.top;
+                    anchors.topMargin: -2;
+                    width: 75
+                    height: 20;
+                    placeholderText: qsTr("Card ID");
+                    selectByMouse: true;
+                    textColor: "blue";
+                    focus: true;
+                    validator: IntValidator {}
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                    onEditingFinished: {
+                        console.log("Card ID onEditingFinished. ", cardIDText.text);
+                        mapGrid.setItemCardID(cardIDText.text);
+                    }
+                }
+
+                TextField {
+                    id: cardIDPosX;
+                    anchors.left: cardIDText.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: cardIDText.top;
+                    width: 34;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    text: "0.0";
+                    validator: DoubleValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                    onEditingFinished: {
+                        mapGrid.setItemCardPosX(Number(cardIDPosX.text));
+                    }
+                }
+                TextField {
+                    id: cardIDPosY;
+                    anchors.left: cardIDPosX.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: cardIDText.top;
+                    width: 34;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    text: "0.0";
+                    validator: DoubleValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                    onEditingFinished: {
+                        mapGrid.setItemCardPosY(Number(cardIDPosY.text));
+                    }
+                }
+
+                CheckBox {
+                    id: arcCheck;
+                    anchors.top: cardCheck.bottom;
+                    anchors.topMargin: 8;
+                    text: "Arc Exsit?";
+                    onClicked: {
+                        console.log("is Arc clicked. ", checked);
+                    }
+                }
+
+                TextField {
+                    id: arcRadiusText;
+                    anchors.left: cardIDText.left;
+                    anchors.leftMargin: 0;
+                    anchors.top: arcCheck.top;
+                    anchors.topMargin: -2;
+                    width: 60;
+                    height: 20;
+                    placeholderText: qsTr("Radius");
+                    selectByMouse: true;
+                    textColor: "blue";
+                    focus: true;
+                    validator: DoubleValidator {}
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                TextField {
+                    id: arcPosX;
+                    anchors.left: cardIDPosX.left;
+                    anchors.leftMargin: 0;
+                    anchors.top: arcRadiusText.top;
+                    width: 34;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    text: "0.0";
+                    validator: DoubleValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                TextField {
+                    id: arcPosY;
+                    anchors.left: arcPosX.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: arcPosX.top;
+                    width: 34;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    text: "0.0";
+                    validator: DoubleValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
                     }
                 }
             }
-            TextField {
-                id: arcPosY;
-                anchors.left: arcPosX.right;
-                anchors.leftMargin: 4;
-                anchors.top: arcPosX.top;
-                width: 34;
-                height: 20;
-                selectByMouse: true;
-                textColor: "green";
-                text: "0.0";
-                validator: DoubleValidator {
-                }
-                onFocusChanged: {
-                    if (focus) {
-                        selectAll();
-                    }
-                }
+
             }
-        }
     }
 
     Menu {
