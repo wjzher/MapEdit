@@ -121,9 +121,9 @@ Rectangle {
             if (root.isCard) {
                 var vx = root.length / root.cardPos[0];
                 var vy = root.length / root.cardPos[1];
-                ctx.fillStyle = "blue";
+                ctx.fillStyle = "magenta";
                 ctx.beginPath();
-                ctx.arc(root.width / vx, root.height / vy, length / div / 2,
+                ctx.arc(root.width / vx, root.height / vy, length / div,
                         0, 2 * Math.PI, false);
                 ctx.fill();
             }
@@ -145,7 +145,9 @@ Rectangle {
 
     Text {
         id: itemText;
-        anchors.centerIn: parent;
+        anchors.top: parent.top;
+        anchors.margins: 2;
+        anchors.left: parent.left;
         font.pixelSize: 9;
         text: "";
     }
