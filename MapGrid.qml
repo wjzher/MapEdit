@@ -52,6 +52,9 @@ Rectangle {
             drag.target: mapGrid;      // drag mapGrid
             drag.axis: Drag.XAndYAxis;
             acceptedButtons: Qt.RightButton;    // right button is valid
+            onPressed: {
+                parent.focus = true;
+            }
         }
         onCurrentIndexChanged: {
             root.currentIndexChanged();
@@ -71,6 +74,7 @@ Rectangle {
             onClicked: {
                 console.log("wrapper " + index + " clicked.");
                 wrapper.GridView.view.currentIndex = index;
+                wrapper.GridView.view.focus = index;
             }
         }
     }

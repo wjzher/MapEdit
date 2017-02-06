@@ -77,14 +77,19 @@ Window {
                 scaleSlide.slideValue = scaleGrid;
                 console.log("set scale slide value.")
             }
+            function setGridFocus() {
+                mapGrid.mapGrid.focus = true;
+            }
 
             function setItemType(type) {
                 mapGrid.mapGrid.currentItem.type = type;
+                setGridFocus();
             }
             function setItemIsCard(isCard) {
                 mapGrid.mapGrid.currentItem.cardPos[0] = Number(cardIDPosX.text);
                 mapGrid.mapGrid.currentItem.cardPos[1] = Number(cardIDPosY.text);
                 mapGrid.mapGrid.currentItem.isCard = isCard;
+                setGridFocus();
             }
             function setItemCardID(id) {
                 mapGrid.mapGrid.currentItem.cardID = Number(id);
@@ -93,11 +98,13 @@ Window {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[0] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
+                setGridFocus();
             }
             function setItemCardPosY(x) {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[1] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
+                setGridFocus();
             }
             function posAdd(pos, x, y) {
                 pos[0] += x;
@@ -289,6 +296,7 @@ Window {
                 item.arcParam = pos;
                 item.isArc = index;
                 arcNeighbour(index, pos, mapGrid.mapGrid.currentIndex);
+                setGridFocus();
             }
 
             function showItemSettings() {
@@ -359,6 +367,7 @@ Window {
                 cardIDPosY.text = item.cardPos[1];
 
                 arcCombo.index = item.isArc;
+                setGridFocus();
             }
             onCurrentIndexChanged: {
 //                console.log("mapGrid index changed. " + mapGrid.mapGrid.currentIndex);
@@ -544,7 +553,6 @@ Window {
                     placeholderText: qsTr("Card ID");
                     selectByMouse: true;
                     textColor: "blue";
-                    focus: true;
                     validator: IntValidator {}
                     onFocusChanged: {
                         if (focus) {
