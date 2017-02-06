@@ -38,24 +38,24 @@ Window {
             }
         }
     }
-    MapItem {
-        id: mapItem;
-        width: 100;
-        height: 100;
-        anchors.left: parent.left;
-        anchors.bottom: parent.bottom;
-        anchors.margins: 4;
-        type: MapItemType.MapItemXLine;
-        color: "white";
-        isCard: false;
-        text: "248";
-        cardPos: [length * 0.3, length * 0.5];
-        Component.onCompleted: {
-        }
-        onClicked: {
-            contentMenu.popup();
-        }
-    }
+//    MapItem {
+//        id: mapItem;
+//        width: 100;
+//        height: 100;
+//        anchors.left: parent.left;
+//        anchors.bottom: parent.bottom;
+//        anchors.margins: 4;
+//        type: MapItemType.MapItemXLine;
+//        color: "white";
+//        isCard: false;
+//        text: "248";
+//        cardPos: [length * 0.3, length * 0.5];
+//        Component.onCompleted: {
+//        }
+//        onClicked: {
+//            contentMenu.popup();
+//        }
+//    }
     Row {
         id: row;
         anchors.fill: parent;
@@ -72,7 +72,7 @@ Window {
             height: row.mapWidth;
             rows: 20;
             columns: 20;
-            scaleGrid: 1.5;
+            scaleGrid: 1.6;
             onScaleGridChanged: {
                 scaleSlide.slideValue = scaleGrid;
                 console.log("set scale slide value.")
@@ -392,6 +392,25 @@ Window {
                         console.log("set mapGrid scaleGrid.")
                     }
                 }
+                FileText {
+                    id: mapFilePath;
+                    anchors.left: parent.left;
+                    anchors.leftMargin: 4;
+                    anchors.top: scaleSlide.bottom;
+                    anchors.topMargin: 4;
+                    width: parent.width;
+                    onFileOpen: {
+                        console.log(mapFilePath.text + " open.")
+                    }
+                }
+                Button {
+                    id: mapFileSave;
+                    anchors.left: parent.left;
+                    anchors.leftMargin: 2;
+                    anchors.top: mapFilePath.bottom;
+                    anchors.topMargin: 4;
+                    text: "Save"
+                }
             }
 
             GroupBox {
@@ -621,49 +640,4 @@ Window {
         }
     }
 
-    Menu {
-        id: contentMenu;
-        MenuItem {
-            text: "NULL";
-            onTriggered: {
-                mapItem.type = MapItemType.MapItemNULL;
-            }
-        }
-
-        MenuItem {
-            text: "XLine";
-            onTriggered: {
-                mapItem.type = MapItemType.MapItemXLine;
-            }
-        }
-
-        MenuItem {
-            text: "YLine";
-            onTriggered: {
-                mapItem.type = MapItemType.MapItemYLine;
-            }
-        }
-
-        MenuItem {
-            text: "Cross";
-            onTriggered: {
-                mapItem.type = MapItemType.MapItemCross;
-            }
-        }
-
-        Menu {
-            title: "del";
-            MenuItem {
-                text: "del2";
-
-            }
-                MenuItem {
-                    text: "delabc";
-                    onTriggered: {
-
-                    }
-                }
-         }
-
-    }
 }

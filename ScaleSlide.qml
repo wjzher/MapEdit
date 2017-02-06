@@ -5,6 +5,8 @@ import QtQuick.Controls.Styles 1.2
 Rectangle {
     id: root;
     width: parent.width;
+    height: 20;
+    color: "transparent"
     property alias slideValue: customPanel.value;
     signal slideChanged;
     Slider {
@@ -12,7 +14,7 @@ Rectangle {
         width: 240;
         height: 20;
         x: (parent.width - width) / 2;
-        stepSize: 0.1;
+        stepSize: 0.2;
         value: 1.5;
         minimumValue: 0.2;
         maximumValue: 4;
