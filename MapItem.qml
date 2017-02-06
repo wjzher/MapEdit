@@ -9,17 +9,20 @@ Rectangle {
     property int cardID: 0;
     property bool isCard: false;
     property var cardPos: [length / 2, length / 2];     // card坐标
-    property bool isArc: false;
-    property var arcParam: [];      //
+    property int isArc: MapItemType.ArcNULL;
+    property var arcParam: [0.0, 0.0, 0.0, 0.0];      // x, y, startAngle, endAngle
+    property var neighbourPos: [];      // dx, dy, dx, dy...
     signal clicked;
     width: length;
     height: length;
+
     function rePaint() {
         canvas.requestPaint();
     }
     onTypeChanged: rePaint();
     onIsCardChanged: rePaint();
     onCardPosChanged: rePaint();
+    onIsArcChanged: rePaint();
 
     Canvas {
         id: canvas;
@@ -123,6 +126,19 @@ Rectangle {
                 ctx.arc(root.width / vx, root.height / vy, length / div / 2,
                         0, 2 * Math.PI, false);
                 ctx.fill();
+            }
+            if (root.isArc != MapItemType.ArcNULL) {
+                var vx = root.length / root.arcParam[0];
+                var vy = root.length / root.arcParam[1];
+                var r = root.width * 2;
+                var startAngle = root.arcParam[2], endAngle = root.arcParam[3];
+                vx = root.width / vx;
+                vy = root.height / vy;
+                ctx.beginPath();
+                console.log("arc " + vx + " " + vy + " " + r + " "
+                            + startAngle + " " + endAngle + " " + root.width + " " + root.length);
+                ctx.arc(vx, vy, r, startAngle, endAngle, false);
+                ctx.stroke();
             }
         }
     }

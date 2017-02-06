@@ -10,7 +10,7 @@ Window {
     minimumHeight: 600;
     minimumWidth: 800;
     width: 800;
-    height: 600;
+    height: 640;
     id: rootItem;
     color: "#EEEEEE";
     title: qsTr("MapEditor")
@@ -38,23 +38,24 @@ Window {
             }
         }
     }
-//    MapItem {
-//        id: mapItem;
-//        length: 100;
-//        anchors.left: parent.left;
-//        anchors.top: parent.top;
-//        anchors.margins: 4;
-//        type: MapItemType.MapItemYUMStop;
-//        color: "red";
-//        isCard: true;
-//        text: "248";
-//        cardPos: [length * 0.3, length * 0.5];
-//        Component.onCompleted: {
-//        }
-//        onClicked: {
-//            contentMenu.popup();
-//        }
-//    }
+    MapItem {
+        id: mapItem;
+        width: 100;
+        height: 100;
+        anchors.left: parent.left;
+        anchors.bottom: parent.bottom;
+        anchors.margins: 4;
+        type: MapItemType.MapItemXLine;
+        color: "white";
+        isCard: false;
+        text: "248";
+        cardPos: [length * 0.3, length * 0.5];
+        Component.onCompleted: {
+        }
+        onClicked: {
+            contentMenu.popup();
+        }
+    }
     Row {
         id: row;
         anchors.fill: parent;
@@ -97,6 +98,197 @@ Window {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[1] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
+            }
+            function posAdd(pos, x, y) {
+                pos[0] += x;
+                pos[1] += y;
+            }
+            function checkItemOut(rows, cols) {
+                if (rows > mapGrid.mapGrid.rows || rows < 0) {
+                    return false;
+                }
+                if (cols > mapGrid.mapGrid.columns || cols < 0) {
+                    return false;
+                }
+                return true;
+            }
+            function calIndex(rows, cols) {
+                return rows * mapGrid.rows + cols;
+            }
+            function calNeighbour(rows, cols, x, y) {
+                rows += y;
+                cols += x;
+                if (checkItemOut(rows, cols)) {
+                    return calIndex(rows, cols);
+                }
+                return -1;
+            }
+            function itemAt(index) {
+                if (index != 0) {
+                    index++;
+                }
+                var item = mapGrid.mapGrid.contentItem.children[index]; // BUG??
+                if (item == null) {
+                    console.log("itemAt " + index + " Error.")
+                }
+
+                return item;
+            }
+            function arrayDeepCopy(dst, src) {
+                for (var i = 0; i < src.length; i++) {
+                    dst[i] = src[i];
+                }
+            }
+            function addNeighbour(rows, cols, dx, dy) {
+                var item = itemAt(calIndex(rows, cols));
+                item.neighbourPos.push([dx, dy]);
+            }
+
+            function updateNeighbour(rows, cols, dx, dy, t, pos) {
+                var neighbour = calNeighbour(rows, cols, dx, dy);
+                console.log("neighbour " + rows + " " + cols + " " + neighbour);
+                var p = [];
+                arrayDeepCopy(p, pos);
+                if (neighbour != -1) {
+                    posAdd(p, -50 * dx, -50 * dy);
+                    var item = itemAt(neighbour);
+                    item.arcParam = p;
+                    item.isArc = t;
+                    addNeighbour(rows, cols, dx, dy);
+                }
+            }
+            function clearNeighbour(rows, cols) {
+                console.log("clear " + rows + " " + cols);
+                var item = itemAt(calIndex(rows, cols));
+                console.log("clear " + rows + " " + cols + " " + typeof(item.neighbourPos) + " " + item.neighbourPos);
+                while (item.neighbourPos.length > 0) {
+                    var p = item.neighbourPos.pop();
+                    console.log("clear " + calIndex(rows, cols) + ": " + p[0] + " " + p[1]);
+                    var nitem = itemAt(calNeighbour(rows, cols, p[0], p[1]));
+                    nitem.isArc = MapItemType.ArcNULL;
+                }
+            }
+
+            function arcNeighbour(t, pos, index) {
+                var rows = parseInt(index / mapGrid.rows);
+                var cols = index % mapGrid.rows;
+                var p = [];
+                arrayDeepCopy(p, pos);
+                // clear
+                clearNeighbour(rows, cols);
+                switch (t) {
+                case MapItemType.ArcXRD:
+                    updateNeighbour(rows, cols, 1, 0, t, p);
+                    updateNeighbour(rows, cols, 1, 1, t, p);
+                    updateNeighbour(rows, cols, 2, 1, t, p);
+                    updateNeighbour(rows, cols, 2, 2, t, p);
+                    break;
+                case MapItemType.ArcXLD:
+                    updateNeighbour(rows, cols, -1, 0, t, p);
+                    updateNeighbour(rows, cols, -1, 1, t, p);
+                    updateNeighbour(rows, cols, -2, 1, t, p);
+                    updateNeighbour(rows, cols, -2, 2, t, p);
+                    break;
+                case MapItemType.ArcXLU:
+                    updateNeighbour(rows, cols, -1, 0, t, p);
+                    updateNeighbour(rows, cols, -1, -1, t, p);
+                    updateNeighbour(rows, cols, -2, -1, t, p);
+                    updateNeighbour(rows, cols, -2, -2, t, p);
+                    break;
+                case MapItemType.ArcXRU:
+                    updateNeighbour(rows, cols, 1, 0, t, p);
+                    updateNeighbour(rows, cols, 1, -1, t, p);
+                    updateNeighbour(rows, cols, 2, -1, t, p);
+                    updateNeighbour(rows, cols, 2, -2, t, p);
+                    break;
+                case MapItemType.ArcYRD:
+                    updateNeighbour(rows, cols, 0, 1, t, p);
+                    updateNeighbour(rows, cols, 1, 1, t, p);
+                    updateNeighbour(rows, cols, 1, 2, t, p);
+                    updateNeighbour(rows, cols, 2, 2, t, p);
+                    break;
+                case MapItemType.ArcYLD:
+                    updateNeighbour(rows, cols, 0, 1, t, p);
+                    updateNeighbour(rows, cols, -1, 1, t, p);
+                    updateNeighbour(rows, cols, -1, 2, t, p);
+                    updateNeighbour(rows, cols, -2, 2, t, p);
+                    break;
+                case MapItemType.ArcYLU:
+                    updateNeighbour(rows, cols, 0, -1, t, p);
+                    updateNeighbour(rows, cols, -1, -1, t, p);
+                    updateNeighbour(rows, cols, -1, -2, t, p);
+                    updateNeighbour(rows, cols, -2, -2, t, p);
+                    break;
+                case MapItemType.ArcYRU:
+                    updateNeighbour(rows, cols, 0, -1, t, p);
+                    updateNeighbour(rows, cols, 1, -1, t, p);
+                    updateNeighbour(rows, cols, 1, -2, t, p);
+                    updateNeighbour(rows, cols, 2, -2, t, p);
+                    break;
+                case MapItemType.ArcNULL:
+                    break;
+                }
+            }
+
+            function setItemArc() {
+                var index = arcCombo.index;
+                var item = mapGrid.mapGrid.currentItem;
+                if (item == null) {
+                    return;
+                }
+                if (item.isArc == index) {
+                    return;
+                }
+                var pos = [0, 0, 0, 0];
+                var startAngle = 0.0;
+                var endAngle = 0.0;
+                posAdd(pos, 25, 25);
+                switch (index) {
+                case MapItemType.ArcXLD:
+                case MapItemType.ArcXRD:
+                    posAdd(pos, 0, 100);
+                    break;
+                case MapItemType.ArcXLU:
+                case MapItemType.ArcXRU:
+                    posAdd(pos, 0, -100);
+                    break;
+                case MapItemType.ArcYLD:
+                case MapItemType.ArcYLU:
+                    posAdd(pos, -100, 0);
+                    break;
+                case MapItemType.ArcYRD:
+                case MapItemType.ArcYRU:
+                    posAdd(pos, 100, 0);
+                    break;
+                }
+                switch (index) {
+                case MapItemType.ArcXLU:
+                case MapItemType.ArcYRD:
+                    startAngle = Math.PI / 2;
+                    endAngle = Math.PI;
+                    break;
+                case MapItemType.ArcXLD:
+                case MapItemType.ArcYRU:
+                    startAngle = Math.PI;
+                    endAngle = Math.PI * 1.5;
+                    break;
+                case MapItemType.ArcXRU:
+                case MapItemType.ArcYLD:
+                    startAngle = 0;
+                    endAngle = Math.PI / 2;
+                    break;
+                case MapItemType.ArcXRD:
+                case MapItemType.ArcYLU:
+                    startAngle = Math.PI * 1.5;
+                    endAngle = Math.PI * 2;
+                    break;
+                }
+                pos[2] = startAngle;
+                pos[3] = endAngle;
+                console.log(pos[0] + " " + pos[1] + " " + pos[2] + " " + pos[3] + " "  + index);
+                item.arcParam = pos;
+                item.isArc = index;
+                arcNeighbour(index, pos, mapGrid.mapGrid.currentIndex);
             }
 
             function showItemSettings() {
@@ -165,6 +357,8 @@ Window {
 
                 cardIDPosX.text = item.cardPos[0];
                 cardIDPosY.text = item.cardPos[1];
+
+                arcCombo.index = item.isArc;
             }
             onCurrentIndexChanged: {
 //                console.log("mapGrid index changed. " + mapGrid.mapGrid.currentIndex);
@@ -405,75 +599,84 @@ Window {
                         mapGrid.setItemCardPosY(Number(cardIDPosY.text));
                     }
                 }
-
-                CheckBox {
-                    id: arcCheck;
+                ArcCombo {
+                    id: arcCombo;
                     anchors.top: cardCheck.bottom;
                     anchors.topMargin: 8;
-                    text: "Arc Exsit?";
-                    onClicked: {
-                        console.log("is Arc clicked. ", checked);
+                    index: MapItemType.ArcNULL;
+                    onIndexChanged: {
+                        console.log("index changed. ", index);
+                        mapGrid.setItemArc();
                     }
                 }
 
-                TextField {
-                    id: arcRadiusText;
-                    anchors.left: cardIDText.left;
-                    anchors.leftMargin: 0;
-                    anchors.top: arcCheck.top;
-                    anchors.topMargin: -2;
-                    width: 60;
-                    height: 20;
-                    placeholderText: qsTr("Radius");
-                    selectByMouse: true;
-                    textColor: "blue";
-                    focus: true;
-                    validator: DoubleValidator {}
-                    onFocusChanged: {
-                        if (focus) {
-                            selectAll();
-                        }
-                    }
-                }
-                TextField {
-                    id: arcPosX;
-                    anchors.left: cardIDPosX.left;
-                    anchors.leftMargin: 0;
-                    anchors.top: arcRadiusText.top;
-                    width: 34;
-                    height: 20;
-                    selectByMouse: true;
-                    textColor: "green";
-                    text: "0.0";
-                    validator: DoubleValidator {
-                    }
-                    onFocusChanged: {
-                        if (focus) {
-                            selectAll();
-                        }
-                    }
-                }
-                TextField {
-                    id: arcPosY;
-                    anchors.left: arcPosX.right;
-                    anchors.leftMargin: 4;
-                    anchors.top: arcPosX.top;
-                    width: 34;
-                    height: 20;
-                    selectByMouse: true;
-                    textColor: "green";
-                    text: "0.0";
-                    validator: DoubleValidator {
-                    }
-                    onFocusChanged: {
-                        if (focus) {
-                            selectAll();
-                        }
-                    }
-                }
-            }
+//                CheckBox {
+//                    id: arcCheck;
+//                    anchors.top: cardCheck.bottom;
+//                    anchors.topMargin: 8;
+//                    text: "Arc Exsit?";
+//                    onClicked: {
+//                        console.log("is Arc clicked. ", checked);
+//                    }
+//                }
 
+//                TextField {
+//                    id: arcRadiusText;
+//                    anchors.left: cardIDText.left;
+//                    anchors.leftMargin: 0;
+//                    anchors.top: arcCheck.top;
+//                    anchors.topMargin: -2;
+//                    width: 60;
+//                    height: 20;
+//                    placeholderText: qsTr("Radius");
+//                    selectByMouse: true;
+//                    textColor: "blue";
+//                    focus: true;
+//                    validator: DoubleValidator {}
+//                    onFocusChanged: {
+//                        if (focus) {
+//                            selectAll();
+//                        }
+//                    }
+//                }
+//                TextField {
+//                    id: arcPosX;
+//                    anchors.left: cardIDPosX.left;
+//                    anchors.leftMargin: 0;
+//                    anchors.top: arcRadiusText.top;
+//                    width: 34;
+//                    height: 20;
+//                    selectByMouse: true;
+//                    textColor: "green";
+//                    text: "0.0";
+//                    validator: DoubleValidator {
+//                    }
+//                    onFocusChanged: {
+//                        if (focus) {
+//                            selectAll();
+//                        }
+//                    }
+//                }
+//                TextField {
+//                    id: arcPosY;
+//                    anchors.left: arcPosX.right;
+//                    anchors.leftMargin: 4;
+//                    anchors.top: arcPosX.top;
+//                    width: 34;
+//                    height: 20;
+//                    selectByMouse: true;
+//                    textColor: "green";
+//                    text: "0.0";
+//                    validator: DoubleValidator {
+//                    }
+//                    onFocusChanged: {
+                //                        if (focus) {
+                //                            selectAll();
+                //                        }
+                //                    }
+                //                }
             }
+        }
     }
 
     Menu {
