@@ -4,6 +4,8 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import Qt.MapItemType 1.0
 import QtQuick.Layouts 1.1
+import Qt.MapData 1.0
+import QtQuick.Dialogs 1.2
 
 Window {
     visible: true
@@ -14,6 +16,24 @@ Window {
     id: rootItem;
     color: "#EEEEEE";
     title: qsTr("MapEditor")
+
+    FileDialog {
+        id: fileDialog;
+        title: "Please choose a file";
+        nameFilters: ["Image Files (*.map)"];
+        onAccepted: {
+            var file = new String(fileDialog.fileUrl);
+            //remove file:///
+            if (Qt.platform.os == "windows"){
+                mapFilePath.text = file.slice(8);
+            } else {
+                mapFilePath.text = file.slice(7);
+            }
+        }
+    }
+    MapData {
+        id: mapData;
+    }
 
     Component {
         id: radioStyle;
@@ -77,6 +97,11 @@ Window {
                 scaleSlide.slideValue = scaleGrid;
                 console.log("set scale slide value.")
             }
+            Component.onCompleted: {
+                mapData.setCols(columns);
+                mapData.setRows(rows);
+            }
+
             function setGridFocus() {
                 mapGrid.mapGrid.focus = true;
             }
@@ -399,27 +424,62 @@ Window {
                     anchors.top: scaleSlide.bottom;
                     anchors.topMargin: 4;
                     width: parent.width;
-                    onFileOpen: {
-                        console.log(mapFilePath.text + " open.")
+                }
+                Button {
+                    id: mapFileNew;
+                    anchors.left: parent.left;
+                    anchors.top: mapFilePath.bottom;
+                    anchors.leftMargin: 2;
+                    anchors.topMargin: 4;
+                    text: "New";
+                    onClicked: {
+                        fileDialog.selectExisting = false;
+                        fileDialog.open();
                     }
                 }
                 Button {
+                    id: mapFileOpen;
+                    anchors.left: mapFileNew.right;
+                    anchors.top: mapFilePath.bottom;
+                    anchors.leftMargin: 2;
+                    anchors.topMargin: 4;
+                    text: "Open";
+                    onClicked: {
+                        fileDialog.selectExisting = true;
+                        fileDialog.open();
+                    }
+                }
+
+                Button {
                     id: mapFileSave;
-                    anchors.left: parent.left;
+                    anchors.left: mapFileOpen.right;
                     anchors.leftMargin: 2;
                     anchors.top: mapFilePath.bottom;
                     anchors.topMargin: 4;
-                    text: "Save"
+                    text: "Save";
+                    onClicked: {
+                        if (mapFilePath.text == "") {
+                            fileDialog.selectExisting = false;
+                            fileDialog.open();
+                        }
+                        console.log("map file save." + mapFilePath.text);
+                        var i;
+                        var n = mapGrid.rows * mapGrid.columns;
+                        for (i = 0; i < n; i++) {
+                            var item = mapGrid.itemAt(i);
+                            mapData.setItemType(i, item.type);
+                            mapData.setItemCardId(i, item.isCard, item.cardID);
+                            mapData.setItemCardPos(i, item.cardPos);
+                            mapData.setItemArc(i, item.isArc, item.neighbourPos);
+                        }
+                        mapData.saveMapData(mapFilePath.text);
+                    }
                 }
             }
 
             GroupBox {
                 id: mapItemSettingsGroup;
                 title: "Item Settings";
-    //            anchors.right: parent.right;
-    //            anchors.top: parent.top;
-    //            anchors.topMargin: 8;
-    //            anchors.rightMargin: 8;
                 width: 280;
                 height: 200;
                 ExclusiveGroup {
@@ -639,5 +699,4 @@ Window {
             }
         }
     }
-
 }
