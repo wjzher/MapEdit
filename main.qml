@@ -21,13 +21,49 @@ Window {
         id: fileDialog;
         title: "Please choose a file";
         nameFilters: ["Image Files (*.map)"];
+        property int opt: 0;    // 0 new, 1 open, 2 save
+        function saveMap() {
+            console.log("map file save. " + mapFilePath.text);
+            var i;
+            var n = mapGrid.rows * mapGrid.columns;
+            for (i = 0; i < n; i++) {
+                var item = mapGrid.itemAt(i);
+                mapData.setItemType(i, item.type);
+                mapData.setItemCardId(i, item.isCard, item.cardID);
+                mapData.setItemCardPos(i, item.cardPos);
+                mapData.setItemArc(i, item.isArc, item.neighbourPos);
+            }
+            mapData.saveMapData(mapFilePath.text);
+        }
+
         onAccepted: {
             var file = new String(fileDialog.fileUrl);
             //remove file:///
             if (Qt.platform.os == "windows"){
-                mapFilePath.text = file.slice(8);
+                file = file.slice(8);
             } else {
-                mapFilePath.text = file.slice(7);
+                file = file.slice(7);
+            }
+            mapFilePath.text = file;
+            if (opt == 1) {
+                console.log("map file open. " + file);
+                mapData.loadMapData(file);
+                var i;
+                var n = mapGrid.rows * mapGrid.columns;
+                for (i = 0; i < n; i++) {
+                    var item = mapGrid.itemAt(i);
+                    item.type = mapData.getItemType(i);
+                    item.isCard = mapData.getItemIsCard(i);
+                    item.cardPos = mapData.getItemCardPos(i);
+                    item.cardID = mapData.getItemCardId(i);
+                    item.isArc = mapData.getItemIsArc(i);
+                    if (item.isArc != MapItemType.ArcNULL) {
+                        mapGrid.updateItemArc(item, item.isArc);
+                    }
+                }
+                mapGrid.showItemSettings();
+            } else if (opt == 2) {
+                saveMap();
             }
         }
     }
@@ -261,21 +297,12 @@ Window {
                     break;
                 }
             }
-
-            function setItemArc() {
-                var index = arcCombo.index;
-                var item = mapGrid.mapGrid.currentItem;
-                if (item == null) {
-                    return;
-                }
-                if (item.isArc == index) {
-                    return;
-                }
+            function updateItemArc(item, arcType) {
                 var pos = [0, 0, 0, 0];
                 var startAngle = 0.0;
                 var endAngle = 0.0;
                 posAdd(pos, 25, 25);
-                switch (index) {
+                switch (arcType) {
                 case MapItemType.ArcXLD:
                 case MapItemType.ArcXRD:
                     posAdd(pos, 0, 100);
@@ -293,7 +320,7 @@ Window {
                     posAdd(pos, 100, 0);
                     break;
                 }
-                switch (index) {
+                switch (arcType) {
                 case MapItemType.ArcXLU:
                 case MapItemType.ArcYRD:
                     startAngle = Math.PI / 2;
@@ -317,10 +344,22 @@ Window {
                 }
                 pos[2] = startAngle;
                 pos[3] = endAngle;
-                console.log(pos[0] + " " + pos[1] + " " + pos[2] + " " + pos[3] + " "  + index);
+                console.log(pos[0] + " " + pos[1] + " " + pos[2] + " " + pos[3] + " "  + arcType);
                 item.arcParam = pos;
-                item.isArc = index;
-                arcNeighbour(index, pos, mapGrid.mapGrid.currentIndex);
+                item.isArc = arcType;
+                arcNeighbour(arcType, pos, mapGrid.mapGrid.currentIndex);
+            }
+
+            function setItemArc() {
+                var arcType = arcCombo.index;
+                var item = mapGrid.mapGrid.currentItem;
+                if (item == null) {
+                    return;
+                }
+                if (item.isArc == arcType) {
+                    return;
+                }
+                updateItemArc(item, arcType);
                 setGridFocus();
             }
 
@@ -434,6 +473,7 @@ Window {
                     text: "New";
                     onClicked: {
                         fileDialog.selectExisting = false;
+                        fileDialog.opt = 0;     // new
                         fileDialog.open();
                     }
                 }
@@ -446,6 +486,7 @@ Window {
                     text: "Open";
                     onClicked: {
                         fileDialog.selectExisting = true;
+                        fileDialog.opt = 1;     // open
                         fileDialog.open();
                     }
                 }
@@ -460,19 +501,11 @@ Window {
                     onClicked: {
                         if (mapFilePath.text == "") {
                             fileDialog.selectExisting = false;
+                            fileDialog.opt = 2;     // save
                             fileDialog.open();
+                        } else {
+                            fileDialog.saveMap();
                         }
-                        console.log("map file save." + mapFilePath.text);
-                        var i;
-                        var n = mapGrid.rows * mapGrid.columns;
-                        for (i = 0; i < n; i++) {
-                            var item = mapGrid.itemAt(i);
-                            mapData.setItemType(i, item.type);
-                            mapData.setItemCardId(i, item.isCard, item.cardID);
-                            mapData.setItemCardPos(i, item.cardPos);
-                            mapData.setItemArc(i, item.isArc, item.neighbourPos);
-                        }
-                        mapData.saveMapData(mapFilePath.text);
                     }
                 }
             }

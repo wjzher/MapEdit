@@ -1,6 +1,10 @@
 #include "mapData.h"
 #include <QDebug>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
 
 MapData::MapData(QObject *parent)
     : QObject(parent)
@@ -99,7 +103,7 @@ void MapData::setItemCardPos(int index, QVariantList pos)
              << " " << item->cardPos[0] << " " << item->cardPos[1];
     return;
 }
-void MapData::setItemArc(int index, bool isArc, QVariantList neighbourPos)
+void MapData::setItemArc(int index, int isArc, QVariantList neighbourPos)
 {
     QVariant var;
     MapItem *item = getMapItem(index);
@@ -138,14 +142,162 @@ void MapData::setItemType(int index, int type)
     return;
 }
 
-void MapData::saveMapData(QString str)
+int MapData::getItemCardId(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->cardId;
+    }
+    return 0;
+}
+
+bool MapData::getItemIsCard(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->cardId;
+    }
+    return false;
+}
+
+QList<int> MapData::getItemCardPos(int index)
+{
+    MapItem *item = getMapItem(index);
+    QList<int> pos;
+    if (item) {
+        pos.append(item->cardPos[0]);
+        pos.append(item->cardPos[1]);
+    }
+    return pos;
+}
+
+int MapData::getItemIsArc(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->isArc;
+    }
+    return 0;
+}
+
+QVariantList MapData::getItemArcNeighbour(int index)
+{
+    QVariantList a;
+    return a;
+}
+
+int MapData::getItemType(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->type;
+    }
+    return 0;
+}
+
+
+int MapData::saveMapData(QString str)
 {
     QFile file(str);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Can not open " + str + "!";
-        return;
+        qDebug() << "saveMapData: Can not open " + str + "!";
+        return -1;
     }
-    //file.write();
+    QJsonObject rootJsonObj;
+    QJsonArray itemArray;
+    for (int i = 0; i < m_itemN; i++) {
+        QJsonObject itemObj;
+        itemObj["index"] = m_items[i].index;
+        itemObj["cardId"] = m_items[i].cardId;
+        itemObj["arcN"] = m_items[i].arcN;
+        itemObj["type"] = m_items[i].type;
+        itemObj["isCard"] = m_items[i].isCard;
+        itemObj["isArc"] = m_items[i].isArc;
+        {
+            QJsonArray posArray;
+            posArray.append(m_items[i].pos[0]);
+            posArray.append(m_items[i].pos[1]);
+            itemObj["pos"] = posArray;
+        }
+        {
+            QJsonArray neighbourArray;
+            for (int j = 0; j < 4; j++) {
+                QJsonArray childArray;
+                childArray.append(m_items[i].arcNeighbour[j][0]);
+                childArray.append(m_items[i].arcNeighbour[j][1]);
+                neighbourArray.append(childArray);
+            }
+            itemObj["arcNeighbour"] = neighbourArray;
+        }
+        {
+            QJsonArray posArray;
+            posArray.append(m_items[i].cardPos[0]);
+            posArray.append(m_items[i].cardPos[1]);
+            itemObj["cardPos"] = posArray;
+        }
+        itemArray.append(itemObj);
+    }
+    rootJsonObj["items"] = itemArray;
+    QJsonDocument jsonDoc(rootJsonObj);
+    file.write(jsonDoc.toJson());
     file.close();
-    return;
+    return 0;
+}
+
+int MapData::loadMapData(QString str)
+{
+    QFile file(str);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "loadMapData: Can not open " + str + "!";
+        return -1;
+    }
+    QTextStream in(&file);
+    QString strJson = in.readAll();
+    file.close();
+    QByteArray byteArray = strJson.toUtf8();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(byteArray);
+    if (jsonDoc.isNull()) {
+        qDebug() << "load Json Doc error";
+        return -2;
+    }
+    QJsonObject rootJsonObj = jsonDoc.object();
+    if (rootJsonObj.empty()) {
+        qDebug() << "root Json Object empty";
+        return -3;
+    }
+    QJsonValue itemsVal = rootJsonObj["items"];
+    if (!itemsVal.isArray()) {
+        qDebug() << "Error itemsVal is not array";
+        return -4;
+    }
+    QJsonArray itemsArray = itemsVal.toArray();
+    if (itemsArray.isEmpty()) {
+        return -5;
+    }
+    int itemsCount = itemsArray.count();
+    for (int i = 0; i < itemsCount; i++) {
+        QJsonObject itemObj = itemsArray.at(i).toObject();
+        int index = itemObj["index"].toInt(-1);
+        if (index < 0 || index >= m_itemN) {
+            qDebug() << "Bug Index out range.";
+            return -6;
+        }
+        MapItem *mItem = &m_items[index];
+        mItem->cardId = itemObj["cardId"].toInt();
+        mItem->cardPos[0] = itemObj["cardPos"].toArray().at(0).toInt();
+        mItem->cardPos[1] = itemObj["cardPos"].toArray().at(1).toInt();
+        mItem->type = itemObj["type"].toInt();
+        mItem->arcN = itemObj["arcN"].toInt();
+        mItem->arcNeighbour[0][0] = itemObj["arcNeighbour"].toArray().at(0).toArray().at(0).toInt();
+        mItem->arcNeighbour[0][1] = itemObj["arcNeighbour"].toArray().at(0).toArray().at(1).toInt();
+        mItem->arcNeighbour[1][0] = itemObj["arcNeighbour"].toArray().at(1).toArray().at(0).toInt();
+        mItem->arcNeighbour[1][1] = itemObj["arcNeighbour"].toArray().at(1).toArray().at(1).toInt();
+        mItem->arcNeighbour[2][0] = itemObj["arcNeighbour"].toArray().at(2).toArray().at(0).toInt();
+        mItem->arcNeighbour[2][1] = itemObj["arcNeighbour"].toArray().at(2).toArray().at(1).toInt();
+        mItem->arcNeighbour[3][0] = itemObj["arcNeighbour"].toArray().at(3).toArray().at(0).toInt();
+        mItem->arcNeighbour[3][1] = itemObj["arcNeighbour"].toArray().at(3).toArray().at(1).toInt();
+        mItem->isCard = itemObj["isCard"].toInt();
+        mItem->isArc = itemObj["isArc"].toInt();
+    }
+    return 0;
 }

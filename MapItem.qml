@@ -118,15 +118,6 @@ Rectangle {
             default:
                 break;
             }
-            if (root.isCard) {
-                var vx = root.length / root.cardPos[0];
-                var vy = root.length / root.cardPos[1];
-                ctx.fillStyle = "magenta";
-                ctx.beginPath();
-                ctx.arc(root.width / vx, root.height / vy, length / div,
-                        0, 2 * Math.PI, false);
-                ctx.fill();
-            }
             if (root.isArc != MapItemType.ArcNULL) {
                 var vx = root.length / root.arcParam[0];
                 var vy = root.length / root.arcParam[1];
@@ -139,6 +130,15 @@ Rectangle {
                             + startAngle + " " + endAngle + " " + root.width + " " + root.length);
                 ctx.arc(vx, vy, r, startAngle, endAngle, false);
                 ctx.stroke();
+            }
+            if (root.isCard) {
+                var vx = root.length / root.cardPos[0];
+                var vy = root.length / root.cardPos[1];
+                ctx.fillStyle = "magenta";
+                ctx.beginPath();
+                ctx.arc(root.width / vx, root.height / vy, length / div,
+                        0, 2 * Math.PI, false);
+                ctx.fill();
             }
         }
     }

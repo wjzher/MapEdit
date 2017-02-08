@@ -29,9 +29,16 @@ public:
     int cols() const;
     Q_INVOKABLE void setItemCardId(int index, bool isCard, int cardID);
     Q_INVOKABLE void setItemCardPos(int index, QVariantList pos);
-    Q_INVOKABLE void setItemArc(int index, bool isArc, QVariantList neighbourPos);
+    Q_INVOKABLE void setItemArc(int index, int isArc, QVariantList neighbourPos);
     Q_INVOKABLE void setItemType(int index, int type);
-    Q_INVOKABLE void saveMapData(QString str);
+    Q_INVOKABLE int getItemCardId(int index);
+    Q_INVOKABLE bool getItemIsCard(int index);
+    Q_INVOKABLE QList<int> getItemCardPos(int index);
+    Q_INVOKABLE int getItemIsArc(int index);
+    Q_INVOKABLE QVariantList getItemArcNeighbour(int index);
+    Q_INVOKABLE int getItemType(int index);
+    Q_INVOKABLE int saveMapData(QString str);
+    Q_INVOKABLE int loadMapData(QString str);
 private:
     MapItem *getMapItem(int index);
     void initItems();
