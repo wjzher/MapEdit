@@ -61,57 +61,57 @@ Rectangle {
             case MapItemType.MapItemXLStop:
                 ctx.moveTo(0, height / 2);
                 ctx.lineTo(width, height / 2);
-                ctx.moveTo(ctx.lineWidth / 2, height / 2 - length / divStopLine / 2);
-                ctx.lineTo(ctx.lineWidth / 2, height / 2 + length / divStopLine / 2);
+                ctx.moveTo(ctx.lineWidth / 2, width / 2 - width / divStopLine / 2);
+                ctx.lineTo(ctx.lineWidth / 2, width / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemXRStop:
                 ctx.moveTo(0, height / 2);
                 ctx.lineTo(width, height / 2);
-                ctx.moveTo(width - ctx.lineWidth / 2, height / 2 - length / divStopLine / 2);
-                ctx.lineTo(width - ctx.lineWidth / 2, height / 2 + length / divStopLine / 2);
+                ctx.moveTo(width - ctx.lineWidth / 2, width / 2 - width / divStopLine / 2);
+                ctx.lineTo(width - ctx.lineWidth / 2, width / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYUStop:
                 ctx.moveTo(width / 2, 0);
                 ctx.lineTo(width / 2, height);
-                ctx.moveTo(width / 2 - length / divStopLine / 2, ctx.lineWidth / 2);
-                ctx.lineTo(width / 2 + length / divStopLine / 2, ctx.lineWidth / 2);
+                ctx.moveTo(width / 2 - width / divStopLine / 2, ctx.lineWidth / 2);
+                ctx.lineTo(width / 2 + width / divStopLine / 2, ctx.lineWidth / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYDStop:
                 ctx.moveTo(width / 2, 0);
                 ctx.lineTo(width / 2, height);
-                ctx.moveTo(width / 2 - length / divStopLine / 2, height - ctx.lineWidth / 2);
-                ctx.lineTo(width / 2 + length / divStopLine / 2, height - ctx.lineWidth / 2);
+                ctx.moveTo(width / 2 - width / divStopLine / 2, width - ctx.lineWidth / 2);
+                ctx.lineTo(width / 2 + width / divStopLine / 2, width - ctx.lineWidth / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemXLMStop:
                 ctx.moveTo(0, height / 2);
                 ctx.lineTo(width, height / 2);
-                ctx.moveTo(ctx.lineWidth / 2 + length / divMStopLine, height / 2 - length / divStopLine / 2);
-                ctx.lineTo(ctx.lineWidth / 2 + length / divMStopLine, height / 2 + length / divStopLine / 2);
+                ctx.moveTo(ctx.lineWidth / 2 + width / divMStopLine, height / 2 - width / divStopLine / 2);
+                ctx.lineTo(ctx.lineWidth / 2 + width / divMStopLine, height / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemXRMStop:
                 ctx.moveTo(0, height / 2);
                 ctx.lineTo(width, height / 2);
-                ctx.moveTo(width - ctx.lineWidth / 2 - length / divMStopLine, height / 2 - length / divStopLine / 2);
-                ctx.lineTo(width - ctx.lineWidth / 2 - length / divMStopLine, height / 2 + length / divStopLine / 2);
+                ctx.moveTo(width - ctx.lineWidth / 2 - width / divMStopLine, height / 2 - width / divStopLine / 2);
+                ctx.lineTo(width - ctx.lineWidth / 2 - width / divMStopLine, height / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYUMStop:
                 ctx.moveTo(width / 2, 0);
                 ctx.lineTo(width / 2, height);
-                ctx.moveTo(width / 2 - length / divStopLine / 2, ctx.lineWidth / 2 + length / divMStopLine);
-                ctx.lineTo(width / 2 + length / divStopLine / 2, ctx.lineWidth / 2 + length / divMStopLine);
+                ctx.moveTo(width / 2 - width / divStopLine / 2, ctx.lineWidth / 2 + width / divMStopLine);
+                ctx.lineTo(width / 2 + width / divStopLine / 2, ctx.lineWidth / 2 + width / divMStopLine);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYDMStop:
                 ctx.moveTo(width / 2, 0);
                 ctx.lineTo(width / 2, height);
-                ctx.moveTo(width / 2 - length / divStopLine / 2, height - ctx.lineWidth / 2 - length / divMStopLine);
-                ctx.lineTo(width / 2 + length / divStopLine / 2, height - ctx.lineWidth / 2 - length / divMStopLine);
+                ctx.moveTo(width / 2 - width / divStopLine / 2, width - ctx.lineWidth / 2 - width / divMStopLine);
+                ctx.lineTo(width / 2 + width / divStopLine / 2, width - ctx.lineWidth / 2 - width / divMStopLine);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemNULL:

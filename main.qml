@@ -34,7 +34,31 @@ Window {
                 mapData.setItemArc(i, item.isArc, item.neighbourPos);
                 mapData.setItemIsNeighbour(i, item.isNeighbour);
             }
+            console.log("save Map Data.");
             mapData.saveMapData(mapFilePath.text);
+        }
+        function mapDataToMapGrid() {
+            var i;
+            var n = mapGrid.rows * mapGrid.columns;
+            for (i = 0; i < n; i++) {
+                var item = mapGrid.itemAt(i);
+                item.type = mapData.getItemType(i);
+                item.isCard = mapData.getItemIsCard(i);
+                item.cardPos = mapData.getItemCardPos(i);
+                item.cardID = mapData.getItemCardId(i);
+                item.isArc = mapData.getItemIsArc(i);
+                item.isNeighbour = mapData.getItemIsNeighbour(i);
+                if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
+                    mapGrid.updateItemArc(i, item, item.isArc);
+                }
+            }
+        }
+
+        function clearMap() {
+            console.log("clear Map.");
+            mapData.initItems();
+            mapDataToMapGrid();
+            mapGrid.showItemSettings();
         }
 
         onAccepted: {
@@ -49,24 +73,13 @@ Window {
             if (opt == 1) {
                 console.log("map file open. " + file);
                 mapData.loadMapData(file);
-                var i;
-                var n = mapGrid.rows * mapGrid.columns;
-                for (i = 0; i < n; i++) {
-                    var item = mapGrid.itemAt(i);
-                    item.type = mapData.getItemType(i);
-                    item.isCard = mapData.getItemIsCard(i);
-                    item.cardPos = mapData.getItemCardPos(i);
-                    item.cardID = mapData.getItemCardId(i);
-                    item.isArc = mapData.getItemIsArc(i);
-                    item.isNeighbour = mapData.getItemIsNeighbour(i);
-                    if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
-                        mapGrid.updateItemArc(i, item, item.isArc);
-                    }
-                }
+                mapDataToMapGrid();
                 mapGrid.showItemSettings();
             } else if (opt == 2) {
                 saveMap();
-            }
+            }/* else if (opt == 0) {
+                clearMap();
+            }*/
         }
     }
     MapData {
@@ -476,7 +489,8 @@ Window {
                     onClicked: {
                         fileDialog.selectExisting = false;
                         fileDialog.opt = 0;     // new
-                        fileDialog.open();
+                        mapFilePath.text = "";
+                        fileDialog.clearMap();
                     }
                 }
                 Button {
@@ -675,6 +689,9 @@ Window {
                     }
                     onEditingFinished: {
                         console.log("Card ID onEditingFinished. ", cardIDText.text);
+                        mapGrid.setItemCardID(cardIDText.text);
+                    }
+                    onTextChanged: {
                         mapGrid.setItemCardID(cardIDText.text);
                     }
                 }

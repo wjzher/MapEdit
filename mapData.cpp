@@ -95,6 +95,10 @@ void MapData::setItemCardPos(int index, QVariantList pos)
 {
     QVariant var;
     MapItem *item = getMapItem(index);
+    int count = pos.count();
+    if (count != 2) {
+        return;
+    }
     var = pos.at(0);
     item->cardPos[0] = var.toInt();
     var = pos.at(1);
@@ -172,7 +176,7 @@ bool MapData::getItemIsCard(int index)
 {
     MapItem *item = getMapItem(index);
     if (item) {
-        return item->cardId;
+        return item->isCard;
     }
     return false;
 }

@@ -42,9 +42,10 @@ public:
     Q_INVOKABLE int getItemType(int index);
     Q_INVOKABLE int saveMapData(QString str);
     Q_INVOKABLE int loadMapData(QString str);
+    Q_INVOKABLE void initItems();
 private:
     MapItem *getMapItem(int index);
-    void initItems();
+
 signals:
     void rowsChanged(int arg);
     void colsChanged(int arg);
