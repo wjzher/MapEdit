@@ -86,7 +86,7 @@ void MapData::setItemCardId(int index, bool isCard, int cardID)
     if (item) {
         item->isCard = isCard;
         item->cardId = cardID;
-        qDebug() << "set Item Card id: " <<  isCard << " " << cardID;
+//        qDebug() << "set Item Card id: " <<  isCard << " " << cardID;
     }
     return;
 }
@@ -99,8 +99,8 @@ void MapData::setItemCardPos(int index, QVariantList pos)
     item->cardPos[0] = var.toInt();
     var = pos.at(1);
     item->cardPos[1] = var.toInt();
-    qDebug() << "set Item Card Pos: " << index << " " << pos
-             << " " << item->cardPos[0] << " " << item->cardPos[1];
+//    qDebug() << "set Item Card Pos: " << index << " " << pos
+//             << " " << item->cardPos[0] << " " << item->cardPos[1];
     return;
 }
 void MapData::setItemArc(int index, int isArc, QVariantList neighbourPos)
@@ -125,11 +125,11 @@ void MapData::setItemArc(int index, int isArc, QVariantList neighbourPos)
         item->arcNeighbour[i][1] = v.toInt();
     }
     item->isArc = isArc;
-    qDebug() << "set Item Arc: " << index << " " << neighbourPos
-             << " " << item->arcNeighbour[0][0] << " " << item->arcNeighbour[0][1]
-             << " " << item->arcNeighbour[1][0] << " " << item->arcNeighbour[1][1]
-             << " " << item->arcNeighbour[2][0] << " " << item->arcNeighbour[2][1]
-             << " " << item->arcNeighbour[3][0] << " " << item->arcNeighbour[3][1];
+//    qDebug() << "set Item Arc: " << index << " " << neighbourPos
+//             << " " << item->arcNeighbour[0][0] << " " << item->arcNeighbour[0][1]
+//             << " " << item->arcNeighbour[1][0] << " " << item->arcNeighbour[1][1]
+//             << " " << item->arcNeighbour[2][0] << " " << item->arcNeighbour[2][1]
+//             << " " << item->arcNeighbour[3][0] << " " << item->arcNeighbour[3][1];
     return;
 }
 void MapData::setItemType(int index, int type)
@@ -137,9 +137,26 @@ void MapData::setItemType(int index, int type)
     MapItem *item = getMapItem(index);
     if (item) {
         item->type = type;
-        qDebug() << "set Item type: " <<  type;
     }
     return;
+}
+
+void MapData::setItemIsNeighbour(int index, bool isNeighbour)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        item->isNeighbour = isNeighbour;
+    }
+    return;
+}
+
+bool MapData::getItemIsNeighbour(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->isNeighbour;
+    }
+    return false;
 }
 
 int MapData::getItemCardId(int index)
@@ -213,6 +230,7 @@ int MapData::saveMapData(QString str)
         itemObj["type"] = m_items[i].type;
         itemObj["isCard"] = m_items[i].isCard;
         itemObj["isArc"] = m_items[i].isArc;
+        itemObj["isNeighbour"] = m_items[i].isNeighbour;
         {
             QJsonArray posArray;
             posArray.append(m_items[i].pos[0]);
@@ -288,6 +306,7 @@ int MapData::loadMapData(QString str)
         mItem->cardPos[1] = itemObj["cardPos"].toArray().at(1).toInt();
         mItem->type = itemObj["type"].toInt();
         mItem->arcN = itemObj["arcN"].toInt();
+        mItem->isNeighbour = itemObj["isNeighbour"].toBool();
         mItem->arcNeighbour[0][0] = itemObj["arcNeighbour"].toArray().at(0).toArray().at(0).toInt();
         mItem->arcNeighbour[0][1] = itemObj["arcNeighbour"].toArray().at(0).toArray().at(1).toInt();
         mItem->arcNeighbour[1][0] = itemObj["arcNeighbour"].toArray().at(1).toArray().at(0).toInt();
@@ -296,7 +315,7 @@ int MapData::loadMapData(QString str)
         mItem->arcNeighbour[2][1] = itemObj["arcNeighbour"].toArray().at(2).toArray().at(1).toInt();
         mItem->arcNeighbour[3][0] = itemObj["arcNeighbour"].toArray().at(3).toArray().at(0).toInt();
         mItem->arcNeighbour[3][1] = itemObj["arcNeighbour"].toArray().at(3).toArray().at(1).toInt();
-        mItem->isCard = itemObj["isCard"].toInt();
+        mItem->isCard = itemObj["isCard"].toBool();
         mItem->isArc = itemObj["isArc"].toInt();
     }
     return 0;

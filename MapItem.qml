@@ -12,6 +12,7 @@ Rectangle {
     property int isArc: MapItemType.ArcNULL;
     property var arcParam: [0.0, 0.0, 0.0, 0.0];      // x, y, startAngle, endAngle
     property var neighbourPos: [];      // dx, dy, dx, dy...
+    property bool isNeighbour: false;
     signal clicked;
     width: length;
     height: length;

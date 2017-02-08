@@ -32,6 +32,7 @@ Window {
                 mapData.setItemCardId(i, item.isCard, item.cardID);
                 mapData.setItemCardPos(i, item.cardPos);
                 mapData.setItemArc(i, item.isArc, item.neighbourPos);
+                mapData.setItemIsNeighbour(i, item.isNeighbour);
             }
             mapData.saveMapData(mapFilePath.text);
         }
@@ -57,8 +58,9 @@ Window {
                     item.cardPos = mapData.getItemCardPos(i);
                     item.cardID = mapData.getItemCardId(i);
                     item.isArc = mapData.getItemIsArc(i);
-                    if (item.isArc != MapItemType.ArcNULL) {
-                        mapGrid.updateItemArc(item, item.isArc);
+                    item.isNeighbour = mapData.getItemIsNeighbour(i);
+                    if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
+                        mapGrid.updateItemArc(i, item, item.isArc);
                     }
                 }
                 mapGrid.showItemSettings();
@@ -221,6 +223,7 @@ Window {
                     var item = itemAt(neighbour);
                     item.arcParam = p;
                     item.isArc = t;
+                    item.isNeighbour = true;
                     addNeighbour(rows, cols, dx, dy);
                 }
             }
@@ -296,7 +299,7 @@ Window {
                     break;
                 }
             }
-            function updateItemArc(item, arcType) {
+            function updateItemArc(index, item, arcType) {
                 var pos = [0, 0, 0, 0];
                 var startAngle = 0.0;
                 var endAngle = 0.0;
@@ -346,7 +349,8 @@ Window {
                 console.log(pos[0] + " " + pos[1] + " " + pos[2] + " " + pos[3] + " "  + arcType);
                 item.arcParam = pos;
                 item.isArc = arcType;
-                arcNeighbour(arcType, pos, mapGrid.mapGrid.currentIndex);
+                item.isNeighbour = false;
+                arcNeighbour(arcType, pos, index);
             }
 
             function setItemArc() {
@@ -358,7 +362,7 @@ Window {
                 if (item.isArc == arcType) {
                     return;
                 }
-                updateItemArc(item, arcType);
+                updateItemArc(mapGrid.mapGrid.currentIndex, item, arcType);
                 setGridFocus();
             }
 

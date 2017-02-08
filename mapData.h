@@ -15,6 +15,7 @@ struct MapItem {
     int isArc;      // 是否存在弧线
     int arcNeighbour[4][2]; // 弧线相邻元素相对坐标
     int arcN;
+    bool isNeighbour;
 };
 
 class MapData : public QObject
@@ -31,8 +32,10 @@ public:
     Q_INVOKABLE void setItemCardPos(int index, QVariantList pos);
     Q_INVOKABLE void setItemArc(int index, int isArc, QVariantList neighbourPos);
     Q_INVOKABLE void setItemType(int index, int type);
+    Q_INVOKABLE void setItemIsNeighbour(int index, bool isNeighbour);
     Q_INVOKABLE int getItemCardId(int index);
     Q_INVOKABLE bool getItemIsCard(int index);
+    Q_INVOKABLE bool getItemIsNeighbour(int index);
     Q_INVOKABLE QList<int> getItemCardPos(int index);
     Q_INVOKABLE int getItemIsArc(int index);
     Q_INVOKABLE QVariantList getItemArcNeighbour(int index);
