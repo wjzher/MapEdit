@@ -11,7 +11,7 @@ Window {
     visible: true
     minimumHeight: 600;
     minimumWidth: 800;
-    width: 800;
+    width: 900;
     height: 640;
     id: rootItem;
     color: "#EEEEEE";
@@ -117,21 +117,20 @@ Window {
         anchors.fill: parent;
         anchors.margins: 8;
         spacing: 4;
-        property int mapWidth: {
-            var w = row.width - mapItemSettingsGroup.width - row.spacing;
-            var h = row.height;
-            return (w < h) ? w : h;
-        }
+//        property int mapWidth: {
+//            var w = row.width - mapItemSettingsGroup.width - row.spacing;
+//            var h = row.height;
+//            return (w < h) ? w : h;
+//        }
         MapGrid {
             id: mapGrid;
-            width: row.mapWidth;
-            height: row.mapWidth;
+            width: row.width - mapItemSettingsGroup.width - row.spacing;
+            height: row.height - 12;
             rows: 20;
             columns: 20;
             scaleGrid: 1.6;
             onScaleGridChanged: {
                 scaleSlide.slideValue = scaleGrid;
-                console.log("set scale slide value.")
             }
             Component.onCompleted: {
                 mapData.setCols(columns);
@@ -453,7 +452,6 @@ Window {
                     slideValue: mapGrid.scaleGrid;
                     onSlideChanged: {
                         mapGrid.scaleGrid = slideValue.toFixed(1);
-                        console.log("set mapGrid scaleGrid.")
                     }
                 }
                 FileText {

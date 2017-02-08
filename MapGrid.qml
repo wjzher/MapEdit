@@ -6,8 +6,9 @@ Rectangle {
     property int rows: 5;
     property int columns: 5;
     property int numberMargins: 1;
-    property int cellW: ((width + numberMargins) / columns);
-    property int cellH: ((height + numberMargins) / rows);
+    property int gridWidth: (width > height) ? width : height;
+    property int cellW: ((gridWidth) / columns);
+    property int cellH: ((gridWidth) / rows);
     property real scaleGrid: 1.0;
     property alias mapGrid: mapGrid;
     signal currentIndexChanged;
@@ -31,8 +32,8 @@ Rectangle {
     }
     GridView {
         id: mapGrid;
-        width: root.width * root.scaleGrid;
-        height: root.height * root.scaleGrid;
+        width: root.gridWidth * root.scaleGrid;
+        height: root.gridWidth * root.scaleGrid;
         anchors.margins: 0;
         //        anchors.centerIn: parent;
 
@@ -54,6 +55,27 @@ Rectangle {
             acceptedButtons: Qt.RightButton;    // right button is valid
             onPressed: {
                 parent.focus = true;
+            }
+            onReleased: {
+                var view = root;
+//                console.log("realse ", parent.x + " " + parent.y);
+//                console.log("parent ", parent.width + " " + parent.height);
+//                console.log("view ", view.width + " " + view.height);
+                var x = parent.x, y = parent.y;
+                if (x > 2) {
+                    parent.x = 2;
+                }
+                if (y > 2) {
+                    parent.y = 2;
+                }
+                x += parent.width - view.width;
+                if (x < -2) {
+                    parent.x = view.width - parent.width - 2;
+                }
+                y += parent.height - view.height;
+                if (y < -2) {
+                    parent.y = view.height - parent.height - 2;
+                }
             }
         }
         onCurrentIndexChanged: {
