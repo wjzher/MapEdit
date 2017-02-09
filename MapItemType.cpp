@@ -1,4 +1,4 @@
-#include "MapItemType.h"
+﻿#include "MapItemType.h"
 
 MapItemType::MapItemType(QObject *parent) : QObject(parent)
 {

@@ -1,4 +1,4 @@
-#ifndef MAPDATA_H
+﻿#ifndef MAPDATA_H
 #define MAPDATA_H
 
 #include <QObject>

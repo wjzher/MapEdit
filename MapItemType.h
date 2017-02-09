@@ -1,4 +1,4 @@
-#ifndef MAPITEMTYPE_H
+﻿#ifndef MAPITEMTYPE_H
 #define MAPITEMTYPE_H
 
 #include <QObject>

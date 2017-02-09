@@ -1,4 +1,4 @@
-import QtQuick 2.0
+﻿import QtQuick 2.0
 import Qt.MapItemType 1.0
 
 Rectangle {

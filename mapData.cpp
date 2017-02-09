@@ -1,4 +1,4 @@
-#include "mapData.h"
+﻿#include "mapData.h"
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
