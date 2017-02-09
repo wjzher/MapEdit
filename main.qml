@@ -749,6 +749,19 @@ Window {
                     }
                 }
             }
+            GroupBox {
+                id: pathSettingsGroup;
+                title: "Path Settings";
+                width: 280;
+                height: 200;
+                ActCombo {
+                    id: actCombo;
+                    anchors.top: parent.top;
+                    anchors.topMargin: 4;
+                    index: MapItemType.ActNULL;
+
+                }
+            }
         }
     }
 }

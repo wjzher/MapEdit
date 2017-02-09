@@ -6,5 +6,6 @@
         <file>ScaleSlide.qml</file>
         <file>ArcCombo.qml</file>
         <file>FileText.qml</file>
+        <file>ActCombo.qml</file>
     </qresource>
 </RCC>

@@ -8,6 +8,7 @@ class MapItemType : public QObject
     Q_OBJECT
     Q_ENUMS(ItemType)
     Q_ENUMS(ArcType)
+    Q_ENUMS(ActType)
 public:
     explicit MapItemType(QObject *parent = 0);
     ~MapItemType();
@@ -35,6 +36,17 @@ public:
         ArcYLD,
         ArcYRU,
         ArcYRD
+    };
+    enum ActType {
+        ActNULL,
+        ActAStop,
+        ActMF,
+        ActMB,
+        ActRCW,
+        ActRCCW,
+        ActPlatform,
+        ActOA,
+        ActCharge
     };
 
 signals:
