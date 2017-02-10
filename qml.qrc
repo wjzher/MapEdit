@@ -7,5 +7,7 @@
         <file>ArcCombo.qml</file>
         <file>FileText.qml</file>
         <file>ActCombo.qml</file>
+        <file>PathInfo.qml</file>
+        <file>ActProperty.qml</file>
     </qresource>
 </RCC>

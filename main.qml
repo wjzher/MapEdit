@@ -530,7 +530,7 @@ Window {
                 id: mapItemSettingsGroup;
                 title: "Item Settings";
                 width: 280;
-                height: 200;
+                height: 162;
                 ExclusiveGroup {
                     id: itemTypeGroup;
                 }
@@ -753,15 +753,49 @@ Window {
                 id: pathSettingsGroup;
                 title: "Path Settings";
                 width: 280;
-                height: 200;
+                height: 90;
+
                 ActCombo {
                     id: actCombo;
                     anchors.top: parent.top;
                     anchors.topMargin: 4;
                     index: MapItemType.ActNULL;
-
+                    onIndexChanged: {
+                        if (actProperty != null) {
+                            actProperty.type = index;
+                        }
+                    }
+                }
+                ActProperty {
+                    id: actProperty;
+                    anchors.top: actCombo.bottom;
+                    anchors.topMargin: 27;
+                    type: 0;
+                }
+                Button {
+                    id: addButton;
+                    width: 40;
+                    height: 20;
+                    anchors.right: parent.right;
+                    anchors.rightMargin: 2;
+                    text: "增加";
+                }
+                Button {
+                    id: reviseButton;
+                    width: 40;
+                    height: 20;
+                    anchors.right: addButton.left;
+                    anchors.rightMargin: 2
+                    anchors.topMargin: 4;
+                    text: "修改";
                 }
             }
+            PathInfo{
+                id: pathList;
+                width: 280;
+                height: rootItem.height - 352 - 32 - 8;
+            }
+
         }
     }
 }
