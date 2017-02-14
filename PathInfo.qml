@@ -35,9 +35,6 @@ Rectangle {
         id: pathJson;
         mode: 1;
     }
-    ActProperty {
-        id: actProperty;
-    }
     Component {
         id:pathDelegate
         Item {
@@ -48,101 +45,23 @@ Rectangle {
                 anchors.fill: parent;
                 onClicked: {
                     var v, pv, pt, pr, pp, po, pc, prl;
-                    //console.log("click: " + index)
                     wrapper.ListView.view.currentIndex = index;
-                    v = listView.model.get(index).Act;
-                    pv = listView.model.get(index).Remark.substring(2,4);
-                    pt = listView.model.get(index).Remark.substring(7,10);
-                    pr = listView.model.get(index).Remark.substring(4,8);
-                    pp = listView.model.get(index).Remark.substring(3,6);
-                    po = listView.model.get(index).Remark.substring(3,6);
-                    pc = listView.model.get(index).Remark.substring(7,9);
-                    prl = listView.model.get(index).Remark.substring(16,18);
-                    //console.log (listView.model.get(index).Remark.substring(listView.model.get(index).Remark.indexOf(":", 2)));
-                    console.log (listView.model.get(index).Remark.substring("v:", 4));
-                    function speedIndex(s) {
-                        if(s == "1档") {
-                            actProperty.speedValue = 1;
-                        } if(s == "2档") {
-                            actProperty.speedValue = 2;
-                        } if(s == "3档") {
-                            actProperty.speedValue = 3;
-                        } if(s == "4档") {
-                            actProperty.speedValue = 4;
-                        } if(s == "5档") {
-                            actProperty.speedValue = 5;
-                        } else {
-                            actProperty.speedValue = 0;
-                        }
+                    var json = JSON.parse(pathJson.exportList());
+                    if (index >= json.length) {
+                        return;
                     }
-                    function turnIndex(t) {
-                        if (t == "左分支") {
-                            actProperty.turnValue = 1;
-                        } if (t == "右分支") {
-                            actProperty.turnValue = 2;
-                        } else {
-                            actProperty.turnValue = 0;
-                        }
-                    }
-                    function rotIndex(t) {
-                        if (t == "90°") {
-                            actProperty.rotValue = 0;
-                        } if (t == "180°") {
-                            actProperty.rotValue = 1;
-                        }
-                    }
-                    function platIndex(t) {
-                        if (t == "升平台") {
-                            actProperty.platValue = 0;
-                        } if (t == "降平台") {
-                            actProperty.platValue = 1;
-                        }
-                    }
-                    function oaIndex(t) {
-                        if (t == "开避障") {
-                            actProperty.oaValue = 0;
-                        } if (t == "关避障") {
-                            actProperty.oaValue = 1;
-                        }
-                    }
-                    function chargeIndex(t) {
-                        if (t == "充电") {
-                            actProperty.chargeValue = 0;
-                        } if (t == "断电") {
-                            actProperty.chargeValue = 1;
-                        }
-                    }
-                    function relayIndex(t) {
-                        if (t == "闭合") {
-                            actProperty.relayValue = 0;
-                        } if (t == "断开") {
-                            actProperty.relayValue = 1;
-                        }
-                    }
-                    if(v == "前行") {
-                        actCombo.index = 2;
-                        speedIndex(pv);
-                        turnIndex(pt);
-                    } if(v == "后退") {
-                        actCombo.index = 3;
-                        speedIndex(pv);
-                        turnIndex(pt);
-                    } if(v == "顺时针旋转") {
-                        actCombo.index = 4;
-                        rotIndex(pr);
-                    } if(v == "逆时针旋转") {
-                        actCombo.index = 5;
-                        rotIndex(pr);
-                    } if(v == "平台动作") {
-                        actCombo.index = 6;
-                        platIndex(pp);
-                    } if(v == "避障") {
-                        actCombo.index = 7;
-                        oaIndex(po);
-                    } if(v == "充电") {
-                        actCombo.index = 8;
-                        chargeIndex(pc);
-                        relayIndex(prl);
+                    var m = json[index];
+                    console.log("click: " + index);
+                    actCombo.index = listView.jsonact(m);
+                    if ((m.act == 3) || (m.act == 4)) {
+                        actProperty.speedValue = listView.jsonspeed(m);
+                        actProperty.turnValue = listView.jsonturn(m);
+                    } if ((m.act == 7) || (m.act == 8)) {
+                        actProperty.rotValue = listView.jsonrot(m);
+                    } if (m.act == 17) {
+                        actProperty.platValue = listView.jsonplat(m);
+                    } if (m.act == 20) {
+                        actProperty.oaValue = listView.jsonoa(m);
                     }
                 }
                 onDoubleClicked: {
@@ -331,13 +250,13 @@ Rectangle {
                 p = actCombo.model[7];
                 return p;
             } else {
-                return 0;
+                return "";
             }
         }
         function remark(m) {
             var p;
             if(m.act == 2) {
-                return 0;
+                return "";
             } if ((m.act == 3) || (m.act == 4)) {
                 if(m.v) {
                     if(m.turn) {
@@ -348,7 +267,7 @@ Rectangle {
                 } else if (m.turn) {
                     p = "T:"+actProperty.modelT[m.turn];
                 } else {
-                    return 0;
+                    return "";
                 }
                 return p;
             } if (m.act == 7 || m.act == 8) {
@@ -370,11 +289,65 @@ Rectangle {
                 } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {
                     p = "oa:"+actProperty.modelB[1];
                 } else {
-                    return 0;
+                    return "";
                 } return p;
             } else {
-                return 0;
+                return "";
             }
+        }
+        function jsonact(m) {
+            var p;
+            if (m.act == 2) {
+                p = 1;
+            } if ((m.act == 3) || (m.act == 4)) {
+                p = m.act - 1;
+            } if ((m.act == 7) || (m.act == 8)) {
+                p = m.act - 3;
+            } if (m.act == 17) {
+                p = 6;
+            } if (m.act == 20) {
+                p = 7;
+            } return p;
+        }
+        function jsonspeed(m) {
+            var p;
+            if (m.v) {
+                p = m.v;
+            } else {
+                p = 0;
+            } return p;
+        }
+        function jsonturn(m) {
+            var p;
+            if (m.turn) {
+                p = m.turn;
+            } else {
+                p = 0;
+            } return p;
+        }
+        function jsonrot(m) {
+            var p;
+            if (m.rot == 90) {
+                p = 0;
+            } if (m.rot == 180) {
+                p = 1;
+            } return p;
+        }
+        function jsonplat(m) {
+            var p;
+            if (m.val == 2) {
+                p = 0;
+            } if (m.val == 4) {
+                p = 1;
+            } return p;
+        }
+        function jsonoa(m) {
+            var p;
+            if ((m.bz[0] == 1) && (m.bz[0] == 2)) {
+                p = 0;
+            } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {
+                p = 1;
+            } return p;
         }
 
         function update(v) {

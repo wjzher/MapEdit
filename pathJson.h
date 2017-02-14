@@ -30,8 +30,8 @@ public:
     }
     Q_INVOKABLE int saveJsonFile(QVariant var);
     Q_INVOKABLE QVariant openJsonFile(QString fileName);
+    Q_INVOKABLE QVariant exportList();
 private:
-    QVariant exportList();
 signals:
 
 public slots:

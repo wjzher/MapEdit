@@ -60,6 +60,5 @@ QVariant PathJson::exportList()
 {
     QJsonDocument jDoc(m_pathArray);
     QVariant var(jDoc.toJson(QJsonDocument::Compact));
-//    qDebug() << "pathVal: " << jDoc.toJson(QJsonDocument::Compact);
     return var;
 }
