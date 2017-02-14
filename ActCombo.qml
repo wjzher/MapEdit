@@ -6,6 +6,7 @@ Rectangle {
     id: root;
     width: 180;
     property alias index: comboBox.currentIndex;
+    property alias model: comboBox.model;
     Row {
         spacing: 8;
         Text {

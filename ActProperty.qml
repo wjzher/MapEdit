@@ -1,4 +1,4 @@
-import QtQuick 2.0
+﻿import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import Qt.MapItemType 1.0
@@ -6,6 +6,20 @@ import Qt.MapItemType 1.0
 Rectangle{
     id: root;
     property int type: 0;
+    property alias speedValue: speedCombobox.currentIndex;
+    property alias turnValue: turnCombobox.currentIndex;
+    property alias rotValue: rotCombobox.currentIndex;
+    property alias platValue: platformCombobox.currentIndex;
+    property alias oaValue: bzCombobox.currentIndex;
+    property alias chargeValue: chargeCombobox.currentIndex;
+    property alias relayValue: relayCombobox.currentIndex;
+    property alias modelV: speedCombobox.model;
+    property alias modelT: turnCombobox.model;
+    property alias modelR: rotCombobox.model;
+    property alias modelP: platformCombobox.model;
+    property alias modelB: bzCombobox.model;
+    property alias modelC: chargeCombobox.model;
+    property alias modelRL: relayCombobox.model;
     Row {
         Rectangle {
             id: speedRect;

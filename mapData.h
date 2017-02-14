@@ -43,6 +43,7 @@ public:
     Q_INVOKABLE int saveMapData(QString str);
     Q_INVOKABLE int loadMapData(QString str);
     Q_INVOKABLE void initItems();
+    Q_INVOKABLE int getItemIndexByCardId(int cardId);
 private:
     MapItem *getMapItem(int index);
 

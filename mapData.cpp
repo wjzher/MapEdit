@@ -172,6 +172,19 @@ int MapData::getItemCardId(int index)
     return 0;
 }
 
+int MapData::getItemIndexByCardId(int cardId)
+{
+    int index = -1;
+    for (int i; i < m_itemN; i++) {
+        MapItem *item = getMapItem(i);
+        if (item->isCard && cardId == item->cardId) {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
 bool MapData::getItemIsCard(int index)
 {
     MapItem *item = getMapItem(index);

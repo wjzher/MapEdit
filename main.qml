@@ -452,6 +452,10 @@ Window {
             onCurrentIndexChanged: {
 //                console.log("mapGrid index changed. " + mapGrid.mapGrid.currentIndex);
                 showItemSettings();
+                var item = mapGrid.mapGrid.currentItem;
+                if (item.isCard == true) {
+                    actCombo.index = 0;
+                }
             }
         }
         Column {
@@ -779,6 +783,43 @@ Window {
                     anchors.right: parent.right;
                     anchors.rightMargin: 2;
                     text: "增加";
+                    onClicked: {
+                        var v;
+                        v = {
+                            "Idx":mapGrid.mapGrid.currentIndex.toString(),
+                            "ID":mapGrid.mapGrid.currentItem.cardID.toString(),
+                            "Act":actCombo.model[actCombo.index],
+                            //"Remark":"V:"+actProperty.speedValue.toString()
+                            //"Remark":"V:"+actProperty.model[actProperty.index]
+                            "Remark":pathSettingsGroup.model()
+                        };
+                        pathList.listView.add(v);
+                    }
+                }
+                function model(){
+                    var p;
+                    if (actCombo.index == 0 || actCombo.index == 1) {
+                        return 0;
+                    }
+                    if (actCombo.index == 2 || actCombo.index == 3) {
+                        p = "v:"+actProperty.modelV[actProperty.speedValue] + ",T:" +actProperty.modelT[actProperty.turnValue];
+                        return p;
+                    }
+                    if (actCombo.index == 4 || actCombo.index == 5) {
+                        p = "rot:"+actProperty.modelR[actProperty.rotValue];
+                        return p;
+                    } if (actCombo.index == 6) {
+                        p = "lf:"+actProperty.modelP[actProperty.platValue];
+                        return p;
+                    } if (actCombo.index == 7) {
+                        p = "oa:"+actProperty.modelB[actProperty.oaValue];
+                        return p;
+                    } if (actCombo.index == 8) {
+                        p = "charge:"+actProperty.modelC[actProperty.chargeValue] + ",relay:" + actProperty.modelRL[actProperty.relayValue];
+                        return p;
+                    } else {
+                        return 0;
+                    }
                 }
                 Button {
                     id: reviseButton;
@@ -788,6 +829,19 @@ Window {
                     anchors.rightMargin: 2
                     anchors.topMargin: 4;
                     text: "修改";
+                    onClicked: {
+                        var item = mapGrid.mapGrid.currentItem;
+                        var v;
+                        v = {
+                            "Act":actCombo.model[actCombo.index],
+                            "Remark":pathSettingsGroup.model()
+                        };
+                        if (item.isCard) {
+                            if (item.cardID != 0) {
+                                pathList.listView.revise(v);
+                            }
+                        }
+                    }
                 }
             }
             PathInfo{
