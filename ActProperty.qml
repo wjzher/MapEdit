@@ -35,6 +35,7 @@ Rectangle{
                     width: 45;
                     id: speedCombobox;
                     model: [
+                        "",
                         "1档",
                         "2档",
                         "3档",
@@ -60,6 +61,7 @@ Rectangle{
                     width: 70;
                     id: turnCombobox;
                     model: [
+                        "",
                         "左分支",
                         "右分支"
                     ];

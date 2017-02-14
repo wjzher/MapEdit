@@ -35,7 +35,9 @@ Rectangle {
         id: pathJson;
         mode: 1;
     }
-
+    ActProperty {
+        id: actProperty;
+    }
     Component {
         id:pathDelegate
         Item {
@@ -46,7 +48,7 @@ Rectangle {
                 anchors.fill: parent;
                 onClicked: {
                     var v, pv, pt, pr, pp, po, pc, prl;
-                    console.log("click: " + index)
+                    //console.log("click: " + index)
                     wrapper.ListView.view.currentIndex = index;
                     v = listView.model.get(index).Act;
                     pv = listView.model.get(index).Remark.substring(2,4);
@@ -56,24 +58,30 @@ Rectangle {
                     po = listView.model.get(index).Remark.substring(3,6);
                     pc = listView.model.get(index).Remark.substring(7,9);
                     prl = listView.model.get(index).Remark.substring(16,18);
+                    //console.log (listView.model.get(index).Remark.substring(listView.model.get(index).Remark.indexOf(":", 2)));
+                    console.log (listView.model.get(index).Remark.substring("v:", 4));
                     function speedIndex(s) {
                         if(s == "1档") {
-                            actProperty.speedValue = 0;
-                        } if(s == "2档") {
                             actProperty.speedValue = 1;
-                        } if(s == "3档") {
+                        } if(s == "2档") {
                             actProperty.speedValue = 2;
-                        } if(s == "4档") {
+                        } if(s == "3档") {
                             actProperty.speedValue = 3;
-                        } if(s == "5档") {
+                        } if(s == "4档") {
                             actProperty.speedValue = 4;
+                        } if(s == "5档") {
+                            actProperty.speedValue = 5;
+                        } else {
+                            actProperty.speedValue = 0;
                         }
                     }
                     function turnIndex(t) {
                         if (t == "左分支") {
-                            actProperty.turnValue = 0;
-                        } if (t == "右分支") {
                             actProperty.turnValue = 1;
+                        } if (t == "右分支") {
+                            actProperty.turnValue = 2;
+                        } else {
+                            actProperty.turnValue = 0;
                         }
                     }
                     function rotIndex(t) {
@@ -299,6 +307,76 @@ Rectangle {
         function revise(v) {
             listView.model.set(listView.currentIndex, v);
         }
+        function act(m) {
+            var p;
+            if (m == 2) {
+                p = actCombo.model[1];
+                return p;
+            } if (m == 3) {
+                p = actCombo.model[2];
+                return p;
+            } if (m == 4) {
+                p = actCombo.model[3];
+                return p;
+            } if (m == 7) {
+                p = actCombo.model[4];
+                return p;
+            } if (m == 8) {
+                p = actCombo.model[5];
+                return p;
+            } if (m == 17) {
+                p = actCombo.model[6];
+                return p;
+            } if (m == 20) {
+                p = actCombo.model[7];
+                return p;
+            } else {
+                return 0;
+            }
+        }
+        function remark(m) {
+            var p;
+            if(m.act == 2) {
+                return 0;
+            } if ((m.act == 3) || (m.act == 4)) {
+                if(m.v) {
+                    if(m.turn) {
+                        p = "v:"+actProperty.modelV[m.v] + ",T:"+actProperty.modelT[m.turn];
+                    } if (!m.turn) {
+                        p = "v:"+actProperty.modelV[m.v];
+                    }
+                } else if (m.turn) {
+                    p = "T:"+actProperty.modelT[m.turn];
+                } else {
+                    return 0;
+                }
+                return p;
+            } if (m.act == 7 || m.act == 8) {
+                if (m.rot == 90) {
+                    p =  "rot:"+actProperty.modelR[0];
+                } if (m.rot == 180) {
+                    p =  "rot:"+actProperty.modelR[1];
+                }
+                return p;
+            } if (m.act == 17) {
+                if (m.val == 2) {
+                    p = "lf:"+actProperty.modelP[0];
+                } if (m.val == 4) {
+                    p = "lf:"+actProperty.modelP[1];
+                } return p;
+            } if (m.act == 20) {
+                if ((m.bz[0] == 1) && (m.bz[0] == 2)) {
+                    p = "oa:"+actProperty.modelB[0];
+                } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {
+                    p = "oa:"+actProperty.modelB[1];
+                } else {
+                    return 0;
+                } return p;
+            } else {
+                return 0;
+            }
+        }
+
         function update(v) {
             var json = JSON.parse(v);
             var i;
@@ -309,8 +387,9 @@ Rectangle {
                 listElement = {
                         "Idx":mapData.getItemIndexByCardId(json[i].id).toString(),
                         "ID":json[i].id.toString(),
-                        "Act":json[i].act.toString(),
-                        "Remark":""
+                        //"Act":json[i].act.toString(),
+                        "Act":act(json[i].act),
+                        "Remark":remark(json[i])
                     };
                 listView.model.append(listElement);
             }
