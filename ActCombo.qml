@@ -7,6 +7,7 @@ Rectangle {
     width: 180;
     property alias index: comboBox.currentIndex;
     property alias model: comboBox.model;
+    property var actJsonVal: [0,2,3,4,7,8,17,20,21];
     Row {
         spacing: 8;
         Text {

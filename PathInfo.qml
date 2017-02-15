@@ -35,6 +35,7 @@ Rectangle {
         id: pathJson;
         mode: 1;
     }
+
     Component {
         id:pathDelegate
         Item {
@@ -150,6 +151,11 @@ Rectangle {
                 width: 20
                 height: 20
                 text: "↑";
+                onClicked: {
+                    var item = listView.currentIndex;
+                    listView.model.move(item, item - 1, 1);
+                    pathJson.moveItem(item,item - 1);
+                }
             }
             Button {
                 id: downmoveButton;
@@ -158,6 +164,11 @@ Rectangle {
                 width: 20
                 height: 20
                 text: "↓";
+                onClicked: {
+                    var item = listView.currentIndex;
+                    listView.model.move(item, item + 1, 1);
+                    pathJson.moveItem(item,item + 1);
+                }
             }
             Button {
                 id: savePathButton;
@@ -187,18 +198,18 @@ Rectangle {
     Component {
         id: pathModel;
         ListModel {
-            ListElement {
-                Idx: "128";
-                ID: "123456";
-                Act: "前行";
-                Remark: "V:2档,T:右分支";
-            }
-            ListElement {
-                Idx: "100";
-                ID: "987456";
-                Act: "顺时针旋转";
-                Remark: "180";
-            }
+//            ListElement {
+//                Idx: "128";
+//                ID: "123456";
+//                Act: "前行";
+//                Remark: "V:2档,T:右分支";
+//            }
+//            ListElement {
+//                Idx: "100";
+//                ID: "987456";
+//                Act: "顺时针旋转";
+//                Remark: "180";
+//            }
         }
     }
     ListView {
@@ -215,16 +226,36 @@ Rectangle {
         highlightFollowsCurrentItem: true;
         onCurrentIndexChanged: {
         }
-        function add(v) {
+
+        function add(idx, v) {
+            console.log("count " + listView.count + " " + listView.currentIndex);
+            if (listView.count == 0) {
+                pathJson.insertItem(0, v);
+            } else {
+                pathJson.insertItem(listView.currentIndex + 1, v);
+            }
+            var json = JSON.parse(v);
+            var listElement;
+            listElement = {
+                    "Idx":idx.toString(),
+                    "ID":json.id.toString(),
+                    "Act":act(json.act),//actCombo.model[actCombo.index],
+                    "Remark":remark(json)//pathSettingsGroup.model.toString()
+                };
             if (listView.count == 0
                 || listView.currentIndex == (listView.count - 1)) {
-                listView.model.append(v);
+                listView.model.append(listElement);
             } else {
-                listView.model.insert(listView.currentIndex + 1, v);
+                listView.model.insert(listView.currentIndex + 1, listElement);
             }
         }
         function revise(v) {
             listView.model.set(listView.currentIndex, v);
+            pathJson.modifyItem(v);
+        }
+        function  del(v) {
+            listView.model.remove(v);
+            pathJson.deleteItem(v);
         }
         function act(m) {
             var p;
@@ -263,20 +294,23 @@ Rectangle {
                         p = "v:"+actProperty.modelV[m.v] + ",T:"+actProperty.modelT[m.turn];
                     } if (!m.turn) {
                         p = "v:"+actProperty.modelV[m.v];
-                    }
+                    } return p;
                 } else if (m.turn) {
                     p = "T:"+actProperty.modelT[m.turn];
                 } else {
                     return "";
                 }
                 return p;
-            } if (m.act == 7 || m.act == 8) {
+            } if ((m.act == 7) || (m.act == 8)) {
                 if (m.rot == 90) {
                     p =  "rot:"+actProperty.modelR[0];
+                    return p;
                 } if (m.rot == 180) {
                     p =  "rot:"+actProperty.modelR[1];
+                    return p;
+                } else {
+                    return "";
                 }
-                return p;
             } if (m.act == 17) {
                 if (m.val == 2) {
                     p = "lf:"+actProperty.modelP[0];
@@ -284,9 +318,10 @@ Rectangle {
                     p = "lf:"+actProperty.modelP[1];
                 } return p;
             } if (m.act == 20) {
-                if ((m.bz[0] == 1) && (m.bz[0] == 2)) {
+                if ((m.bz[0] == 1) && (m.bz[1] == 2)) {
                     p = "oa:"+actProperty.modelB[0];
-                } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {
+                    return p;
+                } if ((m.bz[0] == 2) && (m.bz[1] == 2)) {
                     p = "oa:"+actProperty.modelB[1];
                 } else {
                     return "";

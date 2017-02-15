@@ -20,6 +20,9 @@ Rectangle{
     property alias modelB: bzCombobox.model;
     property alias modelC: chargeCombobox.model;
     property alias modelRL: relayCombobox.model;
+    property var oaJsonVal: ["[1,2]", "[2,2]"];
+    property var rotJsonVal:[90,180];
+    property var platJsonVal:[2,4];
     Row {
         Rectangle {
             id: speedRect;

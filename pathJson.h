@@ -31,6 +31,10 @@ public:
     Q_INVOKABLE int saveJsonFile(QVariant var);
     Q_INVOKABLE QVariant openJsonFile(QString fileName);
     Q_INVOKABLE QVariant exportList();
+    Q_INVOKABLE void modifyItem(int index, QVariant var);
+    Q_INVOKABLE void insertItem(int index, QVariant var);
+    Q_INVOKABLE void deleteItem(int index);
+    Q_INVOKABLE void moveItem(int from, int to);
 private:
 signals:
 
