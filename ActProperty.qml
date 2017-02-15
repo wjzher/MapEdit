@@ -11,14 +11,12 @@ Rectangle{
     property alias rotValue: rotCombobox.currentIndex;
     property alias platValue: platformCombobox.currentIndex;
     property alias oaValue: bzCombobox.currentIndex;
-    property alias chargeValue: chargeCombobox.currentIndex;
     property alias relayValue: relayCombobox.currentIndex;
     property alias modelV: speedCombobox.model;
     property alias modelT: turnCombobox.model;
     property alias modelR: rotCombobox.model;
     property alias modelP: platformCombobox.model;
     property alias modelB: bzCombobox.model;
-    property alias modelC: chargeCombobox.model;
     property alias modelRL: relayCombobox.model;
     property var oaJsonVal: ["[1,2]", "[2,2]"];
     property var rotJsonVal:[90,180];
@@ -35,7 +33,7 @@ Rectangle{
                     text: qsTr("v:");
                 }
                 ComboBox {
-                    width: 45;
+                    width: 50;
                     id: speedCombobox;
                     model: [
                         "",
@@ -61,7 +59,7 @@ Rectangle{
                     text: qsTr("Turn:");
                 }
                 ComboBox {
-                    width: 70;
+                    width: 75;
                     id: turnCombobox;
                     model: [
                         "",
@@ -133,32 +131,10 @@ Rectangle{
             }
         }
     }
-    Row{
-        //spacing: 60;
-        Rectangle {
-            id: chargeRect;
-            width: 100;
-            visible: (type == 8 ? true : false);
-            Row {
-                spacing: 5;
-                Text {
-                    y: 4;
-                    text: qsTr("Charge:");
-                }
-                ComboBox {
-                    width: 50;
-                    id: chargeCombobox;
-                    model: [
-                        "充电",
-                        "断电"
-                    ];
-                }
-            }
-        }
         Rectangle {
             id: relayRect;
             width: 100;
-            anchors.left: chargeRect.right
+            anchors.left: parent.left
             anchors.leftMargin: 2
             visible: (type == 8 ? true : false);
             Row {
@@ -168,7 +144,7 @@ Rectangle{
                     text: qsTr("Relay:");
                 }
                 ComboBox {
-                    width: 50;
+                    width: 70;
                     id: relayCombobox;
                     model: [
                         "闭合",
@@ -177,7 +153,7 @@ Rectangle{
                 }
             }
 
-        }
+
     }
 
 }

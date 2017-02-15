@@ -6,7 +6,8 @@ CONFIG += c++11
 SOURCES += main.cpp \
     MapItemType.cpp \
     mapData.cpp \
-    pathJson.cpp
+    pathJson.cpp \
+    udpServer.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,6 +36,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     MapItemType.h \
     mapData.h \
-    pathJson.h
+    pathJson.h \
+    udpServer.h
 
 DISTFILES +=

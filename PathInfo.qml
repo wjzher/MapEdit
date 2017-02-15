@@ -196,6 +196,7 @@ Rectangle {
                 text: "Open";
                 onClicked: {
                     pathListFileDialog.opt = 1;
+                    pathListFileDialog.selectExisting = true;
                     pathListFileDialog.open();
                 }
             }
@@ -292,7 +293,7 @@ Rectangle {
             }
         }
         function remark(m) {
-            var p;
+            var p = "";
             if(m.act == 2) {
                 return "";
             } if ((m.act == 3) || (m.act == 4)) {
@@ -301,7 +302,8 @@ Rectangle {
                         p = "v:"+actProperty.modelV[m.v] + ",T:"+actProperty.modelT[m.turn];
                     } if (!m.turn) {
                         p = "v:"+actProperty.modelV[m.v];
-                    } return p;
+                    }
+                    return p;
                 } else if (m.turn) {
                     p = "T:"+actProperty.modelT[m.turn];
                 } else {
