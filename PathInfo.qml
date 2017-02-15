@@ -11,9 +11,11 @@ Rectangle {
     property alias listView: listView;
     FileDialog {
         id: pathListFileDialog;
+        property var fileName: "";
         title: "Please choose a file";
         nameFilters: ["Json Files (*.json)"];
         property int opt: 0;    // 0 new, 1 open, 2 save
+        //selectExisting: opt == 2 ? false : true;
         onAccepted: {
             var file = new String(pathListFileDialog.fileUrl);
             //remove file:///
@@ -23,11 +25,14 @@ Rectangle {
                 file = file.slice(7);
             }
             if (opt == 1) {
+                fileName = file;
                 console.log("map file open. " + file);
                 var v = pathJson.openJsonFile(file);
                 console.log(v);
                 listView.update(v);
             } else if (opt == 2) {
+                fileName = file;
+                pathJson.saveJsonFile(fileName);
             }
         }
     }
@@ -45,8 +50,10 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent;
                 onClicked: {
-                    var v, pv, pt, pr, pp, po, pc, prl;
                     wrapper.ListView.view.currentIndex = index;
+                }
+                onDoubleClicked: {
+                    var v, pv, pt, pr, pp, po, pc, prl;
                     var json = JSON.parse(pathJson.exportList());
                     if (index >= json.length) {
                         return;
@@ -64,9 +71,6 @@ Rectangle {
                     } if (m.act == 20) {
                         actProperty.oaValue = listView.jsonoa(m);
                     }
-                }
-                onDoubleClicked: {
-                    console.log("double click: " + index);
                 }
 
             }
@@ -176,11 +180,13 @@ Rectangle {
                 anchors.rightMargin: 8;
                 text: "Save";
                 onClicked: {
-                    console.log(listView.model.get(0));
-                    var v = listView.model.get(0);
-                    console.log(v.Idx);
-                    pathJson.saveJsonFile("", listView.model.get(0));
-
+                    if (pathListFileDialog.fileName == "") {
+                        pathListFileDialog.selectExisting = false;
+                        pathListFileDialog.opt = 2;
+                        pathListFileDialog.open();
+                    } else {
+                        pathJson.saveJsonFile(pathListFileDialog.fileName);
+                    }
                 }
             }
             Button {
@@ -248,6 +254,7 @@ Rectangle {
             } else {
                 listView.model.insert(listView.currentIndex + 1, listElement);
             }
+            listView.currentIndex++;
         }
         function revise(v) {
             listView.model.set(listView.currentIndex, v);

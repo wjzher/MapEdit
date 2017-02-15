@@ -39,6 +39,7 @@ int PathJson::saveJsonFile(QVariant var)
     QJsonObject paramObj;
     paramObj["agvid"] = 1;
     paramObj["handle"] = 0;
+    paramObj["pos_st"] = 0;
     paramObj["path"] = m_pathArray;
     rootJsonObj["param"] = paramObj;
     QJsonDocument jsonDoc(rootJsonObj);

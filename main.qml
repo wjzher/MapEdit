@@ -109,24 +109,7 @@ Window {
             }
         }
     }
-//    MapItem {
-//        id: mapItem;
-//        width: 100;
-//        height: 100;
-//        anchors.left: parent.left;
-//        anchors.bottom: parent.bottom;
-//        anchors.margins: 4;
-//        type: MapItemType.MapItemXLine;
-//        color: "white";
-//        isCard: false;
-//        text: "248";
-//        cardPos: [length * 0.3, length * 0.5];
-//        Component.onCompleted: {
-//        }
-//        onClicked: {
-//            contentMenu.popup();
-//        }
-//    }
+
     Row {
         id: row;
         anchors.fill: parent;
@@ -776,44 +759,6 @@ Window {
                     anchors.topMargin: 27;
                     type: 0;
                 }
-//                function actjson() {
-//                    var p;
-//                    if (actCombo.index == 1) {
-//                        p = 2;
-//                    } if ((actCombo.index == 2) || (actCombo.index == 3)) {
-//                        p = actCombo.index + 1;
-//                    } if ((actCombo.index == 4) || (actCombo.index == 5)) {
-//                        p = actCombo.index + 3;
-//                    } if (actCombo.index == 6) {
-//                        p = 17;
-//                    } if (actCombo.index == 7) {
-//                        p = 20;
-//                    } return p;
-//                }
-//                function rotjson() {
-//                    var p;
-//                    if (actProperty.rotValue == 0) {
-//                        p = 90;
-//                    } if (actProperty.rotValue == 1) {
-//                        p = 180;
-//                    }  return p;
-//                }
-//                function platjson() {
-//                    var p;
-//                    if (actProperty.platValue == 0) {
-//                        p = 2;
-//                    } if (actProperty.platValue == 1) {
-//                        p = 4;
-//                    } return p;
-//                }
-//                function oajson() {
-//                    var p;
-//                    if (actProperty.oaValue == 0) {
-//                        p = "[1,2]";
-//                    } if (actProperty.oaValue == 1) {
-//                        p = "[2,2]";
-//                    } return p;
-//                }
                 function actJsonVal() {
                     var v;
                     if (actCombo.index == 1) {
@@ -877,28 +822,9 @@ Window {
                     anchors.rightMargin: 2;
                     text: "增加";
                     onClicked: {
-//                        var v = "{";
-//                        v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
-//                        v += "\"act\":" + pathSettingsGroup.actjson() + ",";
-//                        v += "\"v\":" + actProperty.speedValue + ",";
-//                        v += "\"turn\":" + actProperty.turnValue + ",";
-//                        v += "\"rot\":" + pathSettingsGroup.rotjson() + ",";
-//                        v += "\"val\":" + pathSettingsGroup.platjson() + ",";
-//                        v += "\"bz\":" + pathSettingsGroup.oajson();
-//                        v += "}";
                         pathSettingsGroup.actJsonVal();
-
                         pathList.listView.add(mapGrid.mapGrid.currentIndex, pathSettingsGroup.actJsonVal());
                         console.log(pathSettingsGroup.actJsonVal());
-//                        v = {
-//                            "Idx":mapGrid.mapGrid.currentIndex.toString(),
-//                            "ID":mapGrid.mapGrid.currentItem.cardID.toString(),
-//                            "Act":actCombo.model[actCombo.index],
-//                            //"Remark":"V:"+actProperty.speedValue.toString()
-//                            //"Remark":"V:"+actProperty.model[actProperty.index]
-//                            "Remark":pathSettingsGroup.model()
-//                        };
-//                        pathList.listView.add(v);
                     }
                 }
                 function model(){
@@ -942,10 +868,6 @@ Window {
                             "Remark":pathSettingsGroup.model()
                         };
                         pathList.listView.revise(v);
-//                        if (item.isCard) {
-//                            if (item.cardID != 0) {
-//                            }
-//                        }
                     }
                 }
                 Button {
