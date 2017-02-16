@@ -7,13 +7,14 @@ UdpServer::UdpServer(QObject *parent)
     udpSocket.bind(11078);
     qDebug() << "Udp Server running";
     connect(&udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+    m_flag = 1;
 }
 
 UdpServer::~UdpServer()
 {
 }
 
-bool UdpServer::isAddressExist(QString addr)
+bool UdpServer::isAddressExist(QString &addr)
 {
     QStringList result = clientList.filter(addr);
     qDebug() << "is Address Exsit" << result;
@@ -23,13 +24,14 @@ bool UdpServer::isAddressExist(QString addr)
     return false;
 }
 
-void UdpServer::addAddressList(QString addr)
+void UdpServer::addAddressList(QString &addr)
 {
     if (isAddressExist(addr)) {
         return;
     }
     clientList.append(addr);
     qDebug() << addr << "add to list";
+    emit agvAddressChanged(str2ip(addr));
     return;
 }
 
@@ -85,7 +87,8 @@ QByteArray UdpServer::makeJsonResponse(int inf, QString &param)
     QJsonObject paramObj = paramDoc.object();
 
     QJsonObject jsonObj;
-    jsonObj["type"] = "1";
+    jsonObj["type"] = "0";
+    jsonObj["flag"] = QString::number(m_flag++);
     jsonObj["src"] = "0";
     jsonObj["auth"] = "nkty";
     jsonObj["inf"] = QString::number(inf);
@@ -113,44 +116,40 @@ void UdpServer::readPendingDatagrams()
             qDebug() << "recv tick data " << addr;
             // 加入client list
             addAddressList(addr);
+            // emit signals
+            emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
             // 回复心跳
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
         } else {
             switch (inf) {
             case 1001:
-                break;
             case 1003:
-                break;
             case 1005:
-                break;
             case 1007:
-                break;
             case 19000:
+                // emit signals
+                emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
                 break;
             default:
                 qDebug() << "unknown inf " + inf;
                 break;
             }
         }
-        // emit signals
-        emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
-//        str2ip(addr);
-//        str2port(addr);
     }
     return;
 }
 
-void UdpServer::emitSignals(QString addr, int inf, QJsonObject &param)
+void UdpServer::emitSignals(QString &ip, int inf, QJsonObject &param)
 {
     if (param.isEmpty()) {
         return;
     }
-    if (!addr.contains(m_currentIp)) {
+    if (ip != m_currentIp) {
         return;
     }
-    qDebug() << "emit signals " << addr << " " << param;
+    qDebug() << "emit signals " << ip << " " << param;
     QJsonDocument jsonDoc(param);
-    QString s(jsonDoc.toJson());
+    QString s(jsonDoc.toJson(QJsonDocument::Compact));
     emit agvStatusChanged(inf, s);
     return;
 }
@@ -158,15 +157,19 @@ void UdpServer::emitSignals(QString addr, int inf, QJsonObject &param)
 /*
  * inf + json string
  */
-void UdpServer::SendCommand(int inf, QString &cmd)
+void UdpServer::sendCommand(int inf, QString cmd)
 {
     QStringList result = clientList.filter(m_currentIp);
     if (!result.count()) {
         qDebug() << "SendCommand " << m_currentIp << " is not exist";
+        return;
     }
     QString &addr = result[0];
     QHostAddress sender(str2ip(addr));
     quint16 senderPort = str2port(addr).toInt();
-    udpSocket.writeDatagram(makeJsonResponse(inf, cmd), sender, senderPort);
+    qDebug() << "send Command " << sender.toString() << " " << senderPort;
+    QByteArray byteArray = makeJsonResponse(inf, cmd);
+    qDebug() << QString(byteArray);
+    udpSocket.writeDatagram(byteArray, sender, senderPort);
     return;
 }
