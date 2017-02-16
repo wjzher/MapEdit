@@ -6,16 +6,21 @@ import Qt.MapItemType 1.0
 import QtQuick.Layouts 1.1
 import Qt.MapData 1.0
 import QtQuick.Dialogs 1.2
+import Qt.UdpServer 1.0
 
 Window {
-    visible: true
+    visible: true;
     minimumHeight: 600;
     minimumWidth: 800;
     width: 900;
     height: 640;
     id: rootItem;
     color: "#EEEEEE";
-    title: qsTr("MapEditor")
+    title: qsTr("MapEditor");
+
+    UdpServer {
+        id: udpServer;
+    }
 
     FileDialog {
         id: fileDialog;
