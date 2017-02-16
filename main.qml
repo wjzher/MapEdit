@@ -22,6 +22,10 @@ Window {
         id: udpServer;
     }
 
+    AgvDialog {
+        id: agvDialog;
+    }
+
     FileDialog {
         id: fileDialog;
         title: "Please choose a file";
@@ -513,6 +517,21 @@ Window {
                             fileDialog.open();
                         } else {
                             fileDialog.saveMap();
+                        }
+                    }
+                }
+                Button {
+                    id: agvDialogButton;
+                    anchors.left: mapFileSave.right;
+                    anchors.leftMargin: 2;
+                    anchors.top: mapFilePath.bottom;
+                    anchors.topMargin: 4;
+                    text: agvDialog.visible ? "Hide" : "Show";
+                    onClicked: {
+                        if (agvDialog.visible) {
+                            agvDialog.hide();
+                        } else {
+                            agvDialog.show();
                         }
                     }
                 }
