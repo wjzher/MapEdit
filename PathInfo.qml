@@ -266,7 +266,7 @@ Rectangle {
             pathJson.deleteItem(v);
         }
         function act(m) {
-            var p;
+            var p = "";
             if (m == 2) {
                 p = actCombo.model[1];
                 return p;
@@ -340,7 +340,7 @@ Rectangle {
             }
         }
         function jsonact(m) {
-            var p;
+            var p = 0;
             if (m.act == 2) {
                 p = 1;
             } if ((m.act == 3) || (m.act == 4)) {
@@ -354,7 +354,7 @@ Rectangle {
             } return p;
         }
         function jsonspeed(m) {
-            var p;
+            var p = 0;
             if (m.v) {
                 p = m.v;
             } else {
@@ -362,7 +362,7 @@ Rectangle {
             } return p;
         }
         function jsonturn(m) {
-            var p;
+            var p = 0;
             if (m.turn) {
                 p = m.turn;
             } else {
@@ -370,7 +370,7 @@ Rectangle {
             } return p;
         }
         function jsonrot(m) {
-            var p;
+            var p = 0;
             if (m.rot == 90) {
                 p = 0;
             } if (m.rot == 180) {
@@ -378,7 +378,7 @@ Rectangle {
             } return p;
         }
         function jsonplat(m) {
-            var p;
+            var p = 0;
             if (m.val == 2) {
                 p = 0;
             } if (m.val == 4) {
@@ -386,7 +386,7 @@ Rectangle {
             } return p;
         }
         function jsonoa(m) {
-            var p;
+            var p = 0;
             if ((m.bz[0] == 1) && (m.bz[0] == 2)) {
                 p = 0;
             } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {

@@ -175,8 +175,12 @@ int MapData::getItemCardId(int index)
 int MapData::getItemIndexByCardId(int cardId)
 {
     int index = -1;
-    for (int i; i < m_itemN; i++) {
+    for (int i = 0; i < m_itemN; i++) {
         MapItem *item = getMapItem(i);
+//        if (item == NULL) {
+//            qDebug() << "BUG";
+//        }
+//        qDebug() << "index item " << item << " " << cardId;
         if (item->isCard && cardId == item->cardId) {
             index = i;
             break;
