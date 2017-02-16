@@ -1,7 +1,8 @@
 ﻿#include "udpServer.h"
 #include <QDebug>
 
-UdpServer::UdpServer(QObject *parent) : QObject(parent), udpSocket(this)
+UdpServer::UdpServer(QObject *parent)
+    : QObject(parent), udpSocket(this), m_currentIp("")
 {
     udpSocket.bind(11078);
     qDebug() << "Udp Server running";
@@ -72,6 +73,27 @@ QByteArray UdpServer::makeTickResponse(QJsonObject &jsonObj)
     return jsonDoc.toJson(QJsonDocument::Compact);
 }
 
+QByteArray UdpServer::makeJsonResponse(int inf, QString &param)
+{
+    QJsonParseError err;
+    QJsonDocument paramDoc = QJsonDocument::fromJson(param.toUtf8(), &err);
+    if (paramDoc.isNull()) {
+        qDebug() << err.errorString();
+        qDebug() << "makeJsonResponse error json doc null";
+        return "";
+    }
+    QJsonObject paramObj = paramDoc.object();
+
+    QJsonObject jsonObj;
+    jsonObj["type"] = "1";
+    jsonObj["src"] = "0";
+    jsonObj["auth"] = "nkty";
+    jsonObj["inf"] = QString::number(inf);
+    jsonObj["param"] = paramObj;
+    QJsonDocument jsonDoc(jsonObj);
+    return jsonDoc.toJson(QJsonDocument::Compact);
+}
+
 void UdpServer::readPendingDatagrams()
 {
     while (udpSocket.hasPendingDatagrams()) {
@@ -95,13 +117,13 @@ void UdpServer::readPendingDatagrams()
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
         } else {
             switch (inf) {
-            case 1002:
+            case 1001:
                 break;
-            case 1004:
+            case 1003:
                 break;
-            case 1006:
+            case 1005:
                 break;
-            case 1008:
+            case 1007:
                 break;
             case 19000:
                 break;
@@ -110,9 +132,41 @@ void UdpServer::readPendingDatagrams()
                 break;
             }
         }
+        // emit signals
+        emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
 //        str2ip(addr);
 //        str2port(addr);
     }
     return;
 }
 
+void UdpServer::emitSignals(QString addr, int inf, QJsonObject &param)
+{
+    if (param.isEmpty()) {
+        return;
+    }
+    if (!addr.contains(m_currentIp)) {
+        return;
+    }
+    qDebug() << "emit signals " << addr << " " << param;
+    QJsonDocument jsonDoc(param);
+    QString s(jsonDoc.toJson());
+    emit agvStatusChanged(inf, s);
+    return;
+}
+
+/*
+ * inf + json string
+ */
+void UdpServer::SendCommand(int inf, QString &cmd)
+{
+    QStringList result = clientList.filter(m_currentIp);
+    if (!result.count()) {
+        qDebug() << "SendCommand " << m_currentIp << " is not exist";
+    }
+    QString &addr = result[0];
+    QHostAddress sender(str2ip(addr));
+    quint16 senderPort = str2port(addr).toInt();
+    udpSocket.writeDatagram(makeJsonResponse(inf, cmd), sender, senderPort);
+    return;
+}
