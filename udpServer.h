@@ -45,7 +45,6 @@ private:
         }
         n = s.length() - n;
         r = s.right(n - 1);
-        qDebug() << r;
         return r;
     }
 

@@ -25,7 +25,6 @@ Window {
         function paramAgvId() {
             return "{\"agvid\":\"1\"";
         }
-
         function cmdMf(speed) {
             var v = paramJson("mf " + speed);
             sendCommand(cmdInf, v);
@@ -98,30 +97,9 @@ Window {
             var v = paramAgvId();
             sendCommand(1003, v);
         }
-
-        onAgvStatusChanged: {
-            console.log("status changed " + inf + " " + status);
-            switch (inf) {
-            case 1001:
-                agvInfo.text = "AGV信息总召";
-                break;
-            case 1003:
-                agvInfo.text = "AGV启动应答";
-                break;
-            case 1005:
-                agvInfo.text = "AGV急停应答";
-                break;
-            case 1007:
-                agvInfo.text = "AGV运动应答";
-                break;
-            case 5001:
-                agvStatus(status);
-                break;
-            }
-        }
-        function agvStatus(status) {
+        function agvShowStatus(status) {
             var json = JSON.parse(status);
-            var m = json.info;
+            var m = json.infos;
             var n = json.alarm;
             switch (m.sta) {
             case 1:
@@ -178,38 +156,72 @@ Window {
             agvNextpose.text = m.nextpos;
             if (!n.dc) {
                 dcNomal.color = "aquamarine";
+                dcAlarm.color = "#EEEEEE";
             } else {
                 dcAlarm.color = "red";
+                dcNomal.color = "#EEEEEE";
             }
             if (!n.driver) {
                 moterNomal.color = "aquamarine";
+                moterAlarm.color = "#EEEEEE";
             } else {
                 moterAlarm.color = "red";
+                moterNomal.color = "#EEEEEE";
             }
             if (!n.elec) {
                 elecNomal.color = "aquamarine";
+                elecAlarm.color = "#EEEEEE";
             } else {
                 elecAlarm.color = "red";
+                elecNomal.color = "#EEEEEE";
             }
             if (!n.lift) {
                 liftNomal.color = "aquamarine";
+                liftAlarm.color = "#EEEEEE";
             } else {
                 liftAlarm.color = "red";
+                liftNomal.color = "#EEEEEE";
             }
             if (!n.chargecommu) {
                 chargeNomal.color = "aquamarine";
+                chargeAlarm.color = "#EEEEEE";
             } else {
                 chargeAlarm.color = "red";
+                chargeNomal.color = "#EEEEEE";
             }
             if (!n.rotate) {
                 rotateNomal.color = "aquamarine";
+                rotateAlarm.color = "#EEEEEE";
             } else {
                 rotateAlarm.color = "red";
+                rotateNomal.color = "#EEEEEE";
+            }
+        }
+
+        onAgvStatusChanged: {
+//            console.log("status changed " + inf + " " + status);
+            switch (inf) {
+            case 1001:
+                agvInfo.text = "AGV信息总召";
+                break;
+            case 1003:
+                agvInfo.text = "AGV启动应答";
+                break;
+            case 1005:
+                agvInfo.text = "AGV急停应答";
+                break;
+            case 1007:
+                agvInfo.text = "AGV运动应答";
+                break;
+            case 5001:
+                agvShowStatus(status);
+                break;
             }
         }
         onAgvAddressChanged: {
             console.log("address changed " + ip);
             currentIp = ip;
+            agvipCombobox.model.append({text: ip});
         }
     }
 
@@ -225,39 +237,42 @@ Window {
             width: 180;
             Column{
                 spacing: 4
-            Row {
-                spacing: 8;
-                Text {
-                    y: 6;
-                    text: qsTr("IP:");
+                Row {
+                    spacing: 8;
+                    Text {
+                        y: 6;
+                        text: qsTr("IP:");
+                    }
+                    ComboBox {
+                        width: 100;
+                        id: agvipCombobox;
+                        model: ListModel {
+                            id: model;
+//                            ListElement {
+//                                text: "Null";
+//                            }
+                        }
+                    }
                 }
-                ComboBox {
-                    width: 100;
-                    id: agvipCombobox;
-                    model: [
-                        "空"
-                    ];
+                Row {
+                    spacing: 8;
+                    Text {
+                        y: 6;
+                        text: qsTr("V: ");
+                    }
+                    ComboBox {
+                        width: 100;
+                        id: agvspeedCombobox;
+                        model: [
+                            "",
+                            "1档",
+                            "2档",
+                            "3档",
+                            "4档",
+                            "5档"
+                        ];
+                    }
                 }
-            }
-            Row {
-                spacing: 8;
-                Text {
-                    y: 6;
-                    text: qsTr("V: ");
-                }
-                ComboBox {
-                    width: 100;
-                    id: agvspeedCombobox;
-                    model: [
-                        "",
-                        "1档",
-                        "2档",
-                        "3档",
-                        "4档",
-                        "5档"
-                    ];
-                }
-            }
             }
             GridLayout {
                 id: consoleGrid
@@ -270,11 +285,13 @@ Window {
                 anchors.margins: 3;
                 ConsoleBtn{
                     id: mfButton;
-                    text: "←";
+                    text: "→";
+                    onClicked: udpServer.cmdMf(agvspeedCombobox.currentIndex);
                 }
                 ConsoleBtn{
                     id: mbButton;
-                    text: "→";
+                    text: "←";
+                    onClicked: udpServer.cmdMb(agvspeedCombobox.currentIndex);
                 }
                 ConsoleBtn{
                     id: mlButton;
@@ -314,6 +331,7 @@ Window {
                 ConsoleBtn{
                     id: estopButton;
                     text: "⚠";
+                    onClicked: udpServer.cmdEStop();
                 }
                 ConsoleBtn{
                     id: platupButton;
@@ -326,20 +344,22 @@ Window {
                     onClicked: udpServer.cmdLiftDown();
                 }
                 ConsoleBtn{
-                    id: starteButton;
-                    text: "↓";
+                    id: startButton;
+                    text: "►";
+                    onClicked: udpServer.cmdStart();
                 }
                 ConsoleBtn{
                     id: stopButton;
-                    text: "↓";
+                    text: "■";
+                    onClicked: udpServer.cmdStop();
                 }
                 ConsoleBtn{
                     id: oaButton;
-                    text: "↓";
+                    text: "OA";
                 }
                 ConsoleBtn{
                     id: relayButton;
-                    text: "↓";
+                    text: "CS";
                 }
             }
         }

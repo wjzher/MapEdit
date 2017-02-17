@@ -17,7 +17,7 @@ UdpServer::~UdpServer()
 bool UdpServer::isAddressExist(QString &addr)
 {
     QStringList result = clientList.filter(addr);
-    qDebug() << "is Address Exsit" << result;
+//    qDebug() << "is Address Exsit" << result;
     if (result.count()) {
         return true;
     }
@@ -113,7 +113,7 @@ void UdpServer::readPendingDatagrams()
         }
         QString addr = sender.toString() + ":" + QString::number(senderPort);
         if (inf == 5001) {
-            qDebug() << "recv tick data " << addr;
+//            qDebug() << "recv tick data " << addr;
             // 加入client list
             addAddressList(addr);
             // emit signals
@@ -147,7 +147,7 @@ void UdpServer::emitSignals(QString &ip, int inf, QJsonObject &param)
     if (ip != m_currentIp) {
         return;
     }
-    qDebug() << "emit signals " << ip << " " << param;
+//    qDebug() << "emit signals " << ip << " " << param;
     QJsonDocument jsonDoc(param);
     QString s(jsonDoc.toJson(QJsonDocument::Compact));
     emit agvStatusChanged(inf, s);
@@ -167,9 +167,9 @@ void UdpServer::sendCommand(int inf, QString cmd)
     QString &addr = result[0];
     QHostAddress sender(str2ip(addr));
     quint16 senderPort = str2port(addr).toInt();
-    qDebug() << "send Command " << sender.toString() << " " << senderPort;
+//    qDebug() << "send Command " << sender.toString() << " " << senderPort;
     QByteArray byteArray = makeJsonResponse(inf, cmd);
-    qDebug() << QString(byteArray);
+//    qDebug() << QString(byteArray);
     udpSocket.writeDatagram(byteArray, sender, senderPort);
     return;
 }
