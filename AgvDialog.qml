@@ -24,7 +24,44 @@ Window {
 
         onAgvStatusChanged: {
             console.log("status changed " + inf + " " + status);
+            var json = JSON.parse(status);
+            switch (inf) {
+            case 1001:
+                agvInfo.text = "AGV信息总召";
+                break;
+            case 1003:
+                agvInfo.text = "AGV启动应答";
+                break;
+            case 1005:
+                agvInfo.text = "AGV急停应答";
+                break;
+            case 1007:
+                agvInfo.text = "AGV运动应答";
+                break;
+            case 5001:
+                 break;
+            }
         }
+        function agvStatus(m) {
+            switch (m.sta) {
+            case 1:
+                agvActive.text = "←"
+                break;
+            case 2:
+                agvActive.text = "→"
+                break;
+            case 5:
+                agvActive.text = "↻"
+                break;
+            case 6:
+                agvActive.text = "↺"
+                break;
+            case 7:
+                agvActive.text = "⚠"
+                break;
+            }
+        }
+
         onAgvAddressChanged: {
             console.log("address changed " + ip);
             currentIp = ip;
@@ -40,7 +77,7 @@ Window {
             id: agvConsole;
             title: "agv console";
             height: root.height - 12;
-            width: root.width / 3;
+            width: 180;
             Row {
                 spacing: 8;
                 Text {
@@ -49,7 +86,7 @@ Window {
                 }
                 ComboBox {
                     width: 100;
-                    id: agvidCombobox;
+                    id: agvipCombobox;
                     model: [
                         "空"
                     ];
@@ -126,69 +163,66 @@ Window {
                 GroupBox {
                     id: agvStatus;
                     title: "agv status";
-                    width: (root.width - agvConsole.width) / 3 + 30 ;
+                    width: (root.width - agvConsole.width) / 3 + 10 ;
                     height: agvConsole.height;
                     Column {
-                        spacing: 8;
+                        spacing: 4;
                         Row {
+                            spacing: 4;
                             RectangleStatus{
+                                id: agvActive;
                                 text: "←"
-                                font: 18;
-                            }
-                        }
-                        Row {
-                            spacing: 4;
-                            RectangleStatus{
-                                text: "↰"
-                                width: 30;
+                                width: 45;
                                 font: 18;
                             }
                             RectangleStatus{
-                                text: "↱"
-                                width: 30;
-                                font: 18;
-                            }
-                        }
-                        Row {
-                            spacing: 4;
-                            RectangleStatus{
-                                text: "↑"
-                                width: 30;
-                                font: 18;
-                            }
-                            RectangleStatus{
-                                text: "↓"
-                                width: 30;
-                                font: 18;
-                            }
-                        }
-
-                        Row {
-                            spacing: 6
-                            RectangleStatus{
+                                id: agvSpeed;
                                 text: "1档";
-                                width: 50;
-                            }
-                            RectangleStatus{
-                                text: "0";
-                                width: 50;
+                                width: 45;
                             }
                         }
-
                         Row {
-                            spacing: 6
+                            spacing: 4;
                             RectangleStatus{
-                                text: "-1";
-                                width: 50;
+                                id: agvBranch
+                                text: "↰"
+                                width: 45;
+                                font: 18;
                             }
                             RectangleStatus{
-                                text: "-1";
-                                width: 50;
+                                id: agvLeft
+                                text: "↑"
+                                width: 45;
+                                font: 18;
                             }
                         }
+                            RectangleStatus{
+                                id: agvVoltage
+                                text: "0 v";
+                                width:94;
+                            }
+                            RectangleStatus{
+                                id: agvPrepos
+                                text: "-1";
+                                width: 94;
+                            }
 
+                            RectangleStatus{
+                                id: agvNextpose;
+                                text: "-1";
+                                width: 94;
+                            }
+
+                        Text {
+                            id: agvInfo;
+                            width: parent.width;
+                            text: "";
+                            //font.family: "Helvetica"
+                            font.pointSize: 18;
+                            color: "blue";
+                            focus: true;
+                        }
                     }
-
                 }
                 GroupBox {
                     id: agvAlarm;
