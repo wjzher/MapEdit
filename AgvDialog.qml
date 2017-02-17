@@ -8,7 +8,7 @@ import QtQuick.Controls 1.4
 Window {
     id: root;
     width: 500;
-    height: 220;
+    height: 260;
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
@@ -17,7 +17,6 @@ Window {
         id: udpServer;
         onAgvStatusChanged: {
             console.log("status changed " + inf + " " + status);
-            var json = JSON.parse(status);
             switch (inf) {
             case 1001:
                 agvInfo.text = "AGV信息总召";
@@ -32,10 +31,14 @@ Window {
                 agvInfo.text = "AGV运动应答";
                 break;
             case 5001:
-                 break;
+                agvStatus(status);
+                break;
             }
         }
-        function agvStatus(m) {
+        function agvStatus(status) {
+            var json = JSON.parse(status);
+            var m = json.info;
+            var n = json.alarm;
             switch (m.sta) {
             case 1:
                 agvActive.text = "←"
@@ -53,8 +56,73 @@ Window {
                 agvActive.text = "⚠"
                 break;
             }
+            switch (m.turnto) {
+            case 1:
+                agvBranch.text = "↰"
+                break;
+            case 2:
+                agvBranch.text = "↱"
+                break;
+            }
+            switch (m.v) {
+            case 1:
+                agvSpeed.text = "1档"
+                break;
+            case 2:
+                agvSpeed.text = "2档";
+                break;
+            case 2:
+                agvSpeed.text = "3档";
+                break;
+            case 2:
+                agvSpeed.text = "4档";
+                break;
+            case 2:
+                agvSpeed.text = "5档";
+                break;
+            }
+            switch (m.liftsta) {
+            case 1:
+                agvLeft.text = "↑";
+                break
+            case 2:
+                agvLeft.text = "↓";
+                break;
+            }
+            agvVoltage.text = m.voltage + "v";
+            agvPrepos.text = m.prepos;
+            agvNextpose.text = m.nextpos;
+            if (!n.dc) {
+                dcNomal.color = "aquamarine";
+            } else {
+                dcAlarm.color = "red";
+            }
+            if (!n.driver) {
+                moterNomal.color = "aquamarine";
+            } else {
+                moterAlarm.color = "red";
+            }
+            if (!n.elec) {
+                elecNomal.color = "aquamarine";
+            } else {
+                elecAlarm.color = "red";
+            }
+            if (!n.lift) {
+                liftNomal.color = "aquamarine";
+            } else {
+                liftAlarm.color = "red";
+            }
+            if (!n.chargecommu) {
+                chargeNomal.color = "aquamarine";
+            } else {
+                chargeAlarm.color = "red";
+            }
+            if (!n.rotate) {
+                rotateNomal.color = "aquamarine";
+            } else {
+                rotateAlarm.color = "red";
+            }
         }
-
         onAgvAddressChanged: {
             console.log("address changed " + ip);
             currentIp = ip;
@@ -71,6 +139,8 @@ Window {
             title: "agv console";
             height: root.height - 12;
             width: 180;
+            Column{
+                spacing: 4
             Row {
                 spacing: 8;
                 Text {
@@ -85,13 +155,33 @@ Window {
                     ];
                 }
             }
+            Row {
+                spacing: 8;
+                Text {
+                    y: 6;
+                    text: qsTr("V: ");
+                }
+                ComboBox {
+                    width: 100;
+                    id: agvspeedCombobox;
+                    model: [
+                        "",
+                        "1档",
+                        "2档",
+                        "3档",
+                        "4档",
+                        "5档"
+                    ];
+                }
+            }
+            }
             GridLayout {
                 id: consoleGrid
                 rows: 2;
                 columns: 4;
                 rowSpacing: 4;
                 columnSpacing: 4;
-                anchors.topMargin: 50
+                anchors.topMargin: 70
                 anchors.fill: parent;
                 anchors.margins: 3;
                 ConsoleBtn{
@@ -143,6 +233,22 @@ Window {
                     id: platdownButton;
                     text: "↓";
                 }
+                ConsoleBtn{
+                    id: starteButton;
+                    text: "↓";
+                }
+                ConsoleBtn{
+                    id: stopButton;
+                    text: "↓";
+                }
+                ConsoleBtn{
+                    id: oaButton;
+                    text: "↓";
+                }
+                ConsoleBtn{
+                    id: relayButton;
+                    text: "↓";
+                }
             }
         }
         Row {
@@ -184,22 +290,22 @@ Window {
                                 font: 18;
                             }
                         }
-                            RectangleStatus{
-                                id: agvVoltage
-                                text: "0 v";
-                                width:94;
-                            }
-                            RectangleStatus{
-                                id: agvPrepos
-                                text: "-1";
-                                width: 94;
-                            }
+                        RectangleStatus{
+                            id: agvVoltage
+                            text: "0 v";
+                            width:94;
+                        }
+                        RectangleStatus{
+                            id: agvPrepos
+                            text: "-1";
+                            width: 94;
+                        }
 
-                            RectangleStatus{
-                                id: agvNextpose;
-                                text: "-1";
-                                width: 94;
-                            }
+                        RectangleStatus{
+                            id: agvNextpose;
+                            text: "-1";
+                            width: 94;
+                        }
 
                         Text {
                             id: agvInfo;
@@ -227,10 +333,12 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: elecNomal;
                                 text: "√";
                                 //color: "aquamarine";
                             }
                             RectangleStatus{
+                                id: elecAlarm
                                 text: "⚠";
                             }
                         }
@@ -241,9 +349,11 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: dcNomal
                                 text: "√";
                             }
                             RectangleStatus{
+                                id: dcAlarm;
                                 text: "⚠";
                                 //color: "red"
                             }
@@ -255,9 +365,11 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: rotateNomal;
                                 text: "√";
                             }
                             RectangleStatus{
+                                id: rotateAlarm;
                                 text: "⚠";
                             }
                         }
@@ -268,9 +380,11 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: liftNomal;
                                 text: "√";
                             }
                             RectangleStatus{
+                                id: liftAlarm;
                                 text: "⚠";
                             }
                         }
@@ -281,9 +395,11 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: moterNomal;
                                 text: "√";
                             }
                             RectangleStatus{
+                                id: moterAlarm;
                                 text: "⚠";
                             }
                         }
@@ -294,9 +410,11 @@ Window {
                                 font.pointSize: 10
                             }
                             RectangleStatus{
+                                id: chargeNomal;
                                 text: "√";
                             }
                             RectangleStatus{
+                                id: chargeAlarm;
                                 text: "⚠";
                             }
                         }
