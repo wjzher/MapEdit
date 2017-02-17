@@ -23,7 +23,7 @@ public:
     {
         m_currentIp = s;
     }
-    Q_INVOKABLE void SendCommand(int inf, QString &cmd);
+    Q_INVOKABLE void sendCommand(int inf, QString cmd);
 private:
     QString str2ip(QString s)
     {
@@ -32,9 +32,7 @@ private:
         if (n < 0) {
             return r;
         }
-        qDebug() << "ip " << n << " " << s.length();
         r = s.left(n);
-        qDebug() << r;
         return r;
     }
 
@@ -51,21 +49,24 @@ private:
         return r;
     }
 
-    void addAddressList(QString addr);
-    bool isAddressExist(QString addr);
+    void addAddressList(QString &addr);
+    bool isAddressExist(QString &addr);
 
     QByteArray makeJsonResponse(int inf, QString &param);
     int jsonMessageParse(QByteArray msg, QJsonObject &jsonObj);
     QByteArray makeTickResponse(QJsonObject &jsonObj);
-    void emitSignals(QString addr, int inf, QJsonObject &param);
+    void emitSignals(QString &ip, int inf, QJsonObject &param);
 signals:
     void agvStatusChanged(int inf, const QString &status);
+    // 信号参数类型QString需要用const引用类型，否则qml不识别
+    void agvAddressChanged(const QString &ip);
 public slots:
     void readPendingDatagrams();
 private:
     QUdpSocket udpSocket;
     QStringList clientList;
     QString m_currentIp;
+    int m_flag;
 };
 
 #endif // UDPSERVER_H

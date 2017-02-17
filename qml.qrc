@@ -10,5 +10,6 @@
         <file>PathInfo.qml</file>
         <file>ActProperty.qml</file>
         <file>AgvDialog.qml</file>
+        <file>ConsoleBtn.qml</file>
     </qresource>
 </RCC>

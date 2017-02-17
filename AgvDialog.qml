@@ -1,8 +1,9 @@
 ﻿import QtQuick 2.0
-import QtQuick.Controls 2.0
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
+import Qt.UdpServer 1.0
+import QtQuick.Controls 1.4
 
 Window {
     id: root;
@@ -11,16 +12,28 @@ Window {
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
-    Column{
-        id: column;
+
+    UdpServer {
+        id: udpServer;
+        onAgvStatusChanged: {
+            console.log("status changed " + inf + " " + status);
+        }
+        onAgvAddressChanged: {
+            console.log("address changed " + ip);
+            currentIp = ip;
+        }
+    }
+
+    Row{
+        id: row;
         anchors.fill: parent;
         anchors.margins: 8;
         spacing: 4;
         GroupBox{
-            id: agvView;
-            title: "agv view";
-            width: root.width - 15;
-            height: root.height / 3;
+            id: agvConsole;
+            title: "agv console";
+            height: root.height - 12;
+            width: root.width / 4;
             Rectangle {
                 id: agvId;
                 width: 80;
@@ -31,110 +44,130 @@ Window {
                         text: qsTr("Current ID:");
                     }
                     ComboBox {
-                        width: 100;
+                        width: 50;
                         //height: agvId.height
                         id: agvidCombobox;
                         model: [
+                            "空"
 
                         ];
                     }
                 }
             }
-        }
-        GroupBox{
-            id: agvConsole;
-            title: "agv console";
-            width: agvView.width;
-            height: root.height / 4;
-            Row{
-                anchors.fill: parent;
-                anchors.margins: 8;
-                spacing: 4;
-                Button{
+//            Column{
+//                anchors.fill: parent;
+//                anchors.margins: 8;
+//                spacing: 4;
+                ConsoleBtn{
                     id: mfButton;
-                    width: 40;
-                    height: 20;
-                    //anchors.left: parent.left;
-                    //anchors.leftMargin: 2;
+                    width: 30;
+                    height: 30;
+                    anchors.left:parent.left
+                    anchors.leftMargin: parent.width / 2 - 34
+                    anchors.top: agvId.bottom
+                    anchors.topMargin: 50
                     text: "←";
                 }
-                Button{
+                ConsoleBtn{
                     id: mbButton;
-                    width: 40;
-                    height: 20;
-                    //anchors.left: mfButton.right;
-                    //anchors.leftMargin: 2;
+                    anchors.top: mfButton.top
+                    anchors.left: mfButton.right
+                    anchors.leftMargin: 8
                     text: "→";
                 }
-                Button{
+                ConsoleBtn{
                     id: mlButton;
-                    width: 40;
-                    height: 20;
-                    text: "↖";
+                    width: 30;
+                    height: 30;
+                    anchors.left:mfButton.left
+                    anchors.top: mfButton.bottom
+                    anchors.topMargin: 8
+                    text: "↰";
                 }
-                Button{
+                ConsoleBtn{
                     id: mrButton;
-                    width: 40;
-                    height: 20;
-                    text: "↗";
+                    anchors.top: mlButton.top
+                    anchors.left: mfButton.right
+                    anchors.leftMargin: 8
+                    text: "↱";
                 }
-                Button{
+                ConsoleBtn{
                     id: rcButton;
-                    width: 40;
-                    height: 20;
+                    width: 30;
+                    height: 30;
+                    anchors.left:mfButton.left
+                    anchors.top: mlButton.bottom
+                    anchors.topMargin: 8
                     text: "↷";
                 }
-                Button{
+                ConsoleBtn{
                     id: rccButton;
-                    width: 40;
-                    height: 20;
+                    anchors.top: rcButton.top
+                    anchors.left: rcButton.right
+                    anchors.leftMargin: 8
                     text: "↶";
                 }
-                Button{
+                ConsoleBtn{
                     id: rc2Button;
-                    width: 40;
-                    height: 20;
+                    width: 30;
+                    height: 30;
+                    anchors.left:mfButton.left
+                    anchors.top: rcButton.bottom
+                    anchors.topMargin: 8
                     text: "↻";
                 }
-                Button{
+                ConsoleBtn{
                     id: rcc2Button;
-                    width: 40;
-                    height: 20;
+                    anchors.top: rc2Button.top
+                    anchors.left: rc2Button.right
+                    anchors.leftMargin: 8
                     text: "↺";
+
                 }
-                Button{
+                ConsoleBtn{
                     id: astopButton;
-                    width: 80;
-                    height: 20;
-                    text: "精确停止";
+                    width: 30;
+                    height: 30;
+                    anchors.left:mfButton.left
+                    anchors.top: rc2Button.bottom
+                    anchors.topMargin: 8
+                    text: "T";
                 }
-                Button{
+                ConsoleBtn{
                     id: estopButton;
-                    width: 40;
-                    height: 20;
+                    width: 30;
+                    height: 30;
+                    anchors.top: astopButton.top
+                    anchors.left: astopButton.right
+                    anchors.leftMargin: 8
                     text: "⚠";
                 }
-                Button{
+                ConsoleBtn{
                     id: platupButton;
-                    width: 40;
-                    height: 20;
+                    width: 30;
+                    height: 30;
+                    anchors.left:mfButton.left
+                    anchors.top: astopButton.bottom
+                    anchors.topMargin: 8
                     text: "↑";
                 }
-                Button{
+                ConsoleBtn{
                     id: platdownButton;
-                    width: 40;
-                    height: 20;
+                    width: 30;
+                    height: 30;
+                    anchors.top: platupButton.top
+                    anchors.left: platupButton.right
+                    anchors.leftMargin: 8
                     text: "↓";
                 }
 
-            }
+//            }
         }
         GroupBox {
             id: agvStatus;
             title: "agv status";
-            width: agvView.width;
-            height: root.height - agvView.height - agvConsole.height - 20;
+            height: agvConsole.height;
+            width: root.width - agvConsole.width - 22;
         }
     }
-
 }

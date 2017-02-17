@@ -18,10 +18,6 @@ Window {
     color: "#EEEEEE";
     title: qsTr("MapEditor");
 
-    UdpServer {
-        id: udpServer;
-    }
-
     AgvDialog {
         id: agvDialog;
     }
