@@ -15,6 +15,13 @@ Window {
 
     UdpServer {
         id: udpServer;
+        function paramJson (cmd) {
+            var v = "{\"agvcmd\":\"";
+            v += cmd;
+            v += "\"}";
+            return v;
+        }
+
         onAgvStatusChanged: {
             console.log("status changed " + inf + " " + status);
         }
@@ -83,6 +90,11 @@ Window {
                     anchors.top: mfButton.bottom
                     anchors.topMargin: 8
                     text: "↰";
+                    onClicked: {
+                        var v = udpServer.paramJson("ml");
+                        console.log(v);
+                        udpServer.sendCommand(20000, v);
+                    }
                 }
                 ConsoleBtn{
                     id: mrButton;
