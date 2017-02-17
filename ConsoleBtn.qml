@@ -4,11 +4,12 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: root;
+    implicitHeight: 30;
+    implicitWidth: 30;
     property alias text: consoleText.text
     Button{
         id: consoleBtn;
-        implicitHeight: 30;
-        implicitWidth: 30;
+        anchors.fill: parent;
         Text {
             id:consoleText
             font.pointSize: 18;

@@ -7,8 +7,8 @@ import QtQuick.Controls 1.4
 
 Window {
     id: root;
-    width: 600;
-    height: 400;
+    width: 500;
+    height: 220;
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
@@ -33,141 +33,242 @@ Window {
             id: agvConsole;
             title: "agv console";
             height: root.height - 12;
-            width: root.width / 4;
-            Rectangle {
-                id: agvId;
-                width: 80;
-                Row {
-                    spacing: 8;
-                    Text {
-                        y: 4;
-                        text: qsTr("Current ID:");
-                    }
-                    ComboBox {
-                        width: 50;
-                        //height: agvId.height
-                        id: agvidCombobox;
-                        model: [
-                            "空"
-
-                        ];
-                    }
+            width: root.width / 3;
+            Row {
+                spacing: 8;
+                Text {
+                    y: 6;
+                    text: qsTr("IP:");
+                }
+                ComboBox {
+                    width: 100;
+                    id: agvidCombobox;
+                    model: [
+                        "空"
+                    ];
                 }
             }
-//            Column{
-//                anchors.fill: parent;
-//                anchors.margins: 8;
-//                spacing: 4;
+            GridLayout {
+                id: consoleGrid
+                rows: 2;
+                columns: 4;
+                rowSpacing: 4;
+                columnSpacing: 4;
+                anchors.topMargin: 50
+                anchors.fill: parent;
+                anchors.margins: 3;
                 ConsoleBtn{
                     id: mfButton;
-                    width: 30;
-                    height: 30;
-                    anchors.left:parent.left
-                    anchors.leftMargin: parent.width / 2 - 34
-                    anchors.top: agvId.bottom
-                    anchors.topMargin: 50
                     text: "←";
                 }
                 ConsoleBtn{
                     id: mbButton;
-                    anchors.top: mfButton.top
-                    anchors.left: mfButton.right
-                    anchors.leftMargin: 8
                     text: "→";
                 }
                 ConsoleBtn{
                     id: mlButton;
-                    width: 30;
-                    height: 30;
-                    anchors.left:mfButton.left
-                    anchors.top: mfButton.bottom
-                    anchors.topMargin: 8
                     text: "↰";
                 }
                 ConsoleBtn{
                     id: mrButton;
-                    anchors.top: mlButton.top
-                    anchors.left: mfButton.right
-                    anchors.leftMargin: 8
                     text: "↱";
                 }
                 ConsoleBtn{
                     id: rcButton;
-                    width: 30;
-                    height: 30;
-                    anchors.left:mfButton.left
-                    anchors.top: mlButton.bottom
-                    anchors.topMargin: 8
                     text: "↷";
                 }
                 ConsoleBtn{
                     id: rccButton;
-                    anchors.top: rcButton.top
-                    anchors.left: rcButton.right
-                    anchors.leftMargin: 8
                     text: "↶";
                 }
                 ConsoleBtn{
                     id: rc2Button;
-                    width: 30;
-                    height: 30;
-                    anchors.left:mfButton.left
-                    anchors.top: rcButton.bottom
-                    anchors.topMargin: 8
                     text: "↻";
                 }
                 ConsoleBtn{
                     id: rcc2Button;
-                    anchors.top: rc2Button.top
-                    anchors.left: rc2Button.right
-                    anchors.leftMargin: 8
                     text: "↺";
 
                 }
                 ConsoleBtn{
                     id: astopButton;
-                    width: 30;
-                    height: 30;
-                    anchors.left:mfButton.left
-                    anchors.top: rc2Button.bottom
-                    anchors.topMargin: 8
                     text: "T";
                 }
                 ConsoleBtn{
                     id: estopButton;
-                    width: 30;
-                    height: 30;
-                    anchors.top: astopButton.top
-                    anchors.left: astopButton.right
-                    anchors.leftMargin: 8
                     text: "⚠";
                 }
                 ConsoleBtn{
                     id: platupButton;
-                    width: 30;
-                    height: 30;
-                    anchors.left:mfButton.left
-                    anchors.top: astopButton.bottom
-                    anchors.topMargin: 8
                     text: "↑";
                 }
                 ConsoleBtn{
                     id: platdownButton;
-                    width: 30;
-                    height: 30;
-                    anchors.top: platupButton.top
-                    anchors.left: platupButton.right
-                    anchors.leftMargin: 8
                     text: "↓";
                 }
-
-//            }
+            }
         }
-        GroupBox {
-            id: agvStatus;
-            title: "agv status";
-            height: agvConsole.height;
-            width: root.width - agvConsole.width - 22;
+        Row {
+            spacing: 4
+            Row {
+                GroupBox {
+                    id: agvStatus;
+                    title: "agv status";
+                    width: (root.width - agvConsole.width) / 3 + 30 ;
+                    height: agvConsole.height;
+                    Column {
+                        spacing: 8;
+                        Row {
+                            RectangleStatus{
+                                text: "←"
+                                font: 18;
+                            }
+                        }
+                        Row {
+                            spacing: 4;
+                            RectangleStatus{
+                                text: "↰"
+                                width: 30;
+                                font: 18;
+                            }
+                            RectangleStatus{
+                                text: "↱"
+                                width: 30;
+                                font: 18;
+                            }
+                        }
+                        Row {
+                            spacing: 4;
+                            RectangleStatus{
+                                text: "↑"
+                                width: 30;
+                                font: 18;
+                            }
+                            RectangleStatus{
+                                text: "↓"
+                                width: 30;
+                                font: 18;
+                            }
+                        }
+
+                        Row {
+                            spacing: 6
+                            RectangleStatus{
+                                text: "1档";
+                                width: 50;
+                            }
+                            RectangleStatus{
+                                text: "0";
+                                width: 50;
+                            }
+                        }
+
+                        Row {
+                            spacing: 6
+                            RectangleStatus{
+                                text: "-1";
+                                width: 50;
+                            }
+                            RectangleStatus{
+                                text: "-1";
+                                width: 50;
+                            }
+                        }
+
+                    }
+
+                }
+                GroupBox {
+                    id: agvAlarm;
+                    title: "agv alarm";
+                    height: agvStatus.height;
+                    width: root.width - agvConsole.width - agvStatus.width - 20
+                    Column {
+                        anchors.topMargin: 20
+                        spacing: 4
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("电量报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                                //color: "aquamarine";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("丢磁报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                                //color: "red"
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("旋转报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("平台报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("电机报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("通信报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                text: "⚠";
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

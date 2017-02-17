@@ -11,5 +11,6 @@
         <file>ActProperty.qml</file>
         <file>AgvDialog.qml</file>
         <file>ConsoleBtn.qml</file>
+        <file>RectangleStatus.qml</file>
     </qresource>
 </RCC>
