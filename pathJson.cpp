@@ -48,6 +48,18 @@ int PathJson::saveJsonFile(QVariant var)
     return 0;
 }
 
+QVariant PathJson::exportParamObject()
+{
+    QJsonObject paramObj;
+    paramObj["agvid"] = 1;
+    paramObj["handle"] = 0;
+    paramObj["pos_st"] = 0;
+    paramObj["path"] = m_pathArray;
+    QJsonDocument jDoc(paramObj);
+    QVariant var(jDoc.toJson(QJsonDocument::Compact));
+    return var;
+}
+
 QVariant PathJson::openJsonFile(QString fileName)
 {
     QVariant var;

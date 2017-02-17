@@ -15,6 +15,90 @@ Window {
 
     UdpServer {
         id: udpServer;
+        property int cmdInf: 20000;
+        function paramJson(cmd) {
+            var v = "{\"agvcmd\":\"";
+            v += cmd;
+            v += "\"}";
+            return v;
+        }
+        function paramAgvId() {
+            return "{\"agvid\":\"1\"";
+        }
+
+        function cmdMf(speed) {
+            var v = paramJson("mf " + speed);
+            sendCommand(cmdInf, v);
+        }
+        function cmdMb(speed) {
+            var v = paramJson("mb " + speed);
+            sendCommand(cmdInf, v);
+        }
+        function cmdStop() {
+            var v = paramJson("s");
+            sendCommand(cmdInf, v);
+        }
+        function cmdAStop() {
+            var v = paramJson("a");
+            sendCommand(cmdInf, v);
+        }
+        function cmdMl() {
+            var v = paramJson("ml");
+            sendCommand(cmdInf, v);
+        }
+        function cmdMr() {
+            var v = paramJson("mr");
+            sendCommand(cmdInf, v);
+        }
+        function cmdRc() {
+            var v = paramJson("rc");
+            sendCommand(cmdInf, v);
+        }
+        function cmdRc2() {
+            var v = paramJson("rc2");
+            sendCommand(cmdInf, v);
+        }
+        function cmdRcc() {
+            var v = paramJson("rcc");
+            sendCommand(cmdInf, v);
+        }
+        function cmdRcc2() {
+            var v = paramJson("rcc2");
+            sendCommand(cmdInf, v);
+        }
+        function cmdOAOn() {
+            var v = paramJson("oa 1");
+            sendCommand(cmdInf, v);
+        }
+        function cmdOAOff() {
+            var v = paramJson("oa 0");
+            sendCommand(cmdInf, v);
+        }
+        function cmdLiftUp() {
+            var v = paramJson("lf 1");
+            sendCommand(cmdInf, v);
+        }
+        function cmdLiftDown() {
+            var v = paramJson("lf 0");
+            sendCommand(cmdInf, v);
+        }
+        function cmdCSOn() {
+            var v = paramJson("cs 1");
+            sendCommand(cmdInf, v);
+        }
+        function cmdCSOff() {
+            var v = paramJson("cs 0");
+            sendCommand(cmdInf, v);
+        }
+        function cmdEStop() {
+            var v = paramAgvId();
+            sendCommand(1005, v);
+        }
+        function cmdStart() {
+            var v = paramAgvId();
+            sendCommand(1003, v);
+        }
+
         onAgvStatusChanged: {
             console.log("status changed " + inf + " " + status);
             switch (inf) {
@@ -195,31 +279,37 @@ Window {
                 ConsoleBtn{
                     id: mlButton;
                     text: "↰";
+                    onClicked: udpServer.cmdMl();
                 }
                 ConsoleBtn{
                     id: mrButton;
                     text: "↱";
+                    onClicked: udpServer.cmdMr();
                 }
                 ConsoleBtn{
                     id: rcButton;
                     text: "↷";
+                    onClicked: udpServer.cmdRc();
                 }
                 ConsoleBtn{
                     id: rccButton;
                     text: "↶";
+                    onClicked: udpServer.cmdRcc();
                 }
                 ConsoleBtn{
                     id: rc2Button;
                     text: "↻";
+                    onClicked: udpServer.cmdRc2();
                 }
                 ConsoleBtn{
                     id: rcc2Button;
                     text: "↺";
-
+                    onClicked: udpServer.cmdRcc2();
                 }
                 ConsoleBtn{
                     id: astopButton;
                     text: "T";
+                    onClicked: udpServer.cmdAStop();
                 }
                 ConsoleBtn{
                     id: estopButton;
@@ -228,10 +318,12 @@ Window {
                 ConsoleBtn{
                     id: platupButton;
                     text: "↑";
+                    onClicked: udpServer.cmdLiftUp();
                 }
                 ConsoleBtn{
                     id: platdownButton;
                     text: "↓";
+                    onClicked: udpServer.cmdLiftDown();
                 }
                 ConsoleBtn{
                     id: starteButton;

@@ -1,4 +1,4 @@
-import QtQuick 2.2
+﻿import QtQuick 2.2
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 
@@ -7,6 +7,7 @@ Rectangle {
     implicitHeight: 30;
     implicitWidth: 30;
     property alias text: consoleText.text
+    signal clicked;
     Button{
         id: consoleBtn;
         anchors.fill: parent;
@@ -15,6 +16,9 @@ Rectangle {
             font.pointSize: 18;
             color: "black";
             anchors.centerIn: parent;
+        }
+        onClicked: {
+            root.clicked();
         }
     }
 }
