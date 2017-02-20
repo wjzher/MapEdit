@@ -12,5 +12,6 @@
         <file>AgvDialog.qml</file>
         <file>ConsoleBtn.qml</file>
         <file>RectangleStatus.qml</file>
+        <file>FlatButton.qml</file>
     </qresource>
 </RCC>
