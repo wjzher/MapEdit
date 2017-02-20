@@ -270,64 +270,135 @@ Window {
                         }
                     }
                 }
-//                Row {
-//                    spacing: 8;
-//                    Text {
-//                        y: 6;
-//                        text: qsTr("V: ");
-//                    }
-//                    ComboBox {
-//                        width: 100;
-//                        id: agvspeedCombobox;
-//                        model: [
-//                            "",
-//                            "1档",
-//                            "2档",
-//                            "3档",
-//                            "4档",
-//                            "5档"
-//                        ];
-//                    }
-//                }
+
                 Column {
                     spacing: 4;
                     Row {
                         spacing: 4;
                         FlatButton {
                             id: speedview;
-                            text:"0";
+                            property int dir: 0;    // 0 front 1 back
+                            text: "0";
+                            font.pointSize: 12;
+                            textColor: "black";
+                            function clear() {
+                                dir = 0;
+                                text = 0;
+                                move();
+                            }
+                            function move() {
+                                if (text == 0) {
+                                    udpServer.cmdStop();
+                                } else {
+                                    if (dir == 0) {
+                                        udpServer.cmdMf(text);
+                                    } else {
+                                        udpServer.cmdMb(text);
+                                    }
+                                }
+                            }
+
+                            function up(){
+                                if (dir == 0) {
+                                    if (speedview.text < 5) {
+                                        speedview.text++;
+                                        move();
+                                    }
+                                } else {
+                                    if (speedview.text > 0) {
+                                        speedview.text--;
+                                        if (speedview.text == 0) {
+                                            dir = 0;
+                                        }
+                                        move();
+                                    }
+                                }
+                            }
+                            function down(){
+                                if (dir == 1) {
+                                    if (speedview.text < 5) {
+                                        speedview.text++;
+                                        move();
+                                    }
+                                } else {
+                                    if (speedview.text > 0) {
+                                        speedview.text--;
+                                        if (speedview.text == 0) {
+                                            dir = 1;
+                                        }
+                                        move();
+                                    }
+                                }
+                            }
                         }
                         FlatButton {
                             id: mfButton;
                             text: "↑";
-                            //font.bold: true;
+                            onClicked: {
+                                speedview.up();
+                            }
                         }
                         FlatButton {
                             id: rcButton;
                             text: "↻";
+                            onClicked: {
+                                if (rotateview.text == 90) {
+                                udpServer.cmdRc();
+                                } else {
+                                    udpServer.cmdRc2();
+                                }
+                            }
                         }
                         FlatButton {
                             id: stopButton;
                             text: "s";
+                            onClicked: {
+                                speedview.clear();
+                            }
                         }
                     }
                     Row {
                         spacing: 4;
                         FlatButton {
                             id: rotateview;
-                            text:"0";
+                            font.pointSize: 12;
+                            textColor: "black";
+                            text:"90";
+                            property int rot: 0
+                            onClicked: {
+                                if (rot == 0) {
+                                    text = "180";
+                                    rot = 1;
+                                } else {
+                                    text = "90";
+                                    rot = 0;
+                                }
+                            }
                         }
                         FlatButton {
                             id: mbButton;
                             text: "↓";
+                            onClicked: {
+                                speedview.down();
+                            }
                         }
                         FlatButton {
                             id: rccButton;
                             text: "↺";
+                            onClicked: {
+                                if (rotateview.text == 90) {
+                                udpServer.cmdRcc();
+                                } else {
+                                    udpServer.cmdRcc2();
+                                }
+                            }
                         }
                         FlatButton {
                             id: astopButton;
-                            text: "s";
+                            text: "a";
+                            onClicked: {
+                                udpServer.cmdAStop()
+                            }
                         }
                     }
                 }
@@ -338,14 +409,38 @@ Window {
                         FlatButton {
                             id: lfupButton;
                             text: "↑";
+                            width: lfdButton.width;
+                            onClicked: {
+                                udpServer.cmdLiftUp();
+                            }
                         }
                         FlatButton {
                             id: oaButton;
                             text: "oa";
+                            width: lfdButton.width;
+                            property int oa: 0;     //0 off, 1 on
+                            function oaview() {
+                                if (oa == 0) {
+                                    textColor = "royalblue";
+                                    udpServer.cmdOAOn();
+                                    oa = 1;
+                                } else {
+                                    textColor = "deeppink";
+                                    udpServer.cmdOAOff();
+                                    oa = 0;
+                                }
+                            }
+                            onClicked: {
+                                oaButton.oaview();
+                            }
                         }
                         FlatButton {
                             id: leftButton;
                             text: "↰";
+                            width: lfdButton.width;
+                            onClicked: {
+                                udpServer.cmdMl();
+                            }
                         }
                     }
                     Row {
@@ -353,14 +448,35 @@ Window {
                         FlatButton {
                             id: lfdButton;
                             text: "↓";
+                            width: 48;
+                            onClicked: {
+                                udpServer.cmdLiftDown();
+                            }
                         }
                         FlatButton {
                             id: csButton;
                             text: "cs";
+                            width: lfdButton.width;
+                            property int cs: 0;
+                            onClicked: {
+                                if (cs == 0) {
+                                    textColor = "royalblue";
+                                    udpServer.cmdCSOn();
+                                    cs = 1;
+                                } else {
+                                    textColor = "deeppink";
+                                    udpServer.cmdCSOff();
+                                    cs = 0;
+                                }
+                            }
                         }
                         FlatButton {
                             id: rightButton;
                             text: "↱";
+                            width: lfdButton.width;
+                            onClicked: {
+                                udpServer.cmdMr();
+                            }
                         }
 
                     }
@@ -370,106 +486,23 @@ Window {
                     FlatButton {
                         id: loadButton;
                         text: "l";
+                        width: lfdButton.width;
                     }
                     FlatButton {
                         id: resButton;
                         text: "o";
+                        width: lfdButton.width;
                     }
                     FlatButton {
                         id: esButton;
                         text: "es";
+                        width: lfdButton.width;
+                        onClicked: {
+                            udpServer.cmdAStop()
+                        }
                     }
                 }
             }
-
-//            GridLayout {
-//                id: consoleGrid
-//                rows: 2;
-//                columns: 4;
-//                rowSpacing: 4;
-//                columnSpacing: 4;
-//                anchors.topMargin: 70
-//                anchors.fill: parent;
-//                anchors.margins: 3;
-//                ConsoleBtn{
-//                    id: mfButton;
-//                    text: "→";
-//                    onClicked: udpServer.cmdMf(agvspeedCombobox.currentIndex);
-//                }
-//                ConsoleBtn{
-//                    id: mbButton;
-//                    text: "←";
-//                    onClicked: udpServer.cmdMb(agvspeedCombobox.currentIndex);
-//                }
-//                ConsoleBtn{
-//                    id: mlButton;
-//                    text: "↰";
-//                    onClicked: udpServer.cmdMl();
-//                }
-//                ConsoleBtn{
-//                    id: mrButton;
-//                    text: "↱";
-//                    onClicked: udpServer.cmdMr();
-//                }
-//                ConsoleBtn{
-//                    id: rcButton;
-//                    text: "↷";
-//                    onClicked: udpServer.cmdRc();
-//                }
-//                ConsoleBtn{
-//                    id: rccButton;
-//                    text: "↶";
-//                    onClicked: udpServer.cmdRcc();
-//                }
-//                ConsoleBtn{
-//                    id: rc2Button;
-//                    text: "↻";
-//                    onClicked: udpServer.cmdRc2();
-//                }
-//                ConsoleBtn{
-//                    id: rcc2Button;
-//                    text: "↺";
-//                    onClicked: udpServer.cmdRcc2();
-//                }
-//                ConsoleBtn{
-//                    id: astopButton;
-//                    text: "T";
-//                    onClicked: udpServer.cmdAStop();
-//                }
-//                ConsoleBtn{
-//                    id: estopButton;
-//                    text: "⚠";
-//                    onClicked: udpServer.cmdEStop();
-//                }
-//                ConsoleBtn{
-//                    id: platupButton;
-//                    text: "↑";
-//                    onClicked: udpServer.cmdLiftUp();
-//                }
-//                ConsoleBtn{
-//                    id: platdownButton;
-//                    text: "↓";
-//                    onClicked: udpServer.cmdLiftDown();
-//                }
-//                ConsoleBtn{
-//                    id: startButton;
-//                    text: "►";
-//                    onClicked: udpServer.cmdStart();
-//                }
-//                ConsoleBtn{
-//                    id: stopButton;
-//                    text: "■";
-//                    onClicked: udpServer.cmdStop();
-//                }
-//                ConsoleBtn{
-//                    id: oaButton;
-//                    text: "OA";
-//                }
-//                ConsoleBtn{
-//                    id: relayButton;
-//                    text: "CS";
-//                }
-//            }
         }
         Row {
             spacing: 4
