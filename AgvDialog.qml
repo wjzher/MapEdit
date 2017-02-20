@@ -241,7 +241,7 @@ Window {
             height: root.height - 12;
             width: 180;
             Column{
-                spacing: 4
+                spacing: 10
                 Row {
                     spacing: 8;
                     Text {
@@ -270,114 +270,206 @@ Window {
                         }
                     }
                 }
+//                Row {
+//                    spacing: 8;
+//                    Text {
+//                        y: 6;
+//                        text: qsTr("V: ");
+//                    }
+//                    ComboBox {
+//                        width: 100;
+//                        id: agvspeedCombobox;
+//                        model: [
+//                            "",
+//                            "1档",
+//                            "2档",
+//                            "3档",
+//                            "4档",
+//                            "5档"
+//                        ];
+//                    }
+//                }
+                Column {
+                    spacing: 4;
+                    Row {
+                        spacing: 4;
+                        FlatButton {
+                            id: speedview;
+                            text:"0";
+                        }
+                        FlatButton {
+                            id: mfButton;
+                            text: "↑";
+                            //font.bold: true;
+                        }
+                        FlatButton {
+                            id: rcButton;
+                            text: "↻";
+                        }
+                        FlatButton {
+                            id: stopButton;
+                            text: "s";
+                        }
+                    }
+                    Row {
+                        spacing: 4;
+                        FlatButton {
+                            id: rotateview;
+                            text:"0";
+                        }
+                        FlatButton {
+                            id: mbButton;
+                            text: "↓";
+                        }
+                        FlatButton {
+                            id: rccButton;
+                            text: "↺";
+                        }
+                        FlatButton {
+                            id: astopButton;
+                            text: "s";
+                        }
+                    }
+                }
+                Column {
+                    spacing: 4;
+                    Row {
+                        spacing: 4;
+                        FlatButton {
+                            id: lfupButton;
+                            text: "↑";
+                        }
+                        FlatButton {
+                            id: oaButton;
+                            text: "oa";
+                        }
+                        FlatButton {
+                            id: leftButton;
+                            text: "↰";
+                        }
+                    }
+                    Row {
+                        spacing: 4;
+                        FlatButton {
+                            id: lfdButton;
+                            text: "↓";
+                        }
+                        FlatButton {
+                            id: csButton;
+                            text: "cs";
+                        }
+                        FlatButton {
+                            id: rightButton;
+                            text: "↱";
+                        }
+
+                    }
+                }
                 Row {
-                    spacing: 8;
-                    Text {
-                        y: 6;
-                        text: qsTr("V: ");
+                    spacing: 4;
+                    FlatButton {
+                        id: loadButton;
+                        text: "l";
                     }
-                    ComboBox {
-                        width: 100;
-                        id: agvspeedCombobox;
-                        model: [
-                            "",
-                            "1档",
-                            "2档",
-                            "3档",
-                            "4档",
-                            "5档"
-                        ];
+                    FlatButton {
+                        id: resButton;
+                        text: "o";
+                    }
+                    FlatButton {
+                        id: esButton;
+                        text: "es";
                     }
                 }
             }
-            GridLayout {
-                id: consoleGrid
-                rows: 2;
-                columns: 4;
-                rowSpacing: 4;
-                columnSpacing: 4;
-                anchors.topMargin: 70
-                anchors.fill: parent;
-                anchors.margins: 3;
-                ConsoleBtn{
-                    id: mfButton;
-                    text: "→";
-                    onClicked: udpServer.cmdMf(agvspeedCombobox.currentIndex);
-                }
-                ConsoleBtn{
-                    id: mbButton;
-                    text: "←";
-                    onClicked: udpServer.cmdMb(agvspeedCombobox.currentIndex);
-                }
-                ConsoleBtn{
-                    id: mlButton;
-                    text: "↰";
-                    onClicked: udpServer.cmdMl();
-                }
-                ConsoleBtn{
-                    id: mrButton;
-                    text: "↱";
-                    onClicked: udpServer.cmdMr();
-                }
-                ConsoleBtn{
-                    id: rcButton;
-                    text: "↷";
-                    onClicked: udpServer.cmdRc();
-                }
-                ConsoleBtn{
-                    id: rccButton;
-                    text: "↶";
-                    onClicked: udpServer.cmdRcc();
-                }
-                ConsoleBtn{
-                    id: rc2Button;
-                    text: "↻";
-                    onClicked: udpServer.cmdRc2();
-                }
-                ConsoleBtn{
-                    id: rcc2Button;
-                    text: "↺";
-                    onClicked: udpServer.cmdRcc2();
-                }
-                ConsoleBtn{
-                    id: astopButton;
-                    text: "T";
-                    onClicked: udpServer.cmdAStop();
-                }
-                ConsoleBtn{
-                    id: estopButton;
-                    text: "⚠";
-                    onClicked: udpServer.cmdEStop();
-                }
-                ConsoleBtn{
-                    id: platupButton;
-                    text: "↑";
-                    onClicked: udpServer.cmdLiftUp();
-                }
-                ConsoleBtn{
-                    id: platdownButton;
-                    text: "↓";
-                    onClicked: udpServer.cmdLiftDown();
-                }
-                ConsoleBtn{
-                    id: startButton;
-                    text: "►";
-                    onClicked: udpServer.cmdStart();
-                }
-                ConsoleBtn{
-                    id: stopButton;
-                    text: "■";
-                    onClicked: udpServer.cmdStop();
-                }
-                ConsoleBtn{
-                    id: oaButton;
-                    text: "OA";
-                }
-                ConsoleBtn{
-                    id: relayButton;
-                    text: "CS";
-                }
-            }
+
+//            GridLayout {
+//                id: consoleGrid
+//                rows: 2;
+//                columns: 4;
+//                rowSpacing: 4;
+//                columnSpacing: 4;
+//                anchors.topMargin: 70
+//                anchors.fill: parent;
+//                anchors.margins: 3;
+//                ConsoleBtn{
+//                    id: mfButton;
+//                    text: "→";
+//                    onClicked: udpServer.cmdMf(agvspeedCombobox.currentIndex);
+//                }
+//                ConsoleBtn{
+//                    id: mbButton;
+//                    text: "←";
+//                    onClicked: udpServer.cmdMb(agvspeedCombobox.currentIndex);
+//                }
+//                ConsoleBtn{
+//                    id: mlButton;
+//                    text: "↰";
+//                    onClicked: udpServer.cmdMl();
+//                }
+//                ConsoleBtn{
+//                    id: mrButton;
+//                    text: "↱";
+//                    onClicked: udpServer.cmdMr();
+//                }
+//                ConsoleBtn{
+//                    id: rcButton;
+//                    text: "↷";
+//                    onClicked: udpServer.cmdRc();
+//                }
+//                ConsoleBtn{
+//                    id: rccButton;
+//                    text: "↶";
+//                    onClicked: udpServer.cmdRcc();
+//                }
+//                ConsoleBtn{
+//                    id: rc2Button;
+//                    text: "↻";
+//                    onClicked: udpServer.cmdRc2();
+//                }
+//                ConsoleBtn{
+//                    id: rcc2Button;
+//                    text: "↺";
+//                    onClicked: udpServer.cmdRcc2();
+//                }
+//                ConsoleBtn{
+//                    id: astopButton;
+//                    text: "T";
+//                    onClicked: udpServer.cmdAStop();
+//                }
+//                ConsoleBtn{
+//                    id: estopButton;
+//                    text: "⚠";
+//                    onClicked: udpServer.cmdEStop();
+//                }
+//                ConsoleBtn{
+//                    id: platupButton;
+//                    text: "↑";
+//                    onClicked: udpServer.cmdLiftUp();
+//                }
+//                ConsoleBtn{
+//                    id: platdownButton;
+//                    text: "↓";
+//                    onClicked: udpServer.cmdLiftDown();
+//                }
+//                ConsoleBtn{
+//                    id: startButton;
+//                    text: "►";
+//                    onClicked: udpServer.cmdStart();
+//                }
+//                ConsoleBtn{
+//                    id: stopButton;
+//                    text: "■";
+//                    onClicked: udpServer.cmdStop();
+//                }
+//                ConsoleBtn{
+//                    id: oaButton;
+//                    text: "OA";
+//                }
+//                ConsoleBtn{
+//                    id: relayButton;
+//                    text: "CS";
+//                }
+//            }
         }
         Row {
             spacing: 4

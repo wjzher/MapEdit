@@ -2,8 +2,8 @@ import QtQuick 2.2
 
 Rectangle {
     id: bkgnd;
-    implicitWidth: 120;
-    implicitHeight: 50;
+    implicitWidth: 35;
+    implicitHeight: 30;
     color: "transparent";
     property alias iconSource: icon.source;
     property alias iconWidth: icon.width;
@@ -11,10 +11,10 @@ Rectangle {
     property alias textColor: btnText.color;
     property alias font: btnText.font;
     property alias text: btnText.text;
-    radius: 6;
+    radius: 4;
     property bool hovered: false;
-    border.color: "#949494";
-    border.width: hovered ? 2 : 0;
+    border.color: "lightsteelblue";
+    border.width: hovered ? 2 : 1;
     signal clicked;
 
     Image {
@@ -25,9 +25,11 @@ Rectangle {
     Text {
         id: btnText;
         anchors.left: icon.right;
+        anchors.centerIn: parent;
         anchors.verticalCenter: icon.verticalCenter;
         anchors.margins: 4;
-        color: ma.pressed ? "blue" : (parent.hovered ? "#0000a0" : "white");
+        font.pointSize: 18;
+        color: ma.pressed ? "blue" : (parent.hovered ? "#0000a0" : "deeppink");
     }
     MouseArea {
         id: ma;
