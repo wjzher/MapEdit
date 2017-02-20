@@ -13,5 +13,6 @@
         <file>ConsoleBtn.qml</file>
         <file>RectangleStatus.qml</file>
         <file>FlatButton.qml</file>
+        <file>MapEditWindow.qml</file>
     </qresource>
 </RCC>
