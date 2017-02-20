@@ -9,6 +9,7 @@ Rectangle {
     id: root;
     clip: true;
     property alias listView: listView;
+    property alias pathJson: pathJson;
     FileDialog {
         id: pathListFileDialog;
         property var fileName: "";

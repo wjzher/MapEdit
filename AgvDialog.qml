@@ -217,6 +217,11 @@ Window {
                 rotateNomal.color = "#EEEEEE";
             }
         }
+        function cmdLoadPath() {
+            var v = pathList.pathJson.exportParamObject();
+            console.log("LoadPath: " + v);
+            sendCommand(1007, v);
+        }
 
         onAgvStatusChanged: {
             //            console.log("status changed " + inf + " " + status);
@@ -240,7 +245,7 @@ Window {
         }
         onAgvAddressChanged: {
             console.log("address changed " + ip);
-            currentIp = ip;
+//            currentIp = ip;
             agvipCombobox.model.append({text: ip});
         }
     }
@@ -271,6 +276,20 @@ Window {
                             //                            ListElement {
                             //                                text: "Null";
                             //                            }
+                            ListElement {
+                                text: "192.168.2.1";
+                            }
+                            ListElement {
+                                text: "192.168.2.2";
+                            }
+                        }
+                        onCurrentIndexChanged: {
+                            if (model.get(currentIndex) == null) {
+                                return;
+                            }
+                            console.log("agv ip changed " + currentIndex + " " + model.get(currentIndex).text);
+                            udpServer.currentIp = model.get(currentIndex).text;
+//                            udpServer.cmdLoadPath();
                         }
                     }
                 }
