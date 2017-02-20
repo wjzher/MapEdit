@@ -145,10 +145,30 @@ Window {
             }
             switch (m.liftsta) {
             case 1:
-                agvLeft.text = "↑";
+                toplift.opacity = 1;
                 break
             case 2:
-                agvLeft.text = "↓";
+                bottomlift.opacity = 1;
+                break;
+            }
+            switch (m.bz[0]) {
+            case 0:
+                oaview.color = "aquamarine";
+                oaButton.color = "aquamarine";
+                break
+            case 1:
+                oaview.color = "#EEEEEE";
+                oaButton.color = "transparent";
+                break;
+            }
+            switch (m.charge) {
+            case 0:
+                csview.color = "aquamarine";
+                csButton.color = "aquamarine";
+                break
+            case 1:
+                csview.color = "#EEEEEE";
+                csButton.color = "transparent"
                 break;
             }
             agvVoltage.text = m.voltage + "v";
@@ -199,7 +219,7 @@ Window {
         }
 
         onAgvStatusChanged: {
-//            console.log("status changed " + inf + " " + status);
+            //            console.log("status changed " + inf + " " + status);
             switch (inf) {
             case 1001:
                 agvInfo.text = "AGV信息总召";
@@ -248,9 +268,9 @@ Window {
                         id: agvipCombobox;
                         model: ListModel {
                             id: model;
-//                            ListElement {
-//                                text: "Null";
-//                            }
+                            //                            ListElement {
+                            //                                text: "Null";
+                            //                            }
                         }
                     }
                 }
@@ -283,9 +303,10 @@ Window {
                             }
 
                             function up(){
-                                if (dir == 0) {
+                                if (dir == 0 || speedview.text == 0) {
                                     if (speedview.text < 5) {
                                         speedview.text++;
+                                        dir = 0;
                                         move();
                                     }
                                 } else {
@@ -299,9 +320,10 @@ Window {
                                 }
                             }
                             function down(){
-                                if (dir == 1) {
+                                if (dir == 1 || speedview.text == 0) {
                                     if (speedview.text < 5) {
                                         speedview.text++;
+                                        dir = 1;
                                         move();
                                     }
                                 } else {
@@ -327,7 +349,7 @@ Window {
                             text: "↻";
                             onClicked: {
                                 if (rotateview.text == 90) {
-                                udpServer.cmdRc();
+                                    udpServer.cmdRc();
                                 } else {
                                     udpServer.cmdRc2();
                                 }
@@ -335,7 +357,7 @@ Window {
                         }
                         FlatButton {
                             id: stopButton;
-                            text: "s";
+                            text: "■";
                             onClicked: {
                                 speedview.clear();
                             }
@@ -348,7 +370,7 @@ Window {
                             font.pointSize: 12;
                             textColor: "black";
                             text:"90";
-                            property int rot: 0
+                            property int rot: 0  //0: 90°  1: 180°
                             onClicked: {
                                 if (rot == 0) {
                                     text = "180";
@@ -371,7 +393,7 @@ Window {
                             text: "↺";
                             onClicked: {
                                 if (rotateview.text == 90) {
-                                udpServer.cmdRcc();
+                                    udpServer.cmdRcc();
                                 } else {
                                     udpServer.cmdRcc2();
                                 }
@@ -379,7 +401,7 @@ Window {
                         }
                         FlatButton {
                             id: astopButton;
-                            text: "a";
+                            text: "T";
                             onClicked: {
                                 udpServer.cmdAStop()
                             }
@@ -405,11 +427,11 @@ Window {
                             property int oa: 0;     //0 off, 1 on
                             function oaview() {
                                 if (oa == 0) {
-                                    textColor = "royalblue";
+                                    color = "aquamarine";
                                     udpServer.cmdOAOn();
                                     oa = 1;
                                 } else {
-                                    textColor = "deeppink";
+                                    color = "transparent";
                                     udpServer.cmdOAOff();
                                     oa = 0;
                                 }
@@ -444,11 +466,11 @@ Window {
                             property int cs: 0;
                             onClicked: {
                                 if (cs == 0) {
-                                    textColor = "royalblue";
+                                    color = "aquamarine";
                                     udpServer.cmdCSOn();
                                     cs = 1;
                                 } else {
-                                    textColor = "deeppink";
+                                    color = "transparent";
                                     udpServer.cmdCSOff();
                                     cs = 0;
                                 }
@@ -502,7 +524,7 @@ Window {
                             spacing: 4;
                             RectangleStatus{
                                 id: agvActive;
-                                text: "←"
+                                text: "↑"
                                 width: 45;
                                 font: 18;
                             }
@@ -522,9 +544,36 @@ Window {
                             }
                             RectangleStatus{
                                 id: agvLeft
-                                text: "↑"
                                 width: 45;
                                 font: 18;
+                                Column {
+                                    anchors.top:parent.top;
+                                    anchors.topMargin: 2;
+                                    anchors.left:parent.left;
+                                    anchors.leftMargin: 12;
+                                    spacing: 4
+                                    Rectangle {
+                                        id: toplift;
+                                        width: 20;
+                                        height: 4;
+                                        color: "black"
+                                        opacity: 0;
+                                    }
+                                    Rectangle {
+                                        id: centerlift;
+                                        width: 20;
+                                        height: 4;
+                                        color: "black"
+                                        opacity: 0;
+                                    }
+                                    Rectangle {
+                                        id: bottomlift;
+                                        width: 20;
+                                        height: 4;
+                                        color: "black"
+                                        opacity: 0;
+                                    }
+                                }
                             }
                         }
                         RectangleStatus{
@@ -542,6 +591,21 @@ Window {
                             id: agvNextpose;
                             text: "-1";
                             width: 94;
+                        }
+                        Row {
+                            spacing: 4;
+                            RectangleStatus{
+                                id: oaview;
+                                text: "oa"
+                                width: 45;
+                                font: 16;
+                            }
+                            RectangleStatus{
+                                id: csview;
+                                text: "cs";
+                                width: 45;
+                                font: 16;
+                            }
                         }
 
                         Text {
