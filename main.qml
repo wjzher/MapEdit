@@ -7,8 +7,10 @@ QtObject {
 
     property var mapWindow: MapEditWindow {
         id: mapWindow;
-        color: palette.window
         visible: true;
+        onClosing: {
+            agvDialog.close();
+        }
     }
 
     property var agvControlWindow: AgvDialog {

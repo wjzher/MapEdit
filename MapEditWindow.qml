@@ -18,10 +18,6 @@ Window {
     color: "#EEEEEE";
     title: qsTr("MapEditor");
 
-//    AgvDialog {
-//        id: agvDialog;
-//    }
-
     FileDialog {
         id: fileDialog;
         title: "Please choose a file";
