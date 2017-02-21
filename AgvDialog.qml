@@ -12,6 +12,68 @@ Window {
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
+    Item {
+            focus: true
+            Keys.onPressed: {
+                switch(event.key) {
+                case Qt.Key_Up:
+                    mfButton.clickedCallBack();
+                    break;
+                case Qt.Key_Down:
+                    mbButton.clickedCallBack();
+                    break;
+                case Qt.Key_Left:
+                    rccButton.clickedCallBack();
+                    break;
+                case Qt.Key_Right:
+                    rcButton.clickedCallBack();
+                    break;
+                case Qt.Key_Equal:
+                    rotateview.clickedCallBack();
+                    break;
+                case Qt.Key_Delete:
+                    delButton.clickedCallBack();
+                    break;
+                case Qt.Key_Insert:
+                    loadButton.clickedCallBack();
+                    break;
+                case Qt.Key_Home:
+                    startButton.clickedCallBack();
+                    break;
+                case Qt.Key_End:
+                    esButton.clickedCallBack();
+                    break;
+                case Qt.Key_R:
+                    rightButton.clickedCallBack();
+                    break;
+                case Qt.Key_L:
+                    leftButton.clickedCallBack();
+                    break;
+                case Qt.Key_S:
+                    stopButton.clickedCallBack();
+                    break;
+                case Qt.Key_A:
+                case Qt.Key_Space:
+                    astopButton.clickedCallBack();
+                    break;
+                case Qt.Key_U:
+                    lfupButton.clickedCallBack();
+                    break;
+                case Qt.Key_D:
+                    lfdButton.clickedCallBack();
+                    break;
+                case Qt.Key_F1:
+                    oaButton.clickedCallBack();
+                    break;
+                case Qt.Key_F2:
+                    csButton.clickedCallBack();
+                    break;
+                default:
+                    return;
+                }
+            }
+        }
+
     UdpServer {
         id: udpServer;
         property int cmdInf: 20000;
@@ -392,27 +454,36 @@ Window {
                         FlatButton {
                             id: mfButton;
                             text: "↑";
-                            onClicked: {
+                            function clickedCallBack(){
                                 speedview.up();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
                             id: rcButton;
                             text: "↻";
-                            onClicked: {
+                            function clickedCallBack() {
                                 if (rotateview.text == 90) {
                                     udpServer.cmdRc();
                                 } else {
                                     udpServer.cmdRc2();
                                 }
                             }
+                            onClicked: {
+                                clickedCallBack();
+                            }
                         }
                         FlatButton {
                             id: stopButton;
                             text: "■";
-                            onClicked: {
+                            function clickedCallBack() {
                                 speedview.clear();
                                 speedview.move();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                     }
@@ -424,7 +495,7 @@ Window {
                             textColor: "black";
                             text:"90";
                             property int rot: 0  //0: 90°  1: 180°
-                            onClicked: {
+                            function clickedCallBack() {
                                 if (rot == 0) {
                                     text = "180";
                                     rot = 1;
@@ -433,31 +504,43 @@ Window {
                                     rot = 0;
                                 }
                             }
+                            onClicked: {
+                                clickedCallBack();
+                            }
                         }
                         FlatButton {
                             id: mbButton;
                             text: "↓";
-                            onClicked: {
+                            function clickedCallBack() {
                                 speedview.down();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
                             id: rccButton;
                             text: "↺";
-                            onClicked: {
+                            function clickedCallBack() {
                                 if (rotateview.text == 90) {
                                     udpServer.cmdRcc();
                                 } else {
                                     udpServer.cmdRcc2();
                                 }
                             }
+                            onClicked: {
+                                clickedCallBack();
+                            }
                         }
                         FlatButton {
                             id: astopButton;
                             text: "T";
-                            onClicked: {
+                            function clickedCallBack() {
                                 speedview.clear();
-                                udpServer.cmdAStop()
+                                udpServer.cmdAStop();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                     }
@@ -470,8 +553,11 @@ Window {
                             id: lfupButton;
                             text: "↑";
                             width: lfdButton.width;
-                            onClicked: {
+                            function clickedCallBack() {
                                 udpServer.cmdLiftUp();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
@@ -480,6 +566,15 @@ Window {
                             width: lfdButton.width;
                             property int oa;     //0 on, 1 off
                             property int onOff: 0;
+                            function clickedCallBack(){
+                                if (onOff == 0) {
+                                    udpServer.cmdOAOn()
+                                    onOff = 1;
+                                } else {
+                                    udpServer.cmdOAOff();
+                                    onOff = 0;
+                                }
+                            }
                             onOaChanged: {
                                 if (oa == 0) {
                                     color = "transparent";
@@ -495,21 +590,18 @@ Window {
                                 }
                             }
                             onClicked: {
-                                if (onOff == 0) {
-                                    udpServer.cmdOAOn()
-                                    onOff = 1;
-                                } else {
-                                    udpServer.cmdOAOff();
-                                    onOff = 0;
-                                }
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
                             id: leftButton;
                             text: "↰";
                             width: lfdButton.width;
-                            onClicked: {
+                            function clickedCallBack() {
                                 udpServer.cmdMl();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                     }
@@ -519,8 +611,11 @@ Window {
                             id: lfdButton;
                             text: "↓";
                             width: 48;
-                            onClicked: {
+                            function clickedCallBack() {
                                 udpServer.cmdLiftDown();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
@@ -529,6 +624,15 @@ Window {
                             width: lfdButton.width;
                             property int cs;  //0:off  1:on
                             property int onOff: 0;
+                            function clickedCallBack() {
+                                if (onOff == 0) {
+                                    udpServer.cmdCSOn();
+                                    onOff = 1;
+                                } else {
+                                    udpServer.cmdCSOff();
+                                    onOff = 0;
+                                }
+                            }
                             onCsChanged: {
                                 if (cs == 0) {
                                     color = "transparent";
@@ -545,21 +649,18 @@ Window {
                             }
 
                             onClicked: {
-                                if (onOff == 0) {
-                                    udpServer.cmdCSOn();
-                                    onOff = 1;
-                                } else {
-                                    udpServer.cmdCSOff();
-                                    onOff = 0;
-                                }
+                                clickedCallBack();
                             }
                         }
                         FlatButton {
                             id: rightButton;
                             text: "↱";
                             width: lfdButton.width;
-                            onClicked: {
+                            function clickedCallBack() {
                                 udpServer.cmdMr();
+                            }
+                            onClicked: {
+                                clickedCallBack();
                             }
                         }
 
@@ -570,30 +671,41 @@ Window {
                     FlatButton {
                         id: loadButton;
                         text: "L";
-
-                        onClicked: {
+                        function clickedCallBack() {
                             udpServer.cmdLoadPath();
+                        }
+                        onClicked: {
+                            clickedCallBack();
                         }
                     }
                     FlatButton {
-                        id: resButton;
+                        id: startButton;
                         text: "O";
-                        onClicked: {
+                        function clickedCallBack() {
                             udpServer.cmdStart();
+                        }
+                        onClicked: {
+                            clickedCallBack()
                         }
                     }
                     FlatButton {
                         id: esButton;
                         text: "ES";
+                        function clickedCallBack() {
+                            udpServer.cmdEStop();
+                        }
                         onClicked: {
-                            udpServer.cmdEStop()
+                            clickedCallBack();
                         }
                     }
                     FlatButton {
                         id: delButton;
                         text: "DEL";
-                        onClicked: {
+                        function clickedCallBack() {
                             udpServer.cmdDEList();
+                        }
+                        onClicked: {
+                            clickedCallBack();
                         }
                     }
                 }
