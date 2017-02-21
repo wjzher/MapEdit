@@ -17,6 +17,7 @@ Window {
     id: rootItem;
     color: "#EEEEEE";
     title: qsTr("MapEditor");
+    property alias pathList: pathList;
 
     FileDialog {
         id: fileDialog;

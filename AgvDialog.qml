@@ -12,10 +12,10 @@ Window {
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
-
     UdpServer {
         id: udpServer;
         property int cmdInf: 20000;
+        property int initFlag: 0;
         function paramJson(cmd) {
             var v = "{\"agvcmd\":\"";
             v += cmd;
@@ -23,7 +23,7 @@ Window {
             return v;
         }
         function paramAgvId() {
-            return "{\"agvid\":\"1\"";
+            return "{\"agvid\":\"1\"}";
         }
         function cmdMf(speed) {
             var v = paramJson("mf " + speed);
@@ -89,6 +89,10 @@ Window {
             var v = paramJson("cs 0");
             sendCommand(cmdInf, v);
         }
+        function cmdDEList() {
+            var v = paramJson("dellist");
+            sendCommand(cmdInf, v);
+        }
         function cmdEStop() {
             var v = paramAgvId();
             sendCommand(1005, v);
@@ -103,10 +107,10 @@ Window {
             var n = json.alarm;
             switch (m.sta) {
             case 1:
-                agvActive.text = "←"
+                agvActive.text = "↑"
                 break;
             case 2:
-                agvActive.text = "→"
+                agvActive.text = "↓"
                 break;
             case 5:
                 agvActive.text = "↻"
@@ -146,29 +150,47 @@ Window {
             switch (m.liftsta) {
             case 1:
                 toplift.opacity = 1;
+                bottomlift.opacity = 0;
                 break
             case 2:
                 bottomlift.opacity = 1;
+                toplift.opacity = 0;
                 break;
             }
             switch (m.bz[0]) {
             case 0:
                 oaview.color = "aquamarine";
                 oaButton.color = "aquamarine";
+                oaButton.oa = 0;
+                if (initFlag == 0) {
+                    oaButton.onOff = 1;
+                }
                 break
             case 1:
                 oaview.color = "#EEEEEE";
                 oaButton.color = "transparent";
+                oaButton.oa = 1;
+                if (initFlag == 0) {
+                    oaButton.onOff = 0;
+                }
                 break;
             }
             switch (m.charge) {
             case 0:
-                csview.color = "aquamarine";
-                csButton.color = "aquamarine";
+                csview.color = "#EEEEEE";
+                csButton.color = "transparent";
+                csButton.cs = 0;
+                if (initFlag == 0) {
+                    csButton.onOff = 0;
+                }
                 break
             case 1:
-                csview.color = "#EEEEEE";
-                csButton.color = "transparent"
+                csview.color = "aquamarine";
+                csButton.color = "aquamarine"
+                csButton.cs = 0;
+                if (initFlag == 0) {
+                    csButton.onOff = 1;
+                }
                 break;
             }
             agvVoltage.text = m.voltage + "v";
@@ -224,8 +246,11 @@ Window {
         }
 
         onAgvStatusChanged: {
-            //            console.log("status changed " + inf + " " + status);
+//            console.log("status changed " + inf + " " + status);
             switch (inf) {
+            case 20000:
+                agvInfo.text = "AGV运动命令应答";
+                break;
             case 1001:
                 agvInfo.text = "AGV信息总召";
                 break;
@@ -240,13 +265,15 @@ Window {
                 break;
             case 5001:
                 agvShowStatus(status);
+                initFlag = 1;
                 break;
             }
         }
         onAgvAddressChanged: {
             console.log("address changed " + ip);
-//            currentIp = ip;
+            //            currentIp = ip;
             agvipCombobox.model.append({text: ip});
+            initFlag = 0;
         }
     }
 
@@ -269,19 +296,26 @@ Window {
                         text: qsTr("IP:");
                     }
                     ComboBox {
-                        width: 100;
+                        width: 140;
                         id: agvipCombobox;
+                        onCountChanged: {
+                            if (count == 1) {
+                                console.log("agv ip count changed " + currentIndex + " " + model.get(currentIndex).text);
+                                udpServer.currentIp = model.get(currentIndex).text;
+                            }
+                        }
+
                         model: ListModel {
                             id: model;
                             //                            ListElement {
                             //                                text: "Null";
                             //                            }
-                            ListElement {
-                                text: "192.168.2.1";
-                            }
-                            ListElement {
-                                text: "192.168.2.2";
-                            }
+                            //                            ListElement {
+                            //                                text: "192.168.2.1";
+                            //                            }
+                            //                            ListElement {
+                            //                                text: "192.168.2.2";
+                            //                            }
                         }
                         onCurrentIndexChanged: {
                             if (model.get(currentIndex) == null) {
@@ -289,7 +323,7 @@ Window {
                             }
                             console.log("agv ip changed " + currentIndex + " " + model.get(currentIndex).text);
                             udpServer.currentIp = model.get(currentIndex).text;
-//                            udpServer.cmdLoadPath();
+                            //                            udpServer.cmdLoadPath();
                         }
                     }
                 }
@@ -307,7 +341,6 @@ Window {
                             function clear() {
                                 dir = 0;
                                 text = 0;
-                                move();
                             }
                             function move() {
                                 if (text == 0) {
@@ -379,6 +412,7 @@ Window {
                             text: "■";
                             onClicked: {
                                 speedview.clear();
+                                speedview.move();
                             }
                         }
                     }
@@ -422,6 +456,7 @@ Window {
                             id: astopButton;
                             text: "T";
                             onClicked: {
+                                speedview.clear();
                                 udpServer.cmdAStop()
                             }
                         }
@@ -441,22 +476,32 @@ Window {
                         }
                         FlatButton {
                             id: oaButton;
-                            text: "oa";
+                            text: "OA";
                             width: lfdButton.width;
-                            property int oa: 0;     //0 off, 1 on
-                            function oaview() {
+                            property int oa;     //0 on, 1 off
+                            property int onOff: 0;
+                            onOaChanged: {
                                 if (oa == 0) {
-                                    color = "aquamarine";
-                                    udpServer.cmdOAOn();
-                                    oa = 1;
-                                } else {
                                     color = "transparent";
-                                    udpServer.cmdOAOff();
-                                    oa = 0;
+                                } else {
+                                    color = "aquamarine";
+                                }
+                            }
+                            onOnOffChanged: {
+                                if (onOff == 0) {
+                                    font.underline = false;
+                                } else {
+                                    font.underline = true;
                                 }
                             }
                             onClicked: {
-                                oaButton.oaview();
+                                if (onOff == 0) {
+                                    udpServer.cmdOAOn()
+                                    onOff = 1;
+                                } else {
+                                    udpServer.cmdOAOff();
+                                    onOff = 0;
+                                }
                             }
                         }
                         FlatButton {
@@ -480,18 +525,32 @@ Window {
                         }
                         FlatButton {
                             id: csButton;
-                            text: "cs";
+                            text: "CS";
                             width: lfdButton.width;
-                            property int cs: 0;
-                            onClicked: {
+                            property int cs;  //0:off  1:on
+                            property int onOff: 0;
+                            onCsChanged: {
                                 if (cs == 0) {
-                                    color = "aquamarine";
-                                    udpServer.cmdCSOn();
-                                    cs = 1;
-                                } else {
                                     color = "transparent";
+                                } else {
+                                    color = "aquamarine";
+                                }
+                            }
+                            onOnOffChanged: {
+                                if (onOff == 0) {
+                                    font.underline = false;
+                                } else {
+                                    font.underline = true;
+                                }
+                            }
+
+                            onClicked: {
+                                if (onOff == 0) {
+                                    udpServer.cmdCSOn();
+                                    onOff = 1;
+                                } else {
                                     udpServer.cmdCSOff();
-                                    cs = 0;
+                                    onOff = 0;
                                 }
                             }
                         }
@@ -510,20 +569,31 @@ Window {
                     spacing: 4;
                     FlatButton {
                         id: loadButton;
-                        text: "l";
-                        width: lfdButton.width;
+                        text: "L";
+
+                        onClicked: {
+                            udpServer.cmdLoadPath();
+                        }
                     }
                     FlatButton {
                         id: resButton;
-                        text: "o";
-                        width: lfdButton.width;
+                        text: "O";
+                        onClicked: {
+                            udpServer.cmdStart();
+                        }
                     }
                     FlatButton {
                         id: esButton;
-                        text: "es";
-                        width: lfdButton.width;
+                        text: "ES";
                         onClicked: {
-                            udpServer.cmdAStop()
+                            udpServer.cmdEStop()
+                        }
+                    }
+                    FlatButton {
+                        id: delButton;
+                        text: "DEL";
+                        onClicked: {
+                            udpServer.cmdDEList();
                         }
                     }
                 }
@@ -538,6 +608,7 @@ Window {
                     width: (root.width - agvConsole.width) / 3 + 10 ;
                     height: agvConsole.height;
                     Column {
+                        id: col1;
                         spacing: 4;
                         Row {
                             spacing: 4;
@@ -615,27 +686,29 @@ Window {
                             spacing: 4;
                             RectangleStatus{
                                 id: oaview;
-                                text: "oa"
+                                text: "OA"
                                 width: 45;
                                 font: 16;
                             }
                             RectangleStatus{
                                 id: csview;
-                                text: "cs";
+                                text: "CS";
                                 width: 45;
                                 font: 16;
                             }
                         }
 
-                        Text {
-                            id: agvInfo;
-                            width: parent.width;
-                            text: "";
-                            //font.family: "Helvetica"
-                            font.pointSize: 18;
-                            color: "blue";
-                            focus: true;
-                        }
+                    }
+                    Text {
+                        id: agvInfo;
+                        width: parent.width;
+                        anchors.top: col1.bottom;
+                        anchors.topMargin: 12;
+                        text: "";
+                        //font.family: "Helvetica"
+                        font.pointSize: 14;
+                        color: "blue";
+                        focus: true;
                     }
                 }
                 GroupBox {

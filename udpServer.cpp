@@ -82,6 +82,7 @@ QByteArray UdpServer::makeJsonResponse(int inf, QString &param)
     if (paramDoc.isNull()) {
         qDebug() << err.errorString();
         qDebug() << "makeJsonResponse error json doc null";
+        qDebug() << param;
         return "";
     }
     QJsonObject paramObj = paramDoc.object();

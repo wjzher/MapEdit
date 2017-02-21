@@ -4,6 +4,7 @@ import QtQuick.Window 2.2
 QtObject {
     property real defaultSpacing: 10
     property SystemPalette palette: SystemPalette { }
+    property alias pathList: mapWindow.pathList;
 
     property var mapWindow: MapEditWindow {
         id: mapWindow;
