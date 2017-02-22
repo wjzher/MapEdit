@@ -132,6 +132,14 @@ void PathJson::deleteItem(int index)
     return;
 }
 
+void PathJson::deleteAll()
+{
+    while (m_pathArray.size()) {
+        m_pathArray.removeAt(0);
+    }
+    return;
+}
+
 void PathJson::insertItem(int index, QVariant var)
 {
     qDebug() << "insert Item " << index << " " << var << " " << m_pathArray.count();

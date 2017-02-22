@@ -34,6 +34,10 @@ Rectangle {
             } else if (opt == 2) {
                 fileName = file;
                 pathJson.saveJsonFile(fileName);
+            } else if (opt == 0) {
+                listView.model.clear();
+                pathJson.deleteAll();
+                fileName = file;
             }
         }
     }
@@ -71,6 +75,7 @@ Rectangle {
                     } if (m.act == 20) {
                         actProperty.oaValue = listView.jsonoa(m);
                     }
+                    pathSetId.text = m.id.toString();
                 }
 
             }
@@ -200,6 +205,17 @@ Rectangle {
                     pathListFileDialog.open();
                 }
             }
+            Button {
+                id: newPathButton;
+                anchors.right: openPathButton.left;
+                anchors.rightMargin: 8;
+                text: "New";
+                onClicked: {
+                    pathListFileDialog.opt = 0;
+                    pathListFileDialog.selectExisting = false;
+                    pathListFileDialog.open();
+                }
+            }
         }
     }
     Component {
@@ -234,7 +250,7 @@ Rectangle {
         onCurrentIndexChanged: {
         }
 
-        function add(idx, v) {
+        function add(v) {
             console.log("count " + listView.count + " " + listView.currentIndex);
             if (listView.count == 0) {
                 pathJson.insertItem(0, v);
@@ -243,6 +259,7 @@ Rectangle {
             }
             var json = JSON.parse(v);
             var listElement;
+            var idx = mapData.getItemIndexByCardId(json.id);
             listElement = {
                     "Idx":idx.toString(),
                     "ID":json.id.toString(),
@@ -260,21 +277,22 @@ Rectangle {
         function revise(v) {
             var json = JSON.parse(v);
             var listElement;
+            var idx = mapData.getItemIndexByCardId(json.id);
             listElement = {
-//                    "Idx":idx.toString(),
-//                    "ID":json.id.toString(),
+                    "Idx":idx.toString(),
+                    "ID":json.id.toString(),
                     "Act":act(json.act),
                     "Remark":remark(json)
                 };
             listView.model.set(listView.currentIndex, listElement);
-            pathJson.modifyItem(listView.currentIndex,v);
+            pathJson.modifyItem(listView.currentIndex, v);
         }
 //        function revise(v) {
 //            listView.model.set(listView.currentIndex, v);
 //            pathJson.modifyItem(v);
 //        }
         function  del(v) {
-            listView.model.remove(v);
+            listView.model.remove(v, 1);
             pathJson.deleteItem(v);
         }
         function act(m) {

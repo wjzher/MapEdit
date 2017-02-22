@@ -440,6 +440,7 @@ Window {
                 var item = mapGrid.mapGrid.currentItem;
                 if (item.isCard == true) {
                     actCombo.index = 0;
+                    pathSetId.text = item.cardID;
                 }
             }
         }
@@ -770,6 +771,14 @@ Window {
                         }
                     }
                 }
+                Text {
+                    id: pathSetId;
+                    anchors.left: actCombo.right;
+                    anchors.leftMargin: 4;
+                    text: "";
+                    color: "blue";
+                }
+
                 ActProperty {
                     id: actProperty;
                     anchors.top: actCombo.bottom;
@@ -778,54 +787,55 @@ Window {
                 }
                 function actJsonVal() {
                     var v;
+                    var id = pathSetId.text.toString();
                     if (actCombo.index == 1) {
                         v =  "{";
-                        v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                        v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index];
                         v += "}";
                     } if ((actCombo.index == 2) || (actCombo.index == 3)) {
                         if(actProperty.speedValue) {
                             if(actProperty.turnValue) {
                                 v =  "{";
-                                v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                                v += "\"id\":\"" + id + "\",";
                                 v += "\"act\":" + actCombo.actJsonVal[actCombo.index] + ",";
                                 v += "\"v\":" + actProperty.speedValue + ",";
                                 v += "\"turn\":" + actProperty.turnValue;
                                 v += "}";
                             } if (!actProperty.turnValue) {
                                 v =  "{";
-                                v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                                v += "\"id\":\"" + id + "\",";
                                 v += "\"act\":" + actCombo.actJsonVal[actCombo.index] + ",";
                                 v += "\"v\":" + actProperty.speedValue;
                                 v += "}";
                             } return v;
                         }  else if (actProperty.turnValue) {
                             v =  "{";
-                            v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                            v += "\"id\":\"" + id + "\",";
                             v += "\"act\":" + actCombo.actJsonVal[actCombo.index] + ",";
                             v += "\"turn\":" + actProperty.turnValue;
                             v += "}";
                         } else {
                             v =  "{";
-                            v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                            v += "\"id\":\"" + id + "\",";
                             v += "\"act\":" + actCombo.actJsonVal[actCombo.index];
                             v += "}";
                         } return v;
                     } if ((actCombo.index == 4) || (actCombo.index == 5)) {
                         v =  "{";
-                        v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                        v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"rot\":" + actProperty.rotJsonVal[actProperty.rotValue];
                         v += "}";
                     } if (actCombo.index == 6) {
                         v =  "{";
-                        v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                        v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"val\":" + actProperty.platJsonVal[actProperty.platValue];
                         v += "}";
                     } if (actCombo.index == 7) {
                         v =  "{";
-                        v += "\"id\":\"" + mapGrid.mapGrid.currentItem.cardID.toString() + "\",";
+                        v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"bz\":" + actProperty.oaJsonVal[actProperty.oaValue];
                         v += "}";
@@ -839,7 +849,10 @@ Window {
                     anchors.rightMargin: 2;
                     text: "增加";
                     onClicked: {
-                        pathList.listView.add(mapGrid.mapGrid.currentIndex, pathSettingsGroup.actJsonVal());
+                        if (pathSetId.text == "") {
+                            return;
+                        }
+                        pathList.listView.add(pathSettingsGroup.actJsonVal());
                         console.log(pathSettingsGroup.actJsonVal());
                     }
                 }
@@ -878,12 +891,13 @@ Window {
                     anchors.topMargin: 2;
                     text: "修改";
                     onClicked: {
-//                        var v;
-//                        v = {
-//                            "Act":actCombo.model[actCombo.index],
-//                            "Remark":pathSettingsGroup.model()
-//                        };
-//                        pathList.listView.revise(v);
+                        console.log("revise " + pathList.listView.count + " " + pathList.listView.currentIndex);
+                        if (pathList.listView.count == 0) {
+                            return;
+                        }
+                        if (pathSetId.text == "") {
+                            return;
+                        }
                         pathList.listView.revise(pathSettingsGroup.actJsonVal());
                     }
                 }
@@ -896,8 +910,11 @@ Window {
                     anchors.topMargin: 2;
                     text: "删除";
                     onClicked: {
-                        var item = mapGrid.mapGrid.currentItem;
-                        pathList.listView.del(item);
+                        if (pathList.listView.count == 0) {
+                            return;
+                        }
+                        var i = pathList.listView.currentIndex;
+                        pathList.listView.del(i);
                     }
                 }
             }
