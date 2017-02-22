@@ -168,6 +168,9 @@ Window {
             var m = json.infos;
             var n = json.alarm;
             switch (m.sta) {
+            case 0:
+                agvActive.text = "⊖"
+                break;
             case 1:
                 agvActive.text = "↑"
                 break;
@@ -399,6 +402,7 @@ Window {
                             property int dir: 0;    // 0 front 1 back
                             text: "0";
                             font.pointSize: 12;
+                            toolTipText: qsTr("下发速度");
                             textColor: "black";
                             function clear() {
                                 dir = 0;
@@ -460,6 +464,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("前行 Key_Up");
                         }
                         FlatButton {
                             id: rcButton;
@@ -474,6 +479,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("顺时针旋转 Key_Right");
                         }
                         FlatButton {
                             id: stopButton;
@@ -485,6 +491,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("停止 Key_S");
                         }
                     }
                     Row {
@@ -507,6 +514,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("旋转角度 Key_Equal");
                         }
                         FlatButton {
                             id: mbButton;
@@ -517,6 +525,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("后退 Key_Down");
                         }
                         FlatButton {
                             id: rccButton;
@@ -531,6 +540,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("逆时针旋转 Key_Left");
                         }
                         FlatButton {
                             id: astopButton;
@@ -542,6 +552,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("精确停止 A/space");
                         }
                     }
                 }
@@ -559,6 +570,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("升平台 U");
                         }
                         FlatButton {
                             id: oaButton;
@@ -592,6 +604,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("避障 F1");
                         }
                         FlatButton {
                             id: leftButton;
@@ -603,6 +616,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("左分支 L");
                         }
                     }
                     Row {
@@ -617,6 +631,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("降平台 D");
                         }
                         FlatButton {
                             id: csButton;
@@ -651,6 +666,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("充电继电器 F2");
                         }
                         FlatButton {
                             id: rightButton;
@@ -662,6 +678,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
+                            toolTipText: qsTr("右分支 R");
                         }
 
                     }
@@ -677,6 +694,7 @@ Window {
                         onClicked: {
                             clickedCallBack();
                         }
+                        toolTipText: qsTr("加载路径 Insert");
                     }
                     FlatButton {
                         id: startButton;
@@ -687,6 +705,7 @@ Window {
                         onClicked: {
                             clickedCallBack()
                         }
+                        toolTipText: qsTr("解除急停 Home");
                     }
                     FlatButton {
                         id: esButton;
@@ -697,6 +716,7 @@ Window {
                         onClicked: {
                             clickedCallBack();
                         }
+                        toolTipText: qsTr("急停 End");
                     }
                     FlatButton {
                         id: delButton;
@@ -707,6 +727,7 @@ Window {
                         onClicked: {
                             clickedCallBack();
                         }
+                        toolTipText: qsTr("删除路径 Delete");
                     }
                 }
             }

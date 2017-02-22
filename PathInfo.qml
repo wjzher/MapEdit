@@ -54,7 +54,6 @@ Rectangle {
                     wrapper.ListView.view.currentIndex = index;
                 }
                 onDoubleClicked: {
-                    var v, pv, pt, pr, pp, po, pc, prl;
                     var json = JSON.parse(pathJson.exportList());
                     if (index >= json.length) {
                         return;
@@ -259,9 +258,21 @@ Rectangle {
             listView.currentIndex++;
         }
         function revise(v) {
-            listView.model.set(listView.currentIndex, v);
-            pathJson.modifyItem(v);
+            var json = JSON.parse(v);
+            var listElement;
+            listElement = {
+//                    "Idx":idx.toString(),
+//                    "ID":json.id.toString(),
+                    "Act":act(json.act),
+                    "Remark":remark(json)
+                };
+            listView.model.set(listView.currentIndex, listElement);
+            pathJson.modifyItem(listView.currentIndex,v);
         }
+//        function revise(v) {
+//            listView.model.set(listView.currentIndex, v);
+//            pathJson.modifyItem(v);
+//        }
         function  del(v) {
             listView.model.remove(v);
             pathJson.deleteItem(v);

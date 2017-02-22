@@ -839,7 +839,6 @@ Window {
                     anchors.rightMargin: 2;
                     text: "增加";
                     onClicked: {
-                        pathSettingsGroup.actJsonVal();
                         pathList.listView.add(mapGrid.mapGrid.currentIndex, pathSettingsGroup.actJsonVal());
                         console.log(pathSettingsGroup.actJsonVal());
                     }
@@ -847,7 +846,8 @@ Window {
                 function model(){
                     var p;
                     if (actCombo.index == 0 || actCombo.index == 1) {
-                        return 0;
+                        p = ""
+                        return p;
                     }
                     if (actCombo.index == 2 || actCombo.index == 3) {
                         p = "v:"+actProperty.modelV[actProperty.speedValue] + ",T:" +actProperty.modelT[actProperty.turnValue];
@@ -878,13 +878,13 @@ Window {
                     anchors.topMargin: 2;
                     text: "修改";
                     onClicked: {
-                        var item = mapGrid.mapGrid.currentItem;
-                        var v;
-                        v = {
-                            "Act":actCombo.model[actCombo.index],
-                            "Remark":pathSettingsGroup.model()
-                        };
-                        pathList.listView.revise(v);
+//                        var v;
+//                        v = {
+//                            "Act":actCombo.model[actCombo.index],
+//                            "Remark":pathSettingsGroup.model()
+//                        };
+//                        pathList.listView.revise(v);
+                        pathList.listView.revise(pathSettingsGroup.actJsonVal());
                     }
                 }
                 Button {

@@ -1,4 +1,5 @@
-import QtQuick 2.2
+﻿import QtQuick 2.2
+import QtQuick.Controls 2.0
 
 Rectangle {
     id: bkgnd;
@@ -11,12 +12,19 @@ Rectangle {
     property alias textColor: btnText.color;
     property alias font: btnText.font;
     property alias text: btnText.text;
+    property alias toolTipText: toolTip.text;
     radius: 4;
     property bool hovered: false;
     border.color: "lightsteelblue";
     border.width: hovered ? 2 : 1;
     signal clicked;
 
+    ToolTip {
+        id: toolTip;
+        visible: hovered;
+        delay: 500;
+        timeout: 2500;
+    }
     Image {
         id: icon;
         anchors.left: parent.left;
