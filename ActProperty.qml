@@ -21,6 +21,7 @@ Rectangle{
     property var oaJsonVal: ["[1,2]", "[2,2]"];
     property var rotJsonVal:[90,180];
     property var platJsonVal:[2,4];
+    property var relayJsonVal:[2,4];
     Row {
         Rectangle {
             id: speedRect;

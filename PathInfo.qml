@@ -74,6 +74,8 @@ Rectangle {
                         actProperty.platValue = listView.jsonplat(m);
                     } if (m.act == 20) {
                         actProperty.oaValue = listView.jsonoa(m);
+                    } if (m.act == 21) {
+                        actProperty.relayValue = listView.jsonrelay(m);
                     }
                     pathSetId.text = m.id.toString();
                 }
@@ -318,6 +320,9 @@ Rectangle {
             } if (m == 20) {
                 p = actCombo.model[7];
                 return p;
+            } if (m == 21) {
+                p = actCombo.model[8];
+                return p;
             } else {
                 return "";
             }
@@ -365,6 +370,12 @@ Rectangle {
                 } else {
                     return "";
                 } return p;
+            } if (m.act == 21) {
+                if (m.val == 2) {
+                    p = "lf:"+actProperty.modelRL[0];
+                } if (m.val == 4) {
+                    p = "lf:"+actProperty.modelRL[1];
+                } return p;
             } else {
                 return "";
             }
@@ -381,6 +392,8 @@ Rectangle {
                 p = 6;
             } if (m.act == 20) {
                 p = 7;
+            } if (m.act == 21) {
+                p = 8;
             } return p;
         }
         function jsonspeed(m) {
@@ -420,6 +433,14 @@ Rectangle {
             if ((m.bz[0] == 1) && (m.bz[0] == 2)) {
                 p = 0;
             } if ((m.bz[0] == 2) && (m.bz[0] == 2)) {
+                p = 1;
+            } return p;
+        }
+        function jsonrelay(m) {
+            var p = 0;
+            if (m.val == 2) {
+                p = 0;
+            } if (m.val == 4) {
                 p = 1;
             } return p;
         }

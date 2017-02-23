@@ -839,7 +839,13 @@ Window {
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"bz\":" + actProperty.oaJsonVal[actProperty.oaValue];
                         v += "}";
-                    }return v;
+                    } if (actCombo.index == 8) {
+                        v =  "{";
+                        v += "\"id\":\"" + id + "\",";
+                        v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
+                        v += "\"val\":" + actProperty.relayJsonVal[actProperty.relayValue];
+                        v += "}";
+                    } return v;
                 }
                 Button {
                     id: addButton;
