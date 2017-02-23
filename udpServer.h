@@ -24,6 +24,7 @@ public:
         m_currentIp = s;
     }
     Q_INVOKABLE void sendCommand(int inf, QString cmd);
+    Q_INVOKABLE QVariant getAgvIpByCardId(int cardId);
 private:
     QString str2ip(QString s)
     {
@@ -50,20 +51,24 @@ private:
 
     void addAddressList(QString &addr);
     bool isAddressExist(QString &addr);
+    int addressIndex(QString &addr);
 
     QByteArray makeJsonResponse(int inf, QString &param);
     int jsonMessageParse(QByteArray msg, QJsonObject &jsonObj);
     QByteArray makeTickResponse(QJsonObject &jsonObj);
     void emitSignals(QString &ip, int inf, QJsonObject &param);
+    void emitCardIdSignal(QString &addr, QJsonObject &param);
 signals:
     void agvStatusChanged(int inf, const QString &status);
     // 信号参数类型QString需要用const引用类型，否则qml不识别
     void agvAddressChanged(const QString &ip);
+    void agvCardIdChanged(const QString &ip, int lastId, int cardId);
 public slots:
     void readPendingDatagrams();
 private:
     QUdpSocket udpSocket;
     QStringList clientList;
+    QList<int> cardIdList;      // agv cardIdList
     QString m_currentIp;
     int m_flag;
 };

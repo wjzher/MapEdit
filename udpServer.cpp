@@ -24,12 +24,18 @@ bool UdpServer::isAddressExist(QString &addr)
     return false;
 }
 
+int UdpServer::addressIndex(QString &addr)
+{
+    return clientList.indexOf(addr);
+}
+
 void UdpServer::addAddressList(QString &addr)
 {
     if (isAddressExist(addr)) {
         return;
     }
     clientList.append(addr);
+    cardIdList.append(-1);
     qDebug() << addr << "add to list";
     emit agvAddressChanged(str2ip(addr));
     return;
@@ -118,7 +124,9 @@ void UdpServer::readPendingDatagrams()
             // 加入client list
             addAddressList(addr);
             // emit signals
-            emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
+            QJsonObject paramObj = jsonObj["param"].toObject();
+            emitSignals(str2ip(addr), inf, paramObj);
+            emitCardIdSignal(addr, paramObj);
             // 回复心跳
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
         } else {
@@ -138,6 +146,49 @@ void UdpServer::readPendingDatagrams()
         }
     }
     return;
+}
+
+QVariant UdpServer::getAgvIpByCardId(int cardId)
+{
+    QVariant val("");
+    int i;
+    for (i = 0; i < cardIdList.count(); i++) {
+        if (cardId == cardIdList[i]) {
+            val = QVariant(str2ip(clientList[i]));
+            break;
+        }
+    }
+    return val;
+}
+
+void UdpServer::emitCardIdSignal(QString &addr, QJsonObject &param)
+{
+    int i;
+    i = addressIndex(addr);
+    if (i < 0) {
+        qDebug() << "Bug: can not find addr " << addr;
+        return;
+    }
+    QJsonValue jVal = param["infos"];
+    if (jVal.isObject() == false) {
+        qDebug() << "emitCardIdSignal Bug: can not find infos";
+        return;
+    }
+    QJsonObject jObj = jVal.toObject();
+    if (jObj["prepos"].isString() == false) {
+        qDebug() << "emitCardIdSignal Bug: can not find prepos";
+        return;
+    }
+    int id = jObj["prepos"].toString().toInt();
+    if (id <= 0) {
+        qDebug() << "emitCardIdSignal Bug: can not find prepos 2";
+        return;
+    }
+    if (cardIdList[i] != id) {
+        qDebug() << id << " emit to " << addr;
+        emit agvCardIdChanged(str2ip(addr), cardIdList[i], id);
+        cardIdList[i] = id;
+    }
 }
 
 void UdpServer::emitSignals(QString &ip, int inf, QJsonObject &param)

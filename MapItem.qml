@@ -13,6 +13,7 @@ Rectangle {
     property var arcParam: [0.0, 0.0, 0.0, 0.0];      // x, y, startAngle, endAngle
     property var neighbourPos: [];      // dx, dy, dx, dy...
     property bool isNeighbour: false;
+    property alias agvIpText: agvIpText.text;
     signal clicked;
     width: length;
     height: length;
@@ -24,7 +25,7 @@ Rectangle {
     onIsCardChanged: rePaint();
     onCardPosChanged: rePaint();
     onIsArcChanged: rePaint();
-
+    onAgvIpTextChanged: rePaint();
     Canvas {
         id: canvas;
         anchors.fill: parent;
@@ -135,13 +136,27 @@ Rectangle {
             if (root.isCard) {
                 var vx = root.length / root.cardPos[0];
                 var vy = root.length / root.cardPos[1];
-                ctx.fillStyle = "magenta";
+                if (agvIpText.text == "") {
+                    ctx.fillStyle = "magenta";
+                } else {
+                    ctx.fillStyle = "tomato";
+                }
                 ctx.beginPath();
                 ctx.arc(root.width / vx, root.height / vy, length / div,
                         0, 2 * Math.PI, false);
                 ctx.fill();
             }
         }
+    }
+
+    Text {
+        id: agvIpText;
+        anchors.bottom: parent.bottom;
+        anchors.horizontalCenter: parent.horizontalCenter;
+        anchors.bottomMargin: 2;
+        font.pixelSize: 11;
+        text: "";
+        color: "tomato";
     }
 
     Text {

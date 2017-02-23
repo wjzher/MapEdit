@@ -18,6 +18,7 @@ Window {
     color: "#EEEEEE";
     title: qsTr("MapEditor");
     property alias pathList: pathList;
+    property alias mapGrid: mapGrid;
 
     FileDialog {
         id: fileDialog;
@@ -52,6 +53,11 @@ Window {
                 item.isNeighbour = mapData.getItemIsNeighbour(i);
                 if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
                     mapGrid.updateItemArc(i, item, item.isArc);
+                }
+                item.agvIpText = "";
+                if (item.isCard == true) {
+                    var ip = udpServer.getAgvIpByCardId(item.cardID);
+                    mapGrid.updateAgvCardId(ip, -1, item.cardID);
                 }
             }
         }
@@ -135,6 +141,29 @@ Window {
             Component.onCompleted: {
                 mapData.setCols(columns);
                 mapData.setRows(rows);
+            }
+
+            function updateAgvCardId(ip, lastId, currentId) {
+                var i, item;
+                console.log("updateAgvCardId " + ip + " " + lastId + " " + currentId);
+                if (lastId > 0) {
+                    i = mapData.getItemIndexByCardId(lastId);
+                    if (i < 0) {
+                        return;
+                    }
+                    item = itemAt(i);
+                    item.agvIpText = "";
+                }
+
+                if (currentId > 0) {
+                    i = mapData.getItemIndexByCardId(currentId);
+                    console.log("updateAgvCardId currentId " + i + " " + ip.substr(ip.lastIndexOf(".") + 1, ip.length - 1));
+                    if (i < 0) {
+                        return;
+                    }
+                    item = itemAt(i);
+                    item.agvIpText = ip.substr(ip.lastIndexOf(".") + 1, ip.length - 1);
+                }
             }
 
             function setGridFocus() {

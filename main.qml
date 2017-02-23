@@ -5,6 +5,8 @@ QtObject {
     property real defaultSpacing: 10
     property SystemPalette palette: SystemPalette { }
     property alias pathList: mapWindow.pathList;
+    property alias mapGrid: mapWindow.mapGrid;
+    property alias udpServer: agvDialog.udpServer;
 
     property var mapWindow: MapEditWindow {
         id: mapWindow;

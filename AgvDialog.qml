@@ -12,6 +12,8 @@ Window {
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
+    property alias udpServer: udpServer;
+
     Item {
             focus: true
             Keys.onPressed: {
@@ -308,6 +310,9 @@ Window {
             var v = pathList.pathJson.exportParamObject();
             console.log("LoadPath: " + v);
             sendCommand(1007, v);
+        }
+        onAgvCardIdChanged: {
+            mapGrid.updateAgvCardId(ip, lastId, cardId);
         }
 
         onAgvStatusChanged: {
