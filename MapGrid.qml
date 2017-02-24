@@ -7,10 +7,6 @@ Rectangle {
     property int columns: 5;
     property int numberMargins: 1;
     property int gridLength: 50;
-//    property int gridWidth: (50 + numberMargins) * columns;
-//    property int gridHeight: (50 + numberMargins) * rows
-//    property int cellW: ((gridWidth) / columns);
-//    property int cellH: ((gridWidth) / rows);
     property real scaleGrid: 1.0;
     property alias mapGrid: mapGrid;
     signal currentIndexChanged;
@@ -34,11 +30,11 @@ Rectangle {
     }
     GridView {
         id: mapGrid;
-        width: rows * cellWidth;
-        height: columns * cellHeight;
+        width: columns * cellWidth;
+        height: rows * cellHeight;
         anchors.margins: 0;
 
-        clip: true
+        clip: true;
         model: (rows * columns);
         delegate: numberDelegate
         cellHeight: (gridLength + numberMargins) * root.scaleGrid;

@@ -92,6 +92,12 @@ Window {
     }
     MapData {
         id: mapData;
+        onRowsChanged: {
+            mapGrid.rows = rows;
+        }
+        onColsChanged: {
+            mapData.cols = cols;
+        }
     }
 
     Component {
@@ -127,7 +133,7 @@ Window {
             id: mapGrid;
             width: row.width - mapItemSettingsGroup.width - row.spacing;
             height: row.height - 12;
-            rows: 20;
+            rows: 15;
             columns: 20;
             scaleGrid: 1.0;
             onScaleGridChanged: {
@@ -204,7 +210,7 @@ Window {
                 return true;
             }
             function calIndex(rows, cols) {
-                return rows * mapGrid.rows + cols;
+                return rows * mapGrid.columns + cols;
             }
             function calNeighbour(rows, cols, x, y) {
                 rows += y;
@@ -262,8 +268,8 @@ Window {
             }
 
             function arcNeighbour(t, pos, index) {
-                var rows = parseInt(index / mapGrid.rows);
-                var cols = index % mapGrid.rows;
+                var rows = parseInt(index / mapGrid.columns);
+                var cols = index % mapGrid.columns;
                 var p = [];
                 arrayDeepCopy(p, pos);
                 // clear

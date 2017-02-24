@@ -22,12 +22,21 @@ MapData::~MapData()
     }
 }
 
+void MapData::initItems(int rows, int cols)
+{
+    m_rows = rows;
+    m_cols = cols;
+    emit rowsChanged(m_rows);
+    emit colsChanged(m_cols);
+    initItems();
+}
+
 void MapData::initItems()
 {
     if (m_items) {
         delete [] m_items;
     }
-    if (m_rows != 0 && m_cols != 0) {
+    if (m_rows > 0 && m_cols > 0) {
         qDebug() << "Init Items: " <<  m_rows << " " << m_cols;
         m_itemN = m_rows * m_cols;
         m_items = new MapItem[m_itemN];
@@ -38,7 +47,7 @@ void MapData::initItems()
             m_items[i].pos[0] = i / m_cols;
             m_items[i].pos[1] = i % m_cols;
         }
-    }
+  }
 }
 
 void MapData::setRows(int arg)
@@ -69,6 +78,28 @@ int MapData::cols() const
     return m_cols;
 }
 
+int MapData::resize(int rows, int cols)
+{
+    if (rows == m_rows && cols == m_cols) {
+        return 0;
+    }
+    MapItem *old = m_items;
+    int /*oldn = m_itemN, */oldr = m_rows, oldc = m_cols;
+    initItems(rows, cols);
+    for (int i = 0; i < m_itemN; i++) {
+        int x = m_items[i].pos[0];
+        int y = m_items[i].pos[1];
+        if (x < oldc && y < oldr) {
+            int idx = x + y * oldc;
+            m_items[i] = old[idx];
+            m_items[i].index = i;
+            m_items[i].pos[0] = x;
+            m_items[i].pos[1] = y;
+        }
+    }
+    delete [] old;
+    return 0;
+}
 
 MapItem *MapData::getMapItem(int index)
 {
@@ -277,6 +308,8 @@ int MapData::saveMapData(QString str)
         itemArray.append(itemObj);
     }
     rootJsonObj["items"] = itemArray;
+    rootJsonObj["rows"] = m_rows;
+    rootJsonObj["cols"] = m_cols;
     QJsonDocument jsonDoc(rootJsonObj);
     file.write(jsonDoc.toJson());
     file.close();
@@ -304,6 +337,30 @@ int MapData::loadMapData(QString str)
         qDebug() << "root Json Object empty";
         return -3;
     }
+    int rows, cols;
+    QJsonValue jVal = rootJsonObj["rows"];
+    if (jVal.isUndefined()) {
+        qDebug() << "mapFile: undefine rows";
+        rows = 20;
+    } else {
+        rows = jVal.toInt(20);
+    }
+    jVal = rootJsonObj["cols"];
+    if (jVal.isUndefined()) {
+        cols = 20;
+    } else {
+        cols = jVal.toInt(20);
+    }
+    if (cols <= 0 || rows <= 0) {
+        return -4;
+    }
+    qDebug() << cols << " " << rows << " " << m_cols << " " << m_rows;
+    if (cols > m_cols || rows > m_rows) {
+        int r = (rows < m_rows) ? m_rows : rows;
+        int c = (cols < m_cols) ? m_cols : cols;
+        initItems(r, c);
+        qDebug() << "load map data: " << c << " " << r;
+    }
     QJsonValue itemsVal = rootJsonObj["items"];
     if (!itemsVal.isArray()) {
         qDebug() << "Error itemsVal is not array";
@@ -316,12 +373,23 @@ int MapData::loadMapData(QString str)
     int itemsCount = itemsArray.count();
     for (int i = 0; i < itemsCount; i++) {
         QJsonObject itemObj = itemsArray.at(i).toObject();
-        int index = itemObj["index"].toInt(-1);
-        if (index < 0 || index >= m_itemN) {
-            qDebug() << "Bug Index out range.";
-            return -6;
+//        int index = itemObj["index"].toInt(-1);
+//        if (index < 0 || index >= m_itemN) {
+//            qDebug() << "Bug Index out range.";
+//            return -6;
+//        }
+        QJsonValue posVal = itemObj["pos"];
+        if (posVal.isArray() == false) {
+            continue;
         }
+        QJsonArray posArray = posVal.toArray();
+        int x = posArray[0].toInt();
+        int y = posArray[1].toInt();
+        int index = x * cols + y;
         MapItem *mItem = &m_items[index];
+//        mItem->index = index;
+//        mItem->pos[0] = x;
+//        mItem->pos[1] = y;
         mItem->cardId = itemObj["cardId"].toInt();
         mItem->cardPos[0] = itemObj["cardPos"].toArray().at(0).toInt();
         mItem->cardPos[1] = itemObj["cardPos"].toArray().at(1).toInt();

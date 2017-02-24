@@ -44,8 +44,10 @@ public:
     Q_INVOKABLE int loadMapData(QString str);
     Q_INVOKABLE void initItems();
     Q_INVOKABLE int getItemIndexByCardId(int cardId);
+    Q_INVOKABLE int resize(int rows, int cols);
 private:
     MapItem *getMapItem(int index);
+    void initItems(int rows, int cols);
 
 signals:
     void rowsChanged(int arg);
