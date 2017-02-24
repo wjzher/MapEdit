@@ -123,18 +123,13 @@ Window {
         anchors.fill: parent;
         anchors.margins: 8;
         spacing: 4;
-//        property int mapWidth: {
-//            var w = row.width - mapItemSettingsGroup.width - row.spacing;
-//            var h = row.height;
-//            return (w < h) ? w : h;
-//        }
         MapGrid {
             id: mapGrid;
             width: row.width - mapItemSettingsGroup.width - row.spacing;
             height: row.height - 12;
             rows: 20;
             columns: 20;
-            scaleGrid: 1.6;
+            scaleGrid: 1.0;
             onScaleGridChanged: {
                 scaleSlide.slideValue = scaleGrid;
             }

@@ -6,9 +6,11 @@ Rectangle {
     property int rows: 5;
     property int columns: 5;
     property int numberMargins: 1;
-    property int gridWidth: (width > height) ? width : height;
-    property int cellW: ((gridWidth) / columns);
-    property int cellH: ((gridWidth) / rows);
+    property int gridLength: 50;
+//    property int gridWidth: (50 + numberMargins) * columns;
+//    property int gridHeight: (50 + numberMargins) * rows
+//    property int cellW: ((gridWidth) / columns);
+//    property int cellH: ((gridWidth) / rows);
     property real scaleGrid: 1.0;
     property alias mapGrid: mapGrid;
     signal currentIndexChanged;
@@ -32,20 +34,17 @@ Rectangle {
     }
     GridView {
         id: mapGrid;
-        width: root.gridWidth * root.scaleGrid;
-        height: root.gridWidth * root.scaleGrid;
+        width: rows * cellWidth;
+        height: columns * cellHeight;
         anchors.margins: 0;
-        //        anchors.centerIn: parent;
 
         clip: true
         model: (rows * columns);
         delegate: numberDelegate
-        cellHeight: root.cellW * root.scaleGrid;
-        cellWidth: root.cellH * root.scaleGrid;
+        cellHeight: (gridLength + numberMargins) * root.scaleGrid;
+        cellWidth: (gridLength + numberMargins) * root.scaleGrid;
         focus: true;
         Component.onCompleted: {
-//            console.log("w = ", root.width, " h = ", root.height);
-//            console.log("cw = " + root.cellW, " ch = ", root.cellH);
         }
         MouseArea {
             id: gridMa;
@@ -57,6 +56,7 @@ Rectangle {
                 parent.focus = true;
             }
             onReleased: {
+                return;
                 var view = root;
 //                console.log("realse ", parent.x + " " + parent.y);
 //                console.log("parent ", parent.width + " " + parent.height);
@@ -87,8 +87,8 @@ Rectangle {
         MapItem {
             id: wrapper;
             type: MapItemType.MapItemNULL;
-            width: (root.cellW - numberMargins) * root.scaleGrid;
-            height: (root.cellH - numberMargins) * root.scaleGrid;
+            width: gridLength * root.scaleGrid;
+            height: gridLength * root.scaleGrid;
             color: "aquamarine";
             border.color: "royalblue";
             border.width: wrapper.GridView.isCurrentItem ? 2 : 0;
