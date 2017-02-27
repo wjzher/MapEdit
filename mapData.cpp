@@ -466,7 +466,7 @@ int MapData::loadMapData(QString str)
         QJsonArray posArray = posVal.toArray();
         int x = posArray[0].toInt();
         int y = posArray[1].toInt();
-        int index = x * cols + y;
+        int index = x * m_cols + y;
         MapItem *mItem = &m_items[index];
 //        mItem->index = index;
 //        mItem->pos[0] = x;
