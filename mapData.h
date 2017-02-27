@@ -36,7 +36,7 @@ public:
     Q_INVOKABLE int getItemCardId(int index);
     Q_INVOKABLE bool getItemIsCard(int index);
     Q_INVOKABLE bool getItemIsNeighbour(int index);
-    Q_INVOKABLE QList<int> getItemCardPos(int index);
+    Q_INVOKABLE QVariantList getItemCardPos(int index);
     Q_INVOKABLE int getItemIsArc(int index);
     Q_INVOKABLE QVariantList getItemArcNeighbour(int index);
     Q_INVOKABLE int getItemType(int index);
