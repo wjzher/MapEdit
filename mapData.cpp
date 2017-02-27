@@ -80,21 +80,31 @@ int MapData::cols() const
 
 int MapData::resize(int rows, int cols)
 {
+    qDebug() << "resize " << rows << " " << cols << " " << m_rows << " " << m_cols;
     if (rows == m_rows && cols == m_cols) {
+        qDebug() << "resize no change";
         return 0;
     }
     MapItem *old = m_items;
     int /*oldn = m_itemN, */oldr = m_rows, oldc = m_cols;
+    m_items = NULL;
     initItems(rows, cols);
     for (int i = 0; i < m_itemN; i++) {
         int x = m_items[i].pos[0];
         int y = m_items[i].pos[1];
-        if (x < oldc && y < oldr) {
-            int idx = x + y * oldc;
+        if (x < oldr && y < oldc) {
+            int idx = y + x * oldc;
+            if (x != old[idx].pos[0] || y != old[idx].pos[1]) {
+                qDebug() << "resize bug " << i << ", " << x << " " << y << " " << idx <<
+                            " " << old[idx].pos[0] << " " << old[idx].pos[1];
+            }
+//            qDebug() << "resize " << i << ", " << x << " " << y << " " << idx << " " << old[idx].index;
             m_items[i] = old[idx];
             m_items[i].index = i;
             m_items[i].pos[0] = x;
             m_items[i].pos[1] = y;
+//            qDebug() << "old is " << old[idx].type;
+//            qDebug() << "new is " << m_items[i].type;
         }
     }
     delete [] old;

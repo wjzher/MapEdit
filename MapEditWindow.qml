@@ -93,10 +93,12 @@ Window {
     MapData {
         id: mapData;
         onRowsChanged: {
+            console.log("rows change " + rows);
             mapGrid.rows = rows;
         }
         onColsChanged: {
-            mapData.cols = cols;
+            console.log("cols change " + cols);
+            mapGrid.columns = cols;
         }
     }
 
@@ -221,9 +223,9 @@ Window {
                 return -1;
             }
             function itemAt(index) {
-                if (index != 0) {
-                    index++;
-                }
+//                if (index != 0) {
+//                    index++;
+//                }
                 var item = mapGrid.mapGrid.contentItem.children[index]; // BUG??
                 if (item == null) {
                     console.log("itemAt " + index + " Error.")
@@ -482,7 +484,7 @@ Window {
                 id: globalSettingsGroup;
                 title: "Global Settings";
                 width: 280;
-                height: 100;
+                height: 120;
 
                 ScaleSlide {
                     id: scaleSlide;
@@ -556,6 +558,56 @@ Window {
                             agvDialog.hide();
                         } else {
                             agvDialog.show();
+                        }
+                    }
+                }
+                Row {
+                    spacing: 2
+                    y:70
+                    Text{
+                        y: 4;
+                        text: "rows:"
+                    }
+                    TextField {
+                        id: rowSpinText;
+                        width: 50;
+                        height: 20;
+                        selectByMouse: true;
+                        textColor: "blue";
+                        validator: IntValidator {}
+                        Component.onCompleted: {
+                            text = mapGrid.rows;
+                        }
+                    }
+                    Text{
+                        y: 4;
+                        text: "column:"
+                    }
+                    TextField {
+                        id: columnsSpinText;
+                        width: 50;
+                        height: 20;
+                        selectByMouse: true;
+                        textColor: "blue";
+                        validator: IntValidator {}
+                        Component.onCompleted: {
+                            text = mapGrid.columns;
+                        }
+                    }
+                    Button {
+                        id: changeSizeButton;
+                        height: 20;
+                        width: 60;
+                        text: "Resize";
+                        onClicked: {
+                            var r = rowSpinText.text;
+                            var c = columnsSpinText.text;
+                            console.log("map Data resize " + r + " " + c);
+                            mapData.resize(r, c);
+                            mapGrid.rows = r;
+                            mapGrid.columns = c;
+                            fileDialog.mapDataToMapGrid();
+                            mapGrid.showItemSettings();
                         }
                     }
                 }
