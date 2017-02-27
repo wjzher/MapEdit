@@ -45,6 +45,10 @@ public:
     Q_INVOKABLE void initItems();
     Q_INVOKABLE int getItemIndexByCardId(int cardId);
     Q_INVOKABLE int resize(int rows, int cols);
+    Q_INVOKABLE int leftmove();
+    Q_INVOKABLE int rightmove();
+    Q_INVOKABLE int upmove();
+    Q_INVOKABLE int downmove();
 private:
     MapItem *getMapItem(int index);
     void initItems(int rows, int cols);

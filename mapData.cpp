@@ -111,6 +111,77 @@ int MapData::resize(int rows, int cols)
     return 0;
 }
 
+int MapData::leftmove()
+{
+    MapItem *old = m_items;
+    m_items = NULL;
+    initItems();
+    for (int i = 0; i < m_itemN - 1; i++) {
+        int x = m_items[i].pos[0];
+        int y = m_items[i].pos[1];
+        if (y != m_cols - 1) {
+           m_items[i] = old[i + 1];
+        }
+        m_items[i].index = i;
+        m_items[i].pos[0] = x;
+        m_items[i].pos[1] = y;
+    }
+    delete [] old;
+    return 0;
+}
+int MapData::rightmove()
+{
+    MapItem *old = m_items;
+    m_items = NULL;
+    initItems();
+    for (int i = 1; i < m_itemN; i++) {
+        int x = m_items[i].pos[0];
+        int y = m_items[i].pos[1];
+        if (y != 0) {
+            m_items[i] = old[i - 1];
+        }
+        m_items[i].index = i;
+        m_items[i].pos[0] = x;
+        m_items[i].pos[1] = y;
+    }
+    delete [] old;
+    return 0;
+}
+int MapData::upmove()
+{
+    MapItem *old = m_items;
+    m_items = NULL;
+    initItems();
+    for (int i = 0; i < m_itemN - m_cols; i++) {
+        int x = m_items[i].pos[0];
+        int y = m_items[i].pos[1];
+        m_items[i] = old[i + m_cols];
+        m_items[i].index = i;
+        m_items[i].pos[0] = x;
+        m_items[i].pos[1] = y;
+    }
+    delete [] old;
+    return 0;
+}
+int MapData::downmove()
+{
+    MapItem *old = m_items;
+    m_items = NULL;
+    initItems();
+    for (int i = m_cols; i < m_itemN; i++) {
+        int x = m_items[i].pos[0];
+        int y = m_items[i].pos[1];
+//        int idx = y + x * m_cols;
+//        int idxi = y + (x+1) * m_cols;
+        m_items[i] = old[i - m_cols];
+        m_items[i].index = i;
+        m_items[i].pos[0] = x;
+        m_items[i].pos[1] = y;
+    }
+    delete [] old;
+    return 0;
+}
+
 MapItem *MapData::getMapItem(int index)
 {
     MapItem *item;

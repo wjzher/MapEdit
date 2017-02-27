@@ -484,7 +484,7 @@ Window {
                 id: globalSettingsGroup;
                 title: "Global Settings";
                 width: 280;
-                height: 120;
+                height: 150;
 
                 ScaleSlide {
                     id: scaleSlide;
@@ -606,6 +606,54 @@ Window {
                             mapData.resize(r, c);
                             mapGrid.rows = r;
                             mapGrid.columns = c;
+                            fileDialog.mapDataToMapGrid();
+                            mapGrid.showItemSettings();
+                        }
+                    }
+                }
+                Row {
+                    spacing: 4;
+                    y: 100
+                    Button {
+                        id: leftmove;
+                        height: 20;
+                        width: 40;
+                        text: "←";
+                        onClicked: {
+                            mapData.leftmove();
+                            fileDialog.mapDataToMapGrid();
+                            mapGrid.showItemSettings();
+                        }
+                    }
+                    Button {
+                        id: rightmove;
+                        height: 20;
+                        width: 40;
+                        text: "→";
+                        onClicked: {
+                            mapData.rightmove();
+                            fileDialog.mapDataToMapGrid();
+                            mapGrid.showItemSettings();
+                        }
+                    }
+                    Button {
+                        id: upmove;
+                        height: 20;
+                        width: 40;
+                        text: "↑";
+                        onClicked: {
+                            mapData.upmove();
+                            fileDialog.mapDataToMapGrid();
+                            mapGrid.showItemSettings();
+                        }
+                    }
+                    Button {
+                        id: downmove;
+                        height: 20;
+                        width: 40;
+                        text: "↓";
+                        onClicked: {
+                            mapData.downmove();
                             fileDialog.mapDataToMapGrid();
                             mapGrid.showItemSettings();
                         }
