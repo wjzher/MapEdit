@@ -28,6 +28,7 @@ Rectangle {
             }
         }
     }
+
     GridView {
         id: mapGrid;
         width: columns * cellWidth;
@@ -95,5 +96,9 @@ Rectangle {
                 wrapper.GridView.view.focus = index;
             }
         }
+    }
+    AgvCar {
+        id: agvCar;
+        scale: scaleGrid;
     }
 }

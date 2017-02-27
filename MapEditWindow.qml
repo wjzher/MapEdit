@@ -175,27 +175,40 @@ Window {
 
             function setItemType(type) {
                 mapGrid.mapGrid.currentItem.type = type;
+                mapData.setItemType(mapGrid.mapGrid.currentIndex, type);
                 setGridFocus();
             }
             function setItemIsCard(isCard) {
                 mapGrid.mapGrid.currentItem.cardPos[0] = Number(cardIDPosX.text);
                 mapGrid.mapGrid.currentItem.cardPos[1] = Number(cardIDPosY.text);
                 mapGrid.mapGrid.currentItem.isCard = isCard;
+                mapData.setItemCardId(mapGrid.mapGrid.currentIndex,
+                                      mapGrid.mapGrid.currentItem.isCard,
+                                      mapGrid.mapGrid.currentItem.cardID);
+                mapData.setItemCardPos(mapGrid.mapGrid.currentIndex,
+                                       mapGrid.mapGrid.currentItem.cardPos);
                 setGridFocus();
             }
             function setItemCardID(id) {
                 mapGrid.mapGrid.currentItem.cardID = Number(id);
+                mapData.setItemCardId(mapGrid.mapGrid.currentIndex,
+                                      mapGrid.mapGrid.currentItem.isCard,
+                                      mapGrid.mapGrid.currentItem.cardID);
             }
             function setItemCardPosX(x) {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[0] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
+                mapData.setItemCardPos(mapGrid.mapGrid.currentIndex,
+                                       mapGrid.mapGrid.currentItem.cardPos);
                 setGridFocus();
             }
             function setItemCardPosY(x) {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[1] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
+                mapData.setItemCardPos(mapGrid.mapGrid.currentIndex,
+                                       mapGrid.mapGrid.currentItem.cardPos);
                 setGridFocus();
             }
             function posAdd(pos, x, y) {
@@ -255,6 +268,10 @@ Window {
                     item.isArc = t;
                     item.isNeighbour = true;
                     addNeighbour(rows, cols, dx, dy);
+                    mapData.setItemArc(neighbour,
+                                       item.isArc, item.neighbourPos);
+                    mapData.setItemIsNeighbour(neighbour,
+                                               item.isNeighbour);
                 }
             }
             function clearNeighbour(rows, cols) {
@@ -264,8 +281,11 @@ Window {
                 while (item.neighbourPos.length > 0) {
                     var p = item.neighbourPos.pop();
                     console.log("clear " + calIndex(rows, cols) + ": " + p[0] + " " + p[1]);
-                    var nitem = itemAt(calNeighbour(rows, cols, p[0], p[1]));
+                    var i = calNeighbour(rows, cols, p[0], p[1]);
+                    var nitem = itemAt(i);
                     nitem.isArc = MapItemType.ArcNULL;
+                    mapData.setItemArc(i,
+                                       nitem.isArc, nitem.neighbourPos);
                 }
             }
 
@@ -393,6 +413,8 @@ Window {
                     return;
                 }
                 updateItemArc(mapGrid.mapGrid.currentIndex, item, arcType);
+                mapData.setItemArc(mapGrid.mapGrid.currentIndex,
+                                   item.isArc, item.neighbourPos);
                 setGridFocus();
             }
 
@@ -799,7 +821,7 @@ Window {
                     id: cardCheck;
                     anchors.top: radioGridLayout.bottom;
                     anchors.topMargin: 8;
-                    text: "Card Exsit?";
+                    text: "Is Card";
                     onClicked: {
                         mapGrid.setItemIsCard(checked);
                     }
@@ -811,7 +833,7 @@ Window {
                     anchors.leftMargin: 4;
                     anchors.top: cardCheck.top;
                     anchors.topMargin: -2;
-                    width: 75
+                    width: 70
                     height: 20;
                     placeholderText: qsTr("Card ID");
                     selectByMouse: true;
@@ -822,13 +844,13 @@ Window {
                             selectAll();
                         }
                     }
-                    onEditingFinished: {
-                        console.log("Card ID onEditingFinished. ", cardIDText.text);
-                        mapGrid.setItemCardID(cardIDText.text);
-                    }
-                    onTextChanged: {
-                        mapGrid.setItemCardID(cardIDText.text);
-                    }
+//                    onEditingFinished: {
+//                        console.log("Card ID onEditingFinished. ", cardIDText.text);
+//                        mapGrid.setItemCardID(cardIDText.text);
+//                    }
+//                    onTextChanged: {
+//                        mapGrid.setItemCardID(cardIDText.text);
+//                    }
                 }
 
                 TextField {
@@ -848,9 +870,9 @@ Window {
                             selectAll();
                         }
                     }
-                    onEditingFinished: {
-                        mapGrid.setItemCardPosX(Number(cardIDPosX.text));
-                    }
+//                    onEditingFinished: {
+//                        mapGrid.setItemCardPosX(Number(cardIDPosX.text));
+//                    }
                 }
                 TextField {
                     id: cardIDPosY;
@@ -869,7 +891,21 @@ Window {
                             selectAll();
                         }
                     }
-                    onEditingFinished: {
+//                    onEditingFinished: {
+//                        mapGrid.setItemCardPosY(Number(cardIDPosY.text));
+//                    }
+                }
+                Button {
+                    id: posEnter;
+                    anchors.left: cardIDPosY.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: cardIDText.top;
+                    width: 34;
+                    height: 20;
+                    text: "Enter";
+                    onClicked: {
+                        mapGrid.setItemCardID(cardIDText.text);
+                        mapGrid.setItemCardPosX(Number(cardIDPosX.text));
                         mapGrid.setItemCardPosY(Number(cardIDPosY.text));
                     }
                 }
