@@ -138,6 +138,7 @@ void MapData::setItemCardPos(int index, QVariantList pos)
     MapItem *item = getMapItem(index);
     int count = pos.count();
     if (count != 2) {
+        qDebug() << "Bug: set " << index << " Item Card pos " << pos.count();
         return;
     }
     var = pos.at(0);
@@ -239,13 +240,16 @@ bool MapData::getItemIsCard(int index)
     return false;
 }
 
-QList<int> MapData::getItemCardPos(int index)
+QVariantList MapData::getItemCardPos(int index)
 {
     MapItem *item = getMapItem(index);
-    QList<int> pos;
+    QVariantList pos;
+    QVariant var;
     if (item) {
-        pos.append(item->cardPos[0]);
-        pos.append(item->cardPos[1]);
+        var = item->cardPos[0];
+        pos.append(var);
+        var = item->cardPos[1];
+        pos.append(var);
     }
     return pos;
 }
