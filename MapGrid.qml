@@ -97,8 +97,4 @@ Rectangle {
             }
         }
     }
-    AgvCar {
-        id: agvCar;
-        scale: scaleGrid;
-    }
 }
