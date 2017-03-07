@@ -502,6 +502,7 @@ Window {
             id: column;
             spacing: 4;
             width: 280;
+            height: parent.height;
             GroupBox {
                 id: globalSettingsGroup;
                 title: "Global Settings";
@@ -1093,7 +1094,9 @@ Window {
             PathInfo{
                 id: pathList;
                 width: 280;
-                height: rootItem.height - 352 - 32 - 8;
+                height: mapGrid.height - globalSettingsGroup.height
+                        - mapItemSettingsGroup.height
+                        - pathSettingsGroup.height - 12;
             }
 
         }
