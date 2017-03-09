@@ -36,6 +36,8 @@ Window {
                 mapData.setItemCardPos(i, item.cardPos);
                 mapData.setItemArc(i, item.isArc, item.neighbourPos);
                 mapData.setItemIsNeighbour(i, item.isNeighbour);
+                mapData.setItemCutLeftUp(i, item.cutLeftUp);
+                mapData.setItemCutRightDown(i, item.cutRightDown);
             }
             console.log("save Map Data.");
             mapData.saveMapData(mapFilePath.text);
@@ -51,6 +53,8 @@ Window {
                 item.cardID = mapData.getItemCardId(i);
                 item.isArc = mapData.getItemIsArc(i);
                 item.isNeighbour = mapData.getItemIsNeighbour(i);
+                item.cutLeftUp = mapData.getItemCutLeftUp(i);
+                item.cutRightDown = mapData.getItemCutRightDown(i)
                 if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
                     mapGrid.updateItemArc(i, item, item.isArc);
                 }
@@ -172,7 +176,16 @@ Window {
             function setGridFocus() {
                 mapGrid.mapGrid.focus = true;
             }
-
+            function setItemCutLeftUp(v) {
+                mapGrid.mapGrid.currentItem.cutLeftUp = v;
+                mapData.setItemCutLeftUp(mapGrid.mapGrid.currentIndex, v);
+                setGridFocus();
+            }
+            function setItemCutRightDown(v) {
+                mapGrid.mapGrid.currentItem.cutRightDown = v;
+                mapData.setItemCutRightDown(mapGrid.mapGrid.currentIndex, v);
+                setGridFocus();
+            }
             function setItemType(type) {
                 mapGrid.mapGrid.currentItem.type = type;
                 mapData.setItemType(mapGrid.mapGrid.currentIndex, type);
@@ -486,6 +499,8 @@ Window {
                 cardIDPosY.text = item.cardPos[1];
 
                 arcCombo.index = item.isArc;
+                cutLeftUpCheck.checked = item.cutLeftUp;
+                cutRightDownCheck.checked = item.cutRightDown;
                 setGridFocus();
             }
             onCurrentIndexChanged: {
@@ -912,6 +927,7 @@ Window {
                 }
                 ArcCombo {
                     id: arcCombo;
+                    width: 150;
                     anchors.top: cardCheck.bottom;
                     anchors.topMargin: 8;
                     index: MapItemType.ArcNULL;
@@ -919,6 +935,26 @@ Window {
                         console.log("index changed. ", index);
                         mapGrid.setItemArc();
                     }
+                }
+                CheckBox {
+                    id: cutLeftUpCheck;
+                    anchors.top: arcCombo.top;
+                    anchors.topMargin: 4;
+                    anchors.left: arcCombo.right;
+                    anchors.leftMargin: 8;
+                    text: "CLU";
+                    checked: false;
+                    onCheckedChanged: mapGrid.setItemCutLeftUp(checked);
+                }
+                CheckBox {
+                    id: cutRightDownCheck;
+                    anchors.top: arcCombo.top;
+                    anchors.topMargin: 4;
+                    anchors.left: cutLeftUpCheck.right;
+                    anchors.leftMargin: 8;
+                    text: "CRD";
+                    checked: false;
+                    onCheckedChanged: mapGrid.setItemCutRightDown(checked);
                 }
             }
             GroupBox {

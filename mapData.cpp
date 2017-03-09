@@ -258,6 +258,24 @@ void MapData::setItemType(int index, int type)
     return;
 }
 
+void MapData::setItemCutLeftUp(int index, bool isChecked)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        item->cutLeftUp = isChecked;
+    }
+    return;
+}
+
+void MapData::setItemCutRightDown(int index, bool isChecked)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        item->cutRightDown = isChecked;
+    }
+    return;
+}
+
 void MapData::setItemIsNeighbour(int index, bool isNeighbour)
 {
     MapItem *item = getMapItem(index);
@@ -349,6 +367,23 @@ int MapData::getItemType(int index)
     return 0;
 }
 
+bool MapData::getItemCutLeftUp(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->cutLeftUp;
+    }
+    return false;
+}
+
+bool MapData::getItemCutRightDown(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->cutRightDown;
+    }
+    return false;
+}
 
 int MapData::saveMapData(QString str)
 {
@@ -367,6 +402,8 @@ int MapData::saveMapData(QString str)
         itemObj["type"] = m_items[i].type;
         itemObj["isCard"] = m_items[i].isCard;
         itemObj["isArc"] = m_items[i].isArc;
+        itemObj["cutLeftUp"] = m_items[i].cutLeftUp;
+        itemObj["cutRightDown"] = m_items[i].cutRightDown;
         itemObj["isNeighbour"] = m_items[i].isNeighbour;
         {
             QJsonArray posArray;
@@ -491,6 +528,12 @@ int MapData::loadMapData(QString str)
         mItem->arcNeighbour[3][1] = itemObj["arcNeighbour"].toArray().at(3).toArray().at(1).toInt();
         mItem->isCard = itemObj["isCard"].toBool();
         mItem->isArc = itemObj["isArc"].toInt();
+        if (itemObj["cutLeftUp"].isBool()) {
+            mItem->cutLeftUp = itemObj["cutLeftUp"].toBool();
+        }
+        if (itemObj["cutRightDown"].isBool()) {
+            mItem->cutRightDown = itemObj["cutRightDown"].toBool();
+        }
     }
     return 0;
 }

@@ -13,6 +13,8 @@ Rectangle {
     property var arcParam: [0.0, 0.0, 0.0, 0.0];      // x, y, startAngle, endAngle
     property var neighbourPos: [];      // dx, dy, dx, dy...
     property bool isNeighbour: false;
+    property bool cutLeftUp: false;
+    property bool cutRightDown: false;
     property alias agvIpText: agvIpText.text;
     signal clicked;
     width: length;
@@ -26,6 +28,8 @@ Rectangle {
     onCardPosChanged: rePaint();
     onIsArcChanged: rePaint();
     onAgvIpTextChanged: rePaint();
+    onCutLeftUpChanged: rePaint();
+    onCutRightDownChanged: rePaint();
     Canvas {
         id: canvas;
         anchors.fill: parent;
@@ -43,13 +47,25 @@ Rectangle {
             ctx.clearRect(0, 0, width, height);
             switch (root.type) {
             case MapItemType.MapItemXLine:
-                ctx.moveTo(0, height / 2);
-                ctx.lineTo(width, height / 2);
+                if (cutLeftUp == false) {
+                    ctx.moveTo(0, height / 2);
+                    ctx.lineTo(width / 2, height / 2);
+                }
+                if (cutRightDown == false) {
+                    ctx.moveTo(width / 2, height / 2);
+                    ctx.lineTo(width, height / 2);
+                }
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYLine:
-                ctx.moveTo(width / 2, 0);
-                ctx.lineTo(width / 2, height);
+                if (cutLeftUp == false) {
+                    ctx.moveTo(width / 2, 0);
+                    ctx.lineTo(width / 2, height / 2);
+                }
+                if (cutRightDown == false) {
+                    ctx.moveTo(width / 2, height / 2);
+                    ctx.lineTo(width / 2, height);
+                }
                 ctx.stroke();
                 break;
             case MapItemType.MapItemCross:

@@ -16,6 +16,8 @@ struct MapItem {
     int arcNeighbour[4][2]; // 弧线相邻元素相对坐标
     int arcN;
     bool isNeighbour;
+    bool cutLeftUp;     // 是否去掉左/上半条线
+    bool cutRightDown;  // 是否去掉右/下半条线
 };
 
 class MapData : public QObject
@@ -32,6 +34,8 @@ public:
     Q_INVOKABLE void setItemCardPos(int index, QVariantList pos);
     Q_INVOKABLE void setItemArc(int index, int isArc, QVariantList neighbourPos);
     Q_INVOKABLE void setItemType(int index, int type);
+    Q_INVOKABLE void setItemCutLeftUp(int index, bool isChecked);
+    Q_INVOKABLE void setItemCutRightDown(int index, bool isChecked);
     Q_INVOKABLE void setItemIsNeighbour(int index, bool isNeighbour);
     Q_INVOKABLE int getItemCardId(int index);
     Q_INVOKABLE bool getItemIsCard(int index);
@@ -40,6 +44,8 @@ public:
     Q_INVOKABLE int getItemIsArc(int index);
     Q_INVOKABLE QVariantList getItemArcNeighbour(int index);
     Q_INVOKABLE int getItemType(int index);
+    Q_INVOKABLE bool getItemCutLeftUp(int index);
+    Q_INVOKABLE bool getItemCutRightDown(int index);
     Q_INVOKABLE int saveMapData(QString str);
     Q_INVOKABLE int loadMapData(QString str);
     Q_INVOKABLE void initItems();
