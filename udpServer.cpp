@@ -1,5 +1,6 @@
 ﻿#include "udpServer.h"
 #include <QDebug>
+#include <QDateTime>
 
 UdpServer::UdpServer(QObject *parent)
     : QObject(parent), udpSocket(this), m_currentIp("")
@@ -37,7 +38,7 @@ void UdpServer::addAddressList(QString &addr)
     clientList.append(addr);
     cardIdList.append(-1);
     qDebug() << addr << "add to list";
-    emit agvAddressChanged(str2ip(addr));
+    emit agvAddressChanged(addr);
     return;
 }
 
@@ -120,12 +121,14 @@ void UdpServer::readPendingDatagrams()
         }
         QString addr = sender.toString() + ":" + QString::number(senderPort);
         if (inf == 5001) {
-//            qDebug() << "recv tick data " << addr;
+            QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
+            QString str = time.toString("hh:mm:ss.z"); //设置显示格式
+//            qDebug() << "recv tick data " << addr << "[" << str << "]" << " " << jsonObj["param"];
             // 加入client list
             addAddressList(addr);
             // emit signals
             QJsonObject paramObj = jsonObj["param"].toObject();
-            emitSignals(str2ip(addr), inf, paramObj);
+            emitSignals(addr, inf, paramObj);
             emitCardIdSignal(addr, paramObj);
             // 回复心跳
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
@@ -137,7 +140,7 @@ void UdpServer::readPendingDatagrams()
             case 1007:
             case 19000:
                 // emit signals
-                emitSignals(str2ip(addr), inf, jsonObj["param"].toObject());
+                emitSignals(addr, inf, jsonObj["param"].toObject());
                 break;
             default:
                 qDebug() << "unknown inf " + inf;
@@ -154,7 +157,7 @@ QVariant UdpServer::getAgvIpByCardId(int cardId)
     int i;
     for (i = 0; i < cardIdList.count(); i++) {
         if (cardId == cardIdList[i]) {
-            val = QVariant(str2ip(clientList[i]));
+            val = QVariant(clientList[i]);
             break;
         }
     }
@@ -186,7 +189,7 @@ void UdpServer::emitCardIdSignal(QString &addr, QJsonObject &param)
     }
     if (cardIdList[i] != id) {
         qDebug() << id << " emit to " << addr;
-        emit agvCardIdChanged(str2ip(addr), cardIdList[i], id);
+        emit agvCardIdChanged(addr, cardIdList[i], id);
         cardIdList[i] = id;
     }
 }
@@ -197,6 +200,7 @@ void UdpServer::emitSignals(QString &ip, int inf, QJsonObject &param)
         return;
     }
     if (ip != m_currentIp) {
+        qDebug() << "filter signal from " + ip + ", current " + m_currentIp;
         return;
     }
 //    qDebug() << "emit signals " << ip << " " << param;

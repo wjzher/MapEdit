@@ -68,7 +68,7 @@ public slots:
 private:
     QUdpSocket udpSocket;
     QStringList clientList;
-    QList<int> cardIdList;      // agv cardIdList
+    QList<int> cardIdList;      // agv cardIdList, agv所在的pre点
     QString m_currentIp;
     int m_flag;
 };
