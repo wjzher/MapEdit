@@ -341,9 +341,9 @@ Window {
         }
         onAgvAddressChanged: {
             console.log("address changed " + ip);
-            //            currentIp = ip;
             agvipCombobox.model.append({text: ip});
             initFlag = 0;
+            mapGrid.addAgvModel(ip);
         }
     }
 
@@ -725,6 +725,85 @@ Window {
                         toolTipText: qsTr("删除路径 Delete");
                     }
                 }
+                Row {
+                    spacing: 4;
+                    TextField {
+                        id: idxTextField
+                        width: 36;
+                        height: 20;
+                        textColor: "blue";
+                        validator: IntValidator {}
+                        placeholderText: qsTr("idx");
+                    }
+                    TextField {
+                        id: xTextField;
+                        width: 26;
+                        height: 20;
+                        textColor: "blue";
+                        validator: IntValidator {}
+                        placeholderText: qsTr("x");
+                    }
+                    TextField {
+                        id: yTextField;
+                        width: 26;
+                        height: 20;
+                        textColor: "blue";
+                        validator: IntValidator {}
+                        placeholderText: qsTr("y");
+                    }
+                    Button {
+                        id: agvInitButton;
+                        width: 34;
+                        height: 20;
+                        text: "Set";
+                        onClicked: {
+                            if (agvipCombobox.count == 0) {
+                                return;
+                            }
+                            mapGrid.setAgvModel(agvipCombobox.currentText,
+                                                idxTextField.text,
+                                                xTextField.text,
+                                                yTextField.text,
+                                                agvCombobox.currentText);
+                        }
+                    }
+                }
+                Row {
+                    spacing: 4;
+                    Text {
+                        id: agvDerection;
+                        y: 6;
+                        text: qsTr("R:")
+                    }
+                    ComboBox {
+                        width: 50;
+                        id: agvCombobox;
+                        model: [
+                            "0",
+                            "90",
+                            "180",
+                            "270"
+                        ];
+                        onCurrentIndexChanged: {
+                        }
+                    }
+                    CheckBox {
+                        y: 6;
+                        id: agvShowCheck;
+                        text: "Show?"
+                        checked: mapGrid.agvModelIsShow(agvipCombobox.currentText);
+                        onCheckedChanged: {
+                            if (agvipCombobox.count == 0) {
+                                return;
+                            }
+                            if (checked) {
+                                mapGrid.showAgvModel(agvipCombobox.currentText);
+                            } else {
+                                mapGrid.hideAgvModel(agvipCombobox.currentText)
+                            }
+                        }
+                    }
+                }
             }
         }
         Row {
@@ -937,109 +1016,6 @@ Window {
                             RectangleStatus{
                                 id: chargeAlarm;
                                 text: "⚠";
-                            }
-                        }
-                        Row {
-                            spacing: 2;
-                            TextField {
-                                id: idxTextField
-                                width: 30;
-                                height: 20;
-                                textColor: "blue";
-                                placeholderText: qsTr("idx");
-                            }
-                            TextField {
-                                id: xTextField;
-                                width: 30;
-                                height: 20;
-                                textColor: "blue";
-                                placeholderText: qsTr("x");
-                            }
-                            TextField {
-                                id: yTextField;
-                                width: 30;
-                                height: 20;
-                                textColor: "blue";
-                                placeholderText: qsTr("y");
-                            }
-                            Button {
-                                id: enterButton;
-                                width: 34;
-                                height: 20;
-                                text: "Enter";
-                                onClicked: {
-                                    mapGrid.setAgvModel(agvAddrCombobox.currentText,
-                                                        idxTextField.text,
-                                                        xTextField.text,
-                                                        yTextField.text,
-                                                        agvCombobox.currentText);
-                                }
-                            }
-                        }
-                        Row {
-                            spacing: 2;
-                            Text {
-                                id: agvDerection;
-                                y: 6;
-                                text: qsTr("Derection:")
-                            }
-                            ComboBox {
-                                width: 50;
-                                id: agvCombobox;
-                                model: [
-                                    "0",
-                                    "90",
-                                    "180",
-                                    "270"
-                                ];
-                                onCurrentIndexChanged: {
-//                                    mapGrid.agvModel.r = currentText;
-                                }
-                            }
-                            Button {
-                                width: 34;
-                                height: 20;
-                                text: "move";
-                                onClicked: {
-                                    //mapGrid.agvModel.agvMove(parseInt(xTextField.text), parseInt(yTextField.text));
-//                                  mapGrid.agvModel.linePath(0, -20, -102, -102);
-                                }
-                            }
-                        }
-                        Row {
-                            spacing: 2;
-                            Text {
-                                y: 6;
-                                text: qsTr("AGV:")
-                            }
-                            ComboBox {
-                                width: 50;
-                                id: agvAddrCombobox;
-                                model: [
-                                    "1:1",
-                                    "2:2",
-                                    "2:4",
-                                    "3:3",
-                                    "3:4"
-                                ];
-                                onCurrentIndexChanged: {
-                                }
-                            }
-                            Button {
-                                width: 34;
-                                height: 20;
-                                text: "add";
-                                onClicked: {
-                                    mapGrid.addAgvModel(agvAddrCombobox.currentText);
-                                }
-                            }
-                            Button {
-                                width: 34;
-                                height: 20;
-                                text: "del";
-                                onClicked: {
-                                    mapGrid.delAgvModel(agvAddrCombobox.currentText);
-                                }
                             }
                         }
                     }

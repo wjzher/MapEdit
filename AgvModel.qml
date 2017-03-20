@@ -10,13 +10,22 @@ Rectangle {
     border.width: 2;
     radius: 6;
 //    property alias arcPathAnimation: arcPathAnimation;
-    property int gridIndex: 50;     // AGV所在格子
+    property alias text: agvText.text;
+    property int gridIndex: 0;     // AGV所在格子
     property int gridX: 0;          // 格子里AGV的坐标X
     property int gridY: 0;          // 格子里AGV的坐标Y
     property int r: 0;              // AGV角度, 逆时针
+    property bool initFlag: false;       // 标记是否初始化成功
     property int magToCenter: 43;
     property int magLength: 30;
     rotation: 360 - r;
+    Text {
+        id: agvText;
+        anchors.centerIn: parent;
+        color: "gray";
+        text: "";
+    }
+
     Rectangle {
         width: 15;
         height: 50;
@@ -29,9 +38,12 @@ Rectangle {
         border.width: 1;
         radius: 6;
     }
-    function agvUpdate() {
-        rect.x = parent.x + ((gridIndex % parent.parent.columns) * parent.cellWidth) - width / 2 + gridX;
-        rect.y = parent.y + parseInt(gridIndex / parent.parent.columns) * parent.cellHeight - height / 2 + gridY;
+    onInitFlagChanged: {
+        if (initFlag == true) {
+            agvTimer.running = true;
+        } else {
+            agvTimer.running = false;
+        }
     }
     // agv move
     function agvMove(dx, dy, dr) {
@@ -45,7 +57,6 @@ Rectangle {
         gridX = x;
         gridY = y;
         rect.r = r;
-        agvUpdate();
     }
     // 坐标转换[x, y]
     function agvCoordinateTransformation(x, y) {
@@ -85,8 +96,9 @@ Rectangle {
         return magArr;
     }
     Timer {
+        id: agvTimer;
         interval: 100;
-        running: true;
+        running: false;
         repeat: true;
         onTriggered: {
 

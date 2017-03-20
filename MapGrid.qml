@@ -31,6 +31,9 @@ Rectangle {
             }
         }
     }
+    onColumnsChanged: {
+        agvUpdateAll();
+    }
 
     GridView {
         id: mapGrid;
@@ -46,6 +49,12 @@ Rectangle {
         focus: true;
         Component.onCompleted: {
         }
+        onCellWidthChanged: agvUpdateAll();
+//        onCellHeightChanged: agvUpdateAll();
+        onXChanged: agvUpdateAll();
+        onYChanged: agvUpdateAll();
+//        onWidthChanged: agvUpdateAll();
+//        onHeightChanged: agvUpdateAll();
         MouseArea {
             id: gridMa;
             anchors.fill: parent;
@@ -108,9 +117,10 @@ Rectangle {
         if (agvComponent.status == Component.Ready) {
             // createObject时赋值x: mapGrid.x + ((gridIndex % columns) * mapGrid.cellWidth) - width / 2 + gridX
             // 报错gridIndex找不到，采用简单赋值可以
-            agv = agvComponent.createObject(mapGrid, {
+            agv = agvComponent.createObject(root, {
                 "x": mapGrid.x,
                 "y": mapGrid.y,
+                "visible": false,
                 "scale": root.scaleGrid
                 });
             if (agv == null) {
@@ -124,6 +134,29 @@ Rectangle {
             console.log("add agv model: " + agvAddrs);
         }
     }
+    function showAgvModel(addr) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        agvModels[i].text = addr;
+        agvModels[i].visible = true;
+    }
+    function hideAgvModel(addr) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        agvModels[i].visible = false;
+    }
+    function agvModelIsShow(addr) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return false;
+        }
+        return agvModels[i].visible;
+    }
+
     function delListItem(list, i) {
         var newList = [];
         var j;
@@ -159,6 +192,22 @@ Rectangle {
         console.log("del agv model: " + agvModels);
         console.log("del agv model: " + agvAddrs);
     }
+    function agvUpdate(i) {
+        var agv = agvModels[i];
+        agv.x = mapGrid.x + ((agv.gridIndex % columns) * mapGrid.cellWidth) - agv.width / 2 + agv.gridX * agv.scale;
+        agv.y = mapGrid.y + parseInt(agv.gridIndex / columns) * mapGrid.cellHeight - agv.height / 2 + agv.gridY * agv.scale;
+        console.log("agv update: col " + columns + " w " + mapGrid.cellWidth + " gridx " + agv.gridX + " " + agv.x);
+        console.log("idx " + agv.gridIndex + " agv.y " + agv.y + " agv.width " + agv.width + " agv.height " + agv.height);
+        console.log("agv scale: " + agv.scale);
+    }
+    function agvUpdateAll() {
+        var i;
+        for (i = 0; i < agvModels.length; i++) {
+            agvModels[i].scale = scaleGrid;
+            agvUpdate(i);
+        }
+    }
+
     function setAgvModel(addr, index, x, y, r) {
         var i = searchAgvModel(addr);
         if (i == -1) {
@@ -166,5 +215,6 @@ Rectangle {
         }
         var agv = agvModels[i];
         agv.agvSetPosition(index, x, y, r);
+        agvUpdate(i);
     }
 }
