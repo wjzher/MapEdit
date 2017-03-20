@@ -155,7 +155,7 @@ Rectangle {
                 if (agvIpText.text == "") {
                     ctx.fillStyle = "magenta";
                 } else {
-                    ctx.fillStyle = "tomato";
+                    ctx.fillStyle = "darkBlue";
                 }
                 ctx.beginPath();
                 ctx.arc(root.width / vx, root.height / vy, length / div,
@@ -172,7 +172,7 @@ Rectangle {
         anchors.bottomMargin: 2;
         font.pixelSize: 11;
         text: "";
-        color: "tomato";
+        color: "darkBlue";
     }
 
     Text {

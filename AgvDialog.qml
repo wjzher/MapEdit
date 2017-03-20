@@ -8,73 +8,73 @@ import QtQuick.Controls 1.4
 Window {
     id: root;
     width: 500;
-    height: 260;
+    height: 360;
     title: "AGV Control";
     color: "#EEEEEE";
     modality: Qt.WindowNoState;
     property alias udpServer: udpServer;
 
     Item {
-            focus: true
-            Keys.onPressed: {
-                switch(event.key) {
-                case Qt.Key_Up:
-                    mfButton.clickedCallBack();
-                    break;
-                case Qt.Key_Down:
-                    mbButton.clickedCallBack();
-                    break;
-                case Qt.Key_Left:
-                    rccButton.clickedCallBack();
-                    break;
-                case Qt.Key_Right:
-                    rcButton.clickedCallBack();
-                    break;
-                case Qt.Key_Equal:
-                    rotateview.clickedCallBack();
-                    break;
-                case Qt.Key_Delete:
-                    delButton.clickedCallBack();
-                    break;
-                case Qt.Key_Insert:
-                    loadButton.clickedCallBack();
-                    break;
-                case Qt.Key_Home:
-                    startButton.clickedCallBack();
-                    break;
-                case Qt.Key_End:
-                    esButton.clickedCallBack();
-                    break;
-                case Qt.Key_R:
-                    rightButton.clickedCallBack();
-                    break;
-                case Qt.Key_L:
-                    leftButton.clickedCallBack();
-                    break;
-                case Qt.Key_S:
-                    stopButton.clickedCallBack();
-                    break;
-                case Qt.Key_A:
-                case Qt.Key_Space:
-                    astopButton.clickedCallBack();
-                    break;
-                case Qt.Key_U:
-                    lfupButton.clickedCallBack();
-                    break;
-                case Qt.Key_D:
-                    lfdButton.clickedCallBack();
-                    break;
-                case Qt.Key_F1:
-                    oaButton.clickedCallBack();
-                    break;
-                case Qt.Key_F2:
-                    csButton.clickedCallBack();
-                    break;
-                default:
-                    return;
-                }
+        focus: true
+        Keys.onPressed: {
+            switch(event.key) {
+            case Qt.Key_Up:
+                mfButton.clickedCallBack();
+                break;
+            case Qt.Key_Down:
+                mbButton.clickedCallBack();
+                break;
+            case Qt.Key_Left:
+                rccButton.clickedCallBack();
+                break;
+            case Qt.Key_Right:
+                rcButton.clickedCallBack();
+                break;
+            case Qt.Key_Equal:
+                rotateview.clickedCallBack();
+                break;
+            case Qt.Key_Delete:
+                delButton.clickedCallBack();
+                break;
+            case Qt.Key_Insert:
+                loadButton.clickedCallBack();
+                break;
+            case Qt.Key_Home:
+                startButton.clickedCallBack();
+                break;
+            case Qt.Key_End:
+                esButton.clickedCallBack();
+                break;
+            case Qt.Key_R:
+                rightButton.clickedCallBack();
+                break;
+            case Qt.Key_L:
+                leftButton.clickedCallBack();
+                break;
+            case Qt.Key_S:
+                stopButton.clickedCallBack();
+                break;
+            case Qt.Key_A:
+            case Qt.Key_Space:
+                astopButton.clickedCallBack();
+                break;
+            case Qt.Key_U:
+                lfupButton.clickedCallBack();
+                break;
+            case Qt.Key_D:
+                lfdButton.clickedCallBack();
+                break;
+            case Qt.Key_F1:
+                oaButton.clickedCallBack();
+                break;
+            case Qt.Key_F2:
+                csButton.clickedCallBack();
+                break;
+            default:
+                return;
             }
         }
+    }
 
     UdpServer {
         id: udpServer;
@@ -377,15 +377,6 @@ Window {
 
                         model: ListModel {
                             id: model;
-                            //                            ListElement {
-                            //                                text: "Null";
-                            //                            }
-                            //                            ListElement {
-                            //                                text: "192.168.2.1";
-                            //                            }
-                            //                            ListElement {
-                            //                                text: "192.168.2.2";
-                            //                            }
                         }
                         onCurrentIndexChanged: {
                             if (model.get(currentIndex) == null) {
@@ -393,7 +384,6 @@ Window {
                             }
                             console.log("agv ip changed " + currentIndex + " " + model.get(currentIndex).text);
                             udpServer.currentIp = model.get(currentIndex).text;
-                            //                            udpServer.cmdLoadPath();
                         }
                     }
                 }
@@ -594,9 +584,9 @@ Window {
                             }
                             onOaChanged: {
                                 if (oa == 0) {
-                                    color = "transparent";
-                                } else {
                                     color = "aquamarine";
+                                } else {
+                                    color = "transparent";
                                 }
                             }
                             onOnOffChanged: {
@@ -947,6 +937,109 @@ Window {
                             RectangleStatus{
                                 id: chargeAlarm;
                                 text: "⚠";
+                            }
+                        }
+                        Row {
+                            spacing: 2;
+                            TextField {
+                                id: idxTextField
+                                width: 30;
+                                height: 20;
+                                textColor: "blue";
+                                placeholderText: qsTr("idx");
+                            }
+                            TextField {
+                                id: xTextField;
+                                width: 30;
+                                height: 20;
+                                textColor: "blue";
+                                placeholderText: qsTr("x");
+                            }
+                            TextField {
+                                id: yTextField;
+                                width: 30;
+                                height: 20;
+                                textColor: "blue";
+                                placeholderText: qsTr("y");
+                            }
+                            Button {
+                                id: enterButton;
+                                width: 34;
+                                height: 20;
+                                text: "Enter";
+                                onClicked: {
+                                    mapGrid.setAgvModel(agvAddrCombobox.currentText,
+                                                        idxTextField.text,
+                                                        xTextField.text,
+                                                        yTextField.text,
+                                                        agvCombobox.currentText);
+                                }
+                            }
+                        }
+                        Row {
+                            spacing: 2;
+                            Text {
+                                id: agvDerection;
+                                y: 6;
+                                text: qsTr("Derection:")
+                            }
+                            ComboBox {
+                                width: 50;
+                                id: agvCombobox;
+                                model: [
+                                    "0",
+                                    "90",
+                                    "180",
+                                    "270"
+                                ];
+                                onCurrentIndexChanged: {
+//                                    mapGrid.agvModel.r = currentText;
+                                }
+                            }
+                            Button {
+                                width: 34;
+                                height: 20;
+                                text: "move";
+                                onClicked: {
+                                    //mapGrid.agvModel.agvMove(parseInt(xTextField.text), parseInt(yTextField.text));
+//                                  mapGrid.agvModel.linePath(0, -20, -102, -102);
+                                }
+                            }
+                        }
+                        Row {
+                            spacing: 2;
+                            Text {
+                                y: 6;
+                                text: qsTr("AGV:")
+                            }
+                            ComboBox {
+                                width: 50;
+                                id: agvAddrCombobox;
+                                model: [
+                                    "1:1",
+                                    "2:2",
+                                    "2:4",
+                                    "3:3",
+                                    "3:4"
+                                ];
+                                onCurrentIndexChanged: {
+                                }
+                            }
+                            Button {
+                                width: 34;
+                                height: 20;
+                                text: "add";
+                                onClicked: {
+                                    mapGrid.addAgvModel(agvAddrCombobox.currentText);
+                                }
+                            }
+                            Button {
+                                width: 34;
+                                height: 20;
+                                text: "del";
+                                onClicked: {
+                                    mapGrid.delAgvModel(agvAddrCombobox.currentText);
+                                }
                             }
                         }
                     }

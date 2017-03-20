@@ -10,6 +10,9 @@ Rectangle {
     property real scaleGrid: 1.0;
     property alias mapGrid: mapGrid;
     signal currentIndexChanged;
+    property Component agvComponent: null;
+    property var agvModels: [];
+    property var agvAddrs: [];
     clip: true;
     MouseArea {
         anchors.fill: parent;
@@ -96,5 +99,72 @@ Rectangle {
                 wrapper.GridView.view.focus = index;
             }
         }
+    }
+    function addAgvModel(addr) {
+        if (agvComponent == null) {
+            agvComponent = Qt.createComponent("AgvModel.qml");
+        }
+        var agv;
+        if (agvComponent.status == Component.Ready) {
+            // createObject时赋值x: mapGrid.x + ((gridIndex % columns) * mapGrid.cellWidth) - width / 2 + gridX
+            // 报错gridIndex找不到，采用简单赋值可以
+            agv = agvComponent.createObject(mapGrid, {
+                "x": mapGrid.x,
+                "y": mapGrid.y,
+                "scale": root.scaleGrid
+                });
+            if (agv == null) {
+                // Error
+                console.log("create agv object error");
+                return;
+            }
+            agvModels.push(agv);
+            agvAddrs.push(addr);
+            console.log("add agv model: " + agvModels);
+            console.log("add agv model: " + agvAddrs);
+        }
+    }
+    function delListItem(list, i) {
+        var newList = [];
+        var j;
+        for (j = 0; j < list.length; j++) {
+            if (j == i) {
+                continue;
+            }
+            newList.push(list[j]);
+        }
+        return newList;
+    }
+    function searchAgvModel(addr) {
+        var i;
+        for (i = 0; i < agvAddrs.length; i++) {
+            if (agvAddrs[i] == addr) {
+                break;
+            }
+        }
+        if (i == agvAddrs.length) {
+            console.log("del Agv Model: can not find " + addr);
+            return -1;
+        }
+        return i;
+    }
+    function delAgvModel(addr) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        agvModels[i].destroy();
+        agvAddrs = delListItem(agvAddrs, i);
+        agvModels = delListItem(agvModels, i);
+        console.log("del agv model: " + agvModels);
+        console.log("del agv model: " + agvAddrs);
+    }
+    function setAgvModel(addr, index, x, y, r) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        var agv = agvModels[i];
+        agv.agvSetPosition(index, x, y, r);
     }
 }

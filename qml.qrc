@@ -14,5 +14,6 @@
         <file>RectangleStatus.qml</file>
         <file>FlatButton.qml</file>
         <file>MapEditWindow.qml</file>
+        <file>AgvModel.qml</file>
     </qresource>
 </RCC>

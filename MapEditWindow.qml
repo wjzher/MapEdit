@@ -16,7 +16,7 @@ Window {
     height: 640;
     id: rootItem;
     color: "#EEEEEE";
-    title: qsTr("MapEditor");
+    title: qsTr("南开太阳AGV地图运行仿真系统");
     property alias pathList: pathList;
     property alias mapGrid: mapGrid;
 

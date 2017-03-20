@@ -58,8 +58,10 @@ private:
     QByteArray makeTickResponse(QJsonObject &jsonObj);
     void emitSignals(QString &ip, int inf, QJsonObject &param);
     void emitCardIdSignal(QString &addr, QJsonObject &param);
+    void emitStatus(QString &ip, QJsonObject &param);
 signals:
     void agvStatusChanged(int inf, const QString &status);
+    void agvStatusChanged2(const QString &ip, const QString &status);
     // 信号参数类型QString需要用const引用类型，否则qml不识别
     void agvAddressChanged(const QString &ip);
     void agvCardIdChanged(const QString &ip, int lastId, int cardId);

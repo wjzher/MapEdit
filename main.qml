@@ -18,5 +18,6 @@ QtObject {
 
     property var agvControlWindow: AgvDialog {
         id: agvDialog;
+        visible: true;
     }
 }

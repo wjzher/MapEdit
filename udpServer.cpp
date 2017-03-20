@@ -210,6 +210,18 @@ void UdpServer::emitSignals(QString &ip, int inf, QJsonObject &param)
     return;
 }
 
+void UdpServer::emitStatus(QString &ip, QJsonObject &param)
+{
+    if (param.isEmpty()) {
+        return;
+    }
+    qDebug() << "emit Status " << ip << " " << param;
+    QJsonDocument jsonDoc(param);
+    QString s(jsonDoc.toJson(QJsonDocument::Compact));
+    emit agvStatusChanged2(ip, s);
+    return;
+}
+
 /*
  * inf + json string
  */
