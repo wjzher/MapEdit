@@ -5,7 +5,7 @@ Rectangle {
     id: root;
     property int rows: 5;
     property int columns: 5;
-    property int numberMargins: 1;
+    property int numberMargins: 0;
     property int gridLength: 50;
     property real scaleGrid: 1.0;
     property alias mapGrid: mapGrid;
@@ -102,8 +102,8 @@ Rectangle {
             width: gridLength * root.scaleGrid;
             height: gridLength * root.scaleGrid;
             color: "aquamarine";
-            border.color: "royalblue";
-            border.width: wrapper.GridView.isCurrentItem ? 2 : 0;
+            border.color: wrapper.GridView.isCurrentItem ? "royalblue" : "white";
+            border.width: wrapper.GridView.isCurrentItem ? 2 : 1;
             text: index;
             onClicked: {
                 console.log("wrapper " + index + " clicked.");
@@ -217,6 +217,14 @@ Rectangle {
             agvModels[i].scale = scaleGrid;
             agvUpdate(i);
         }
+    }
+    function agvUpdateStatus(addr, s) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        agvModels[i].agvStatus = s;
+        console.log("agvUpdateStatus: " + addr + ", " + s);
     }
 
     function setAgvModel(addr, index, x, y, r) {

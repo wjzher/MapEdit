@@ -905,6 +905,41 @@ Rectangle {
         // 判断是否有交点
     }
 
+    // 计算圆弧r上经过d的角度
+    function calDeltaAngle(r, d) {
+        return d / r;
+    }
+
+    // 计算此次行走距离，返回行走距离 点
+    function calDeltaDistance(sp) {
+        if (sp > 5 || sp < 1) {
+            return 0;
+        }
+        sp -= 1;
+        return agvTimer.interval * speedVal[sp] / 1000 * 100;   // cm <=> 点
+    }
+    // 计算下一个位置
+    // cv: 磁条曲线list
+    // crossType: 与MagSensor相交的曲线类型 0: 直线; 1: 圆弧
+    // dir: 行走方向，相对于世界坐标系
+    function calNextPosition(cv, crossType, dir) {
+        if (crossType == 1) {
+
+        }
+
+        if (cv.length == 1) {
+
+        }
+    }
+    function isAgvMove(infos) {
+        var sta = infos.sta;
+        if (sta == 1 || sta == 2 || sta == 3 || sta == 4
+                || sta == 5 || sta == 6 || sta == 9) {
+            return true;
+        }
+        return false;
+    }
+
     Timer {
         id: agvTimer;
         interval: 100;
@@ -924,6 +959,15 @@ Rectangle {
             // 只有运动时才有效
             // 得到磁条曲线
             cv = getMagCurve(infos.sta, infos.turnto, rect.r);
+            // 判断AGV是否在磁条上
+
+            // 判断动作，进行移动
+
+            if (isAgvMove() == false) {
+                return;
+            }
+            // 得到磁条曲线
+            cv = getMagCurve();
             // 判断AGV是否在磁条上
 
             // 判断动作，进行移动

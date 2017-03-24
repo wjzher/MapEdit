@@ -346,7 +346,8 @@ Window {
             mapGrid.addAgvModel(ip);
         }
         onAgvStatusChanged2: {
-//            console.log("agv status changed " + ip);
+            console.log("agv status changed " + ip);
+            mapGrid.agvUpdateStatus(ip, status);
         }
     }
 
@@ -770,7 +771,6 @@ Window {
                                                 xTextField.text,
                                                 yTextField.text,
                                                 agvRotation.text);
-                            //mapGrid.agvModel(agvipCombobox.currentText);
                         }
                     }
                 }
