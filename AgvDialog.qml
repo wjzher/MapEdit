@@ -345,6 +345,10 @@ Window {
             initFlag = 0;
             mapGrid.addAgvModel(ip);
         }
+        onAgvStatusChanged2: {
+            console.log("agv status changed " + ip);
+            mapGrid.agvUpdateStatus(ip, status);
+        }
     }
 
     Row{
@@ -764,7 +768,7 @@ Window {
                                                 idxTextField.text,
                                                 xTextField.text,
                                                 yTextField.text,
-                                                agvCombobox.currentText);
+                                                agvRotation.text);
                         }
                     }
                 }
@@ -775,17 +779,10 @@ Window {
                         y: 6;
                         text: qsTr("R:")
                     }
-                    ComboBox {
+                    TextField {
                         width: 50;
-                        id: agvCombobox;
-                        model: [
-                            "0",
-                            "90",
-                            "180",
-                            "270"
-                        ];
-                        onCurrentIndexChanged: {
-                        }
+                        id: agvRotation;
+                        text: "0";
                     }
                     CheckBox {
                         y: 6;

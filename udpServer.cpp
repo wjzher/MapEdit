@@ -130,6 +130,7 @@ void UdpServer::readPendingDatagrams()
             QJsonObject paramObj = jsonObj["param"].toObject();
             emitSignals(addr, inf, paramObj);
             emitCardIdSignal(addr, paramObj);
+            emitStatus(addr, paramObj);
             // 回复心跳
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
         } else {
