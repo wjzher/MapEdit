@@ -130,6 +130,7 @@ void UdpServer::readPendingDatagrams()
             QJsonObject paramObj = jsonObj["param"].toObject();
             emitSignals(addr, inf, paramObj);
             emitCardIdSignal(addr, paramObj);
+            emitStatus(addr, paramObj);
             // 回复心跳
             udpSocket.writeDatagram(makeTickResponse(jsonObj), sender, senderPort);
         } else {
@@ -184,7 +185,7 @@ void UdpServer::emitCardIdSignal(QString &addr, QJsonObject &param)
     }
     int id = jObj["prepos"].toString().toInt();
     if (id <= 0) {
-        qDebug() << "emitCardIdSignal Bug: can not find prepos 2";
+//        qDebug() << "emitCardIdSignal Bug: can not find prepos 2";
         return;
     }
     if (cardIdList[i] != id) {
@@ -215,7 +216,7 @@ void UdpServer::emitStatus(QString &ip, QJsonObject &param)
     if (param.isEmpty()) {
         return;
     }
-    qDebug() << "emit Status " << ip << " " << param;
+//    qDebug() << "emit Status " << ip << " " << param;
     QJsonDocument jsonDoc(param);
     QString s(jsonDoc.toJson(QJsonDocument::Compact));
     emit agvStatusChanged2(ip, s);

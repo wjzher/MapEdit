@@ -49,10 +49,13 @@ Rectangle {
         focus: true;
         Component.onCompleted: {
         }
-        onCellWidthChanged: agvUpdateAll();
-//        onCellHeightChanged: agvUpdateAll();
-        onXChanged: agvUpdateAll();
-        onYChanged: agvUpdateAll();
+//        onCellWidthChanged: {
+//            console.log("cell width changed");
+//            agvUpdateAll();
+//        }
+        onCellHeightChanged: agvUpdateAll();
+//        onXChanged: agvUpdateAll();
+//        onYChanged: agvUpdateAll();
 //        onWidthChanged: agvUpdateAll();
 //        onHeightChanged: agvUpdateAll();
         MouseArea {
@@ -117,9 +120,9 @@ Rectangle {
         if (agvComponent.status == Component.Ready) {
             // createObject时赋值x: mapGrid.x + ((gridIndex % columns) * mapGrid.cellWidth) - width / 2 + gridX
             // 报错gridIndex找不到，采用简单赋值可以
-            agv = agvComponent.createObject(root, {
-                "x": mapGrid.x,
-                "y": mapGrid.y,
+            agv = agvComponent.createObject(mapGrid, {
+                "x": 0,
+                "y": 0,
                 "visible": false,
                 "scale": root.scaleGrid
                 });
@@ -155,6 +158,14 @@ Rectangle {
             return false;
         }
         return agvModels[i].visible;
+    }
+    function agvModel(addr) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return false;
+        }
+        console.log("agvModel test...")
+        return agvModels[i].getMapItemType();
     }
 
     function delListItem(list, i) {
@@ -194,8 +205,8 @@ Rectangle {
     }
     function agvUpdate(i) {
         var agv = agvModels[i];
-        agv.x = mapGrid.x + ((agv.gridIndex % columns) * mapGrid.cellWidth) - agv.width / 2 + agv.gridX * agv.scale;
-        agv.y = mapGrid.y + parseInt(agv.gridIndex / columns) * mapGrid.cellHeight - agv.height / 2 + agv.gridY * agv.scale;
+        agv.x = ((agv.gridIndex % columns) * mapGrid.cellWidth) - agv.width / 2 + agv.gridX * agv.scale;
+        agv.y = parseInt(agv.gridIndex / columns) * mapGrid.cellHeight - agv.height / 2 + agv.gridY * agv.scale;
         console.log("agv update: col " + columns + " w " + mapGrid.cellWidth + " gridx " + agv.gridX + " " + agv.x);
         console.log("idx " + agv.gridIndex + " agv.y " + agv.y + " agv.width " + agv.width + " agv.height " + agv.height);
         console.log("agv scale: " + agv.scale);
@@ -216,5 +227,14 @@ Rectangle {
         var agv = agvModels[i];
         agv.agvSetPosition(index, x, y, r);
         agvUpdate(i);
+    }
+
+    function agvTestGetMagCurve(addr, act, turn) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        var agv = agvModels[i];
+        agv.getMagCurve(act, turn);
     }
 }

@@ -345,6 +345,9 @@ Window {
             initFlag = 0;
             mapGrid.addAgvModel(ip);
         }
+        onAgvStatusChanged2: {
+//            console.log("agv status changed " + ip);
+        }
     }
 
     Row{
@@ -739,6 +742,7 @@ Window {
                         id: xTextField;
                         width: 26;
                         height: 20;
+                        text: "25"
                         textColor: "blue";
                         validator: IntValidator {}
                         placeholderText: qsTr("x");
@@ -747,6 +751,7 @@ Window {
                         id: yTextField;
                         width: 26;
                         height: 20;
+                        text: "25"
                         textColor: "blue";
                         validator: IntValidator {}
                         placeholderText: qsTr("y");
@@ -764,7 +769,8 @@ Window {
                                                 idxTextField.text,
                                                 xTextField.text,
                                                 yTextField.text,
-                                                agvCombobox.currentText);
+                                                agvRotation.text);
+                            //mapGrid.agvModel(agvipCombobox.currentText);
                         }
                     }
                 }
@@ -775,17 +781,10 @@ Window {
                         y: 6;
                         text: qsTr("R:")
                     }
-                    ComboBox {
+                    TextField {
                         width: 50;
-                        id: agvCombobox;
-                        model: [
-                            "0",
-                            "90",
-                            "180",
-                            "270"
-                        ];
-                        onCurrentIndexChanged: {
-                        }
+                        id: agvRotation;
+                        text: "0";
                     }
                     CheckBox {
                         y: 6;
@@ -801,6 +800,26 @@ Window {
                             } else {
                                 mapGrid.hideAgvModel(agvipCombobox.currentText)
                             }
+                        }
+                    }
+                }
+                Row {
+                    spacing: 4;
+                    TextField {
+                        width: 50;
+                        id: agvAct;
+                        text: "1";
+                    }
+                    TextField {
+                        width: 50;
+                        id: agvTurn;
+                        text: "1";
+                    }
+                    Button {
+                        width: 30;
+                        text: "test";
+                        onClicked: {
+                            mapGrid.agvTestGetMagCurve(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
                         }
                     }
                 }
