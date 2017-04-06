@@ -47,8 +47,6 @@ Rectangle {
         cellHeight: (gridLength + numberMargins) * root.scaleGrid;
         cellWidth: (gridLength + numberMargins) * root.scaleGrid;
         focus: true;
-        Component.onCompleted: {
-        }
 //        onCellWidthChanged: {
 //            console.log("cell width changed");
 //            agvUpdateAll();
@@ -112,10 +110,16 @@ Rectangle {
             }
         }
     }
-    function addAgvModel(addr) {
+    Component.onCompleted: {
         if (agvComponent == null) {
             agvComponent = Qt.createComponent("AgvModel.qml");
+            if (agvComponent.status != Component.Ready) {
+                console.log("Warning: agv Componet not ready");
+            }
         }
+    }
+
+    function addAgvModel(addr) {
         var agv;
         if (agvComponent.status == Component.Ready) {
             // createObject时赋值x: mapGrid.x + ((gridIndex % columns) * mapGrid.cellWidth) - width / 2 + gridX
@@ -187,7 +191,7 @@ Rectangle {
             }
         }
         if (i == agvAddrs.length) {
-            console.log("del Agv Model: can not find " + addr);
+            console.log("searchAgvModel: can not find " + addr);
             return -1;
         }
         return i;
@@ -224,7 +228,7 @@ Rectangle {
             return;
         }
         agvModels[i].agvStatus = s;
-        console.log("agvUpdateStatus: " + addr + ", " + s);
+        //console.log("agvUpdateStatus: " + addr + ", " + s);
     }
 
     function setAgvModel(addr, index, x, y, r) {
@@ -244,5 +248,13 @@ Rectangle {
         }
         var agv = agvModels[i];
         agv.getMagCurve(act, turn);
+    }
+    function agvTestGetCross(addr, act, turn) {
+        var i = searchAgvModel(addr);
+        if (i == -1) {
+            return;
+        }
+        var agv = agvModels[i];
+        agv.crossTestLine(act, turn);
     }
 }

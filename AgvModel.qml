@@ -30,6 +30,25 @@ Rectangle {
         text: "";
         rotation: rect.rotation;
     }
+    Canvas {
+        id: canvas;
+        anchors.fill: parent;
+        onPaint: {
+            var plu = [magToCenter + rect.width / 2, magLength / 2 + rect.height / 2];
+            var pld = [magToCenter + rect.width / 2, -magLength / 2 + rect.height / 2];
+            var pru = [-magToCenter + rect.width / 2, magLength / 2 + rect.height / 2];
+            var prd = [-magToCenter + rect.width / 2, -magLength / 2 + rect.height / 2];
+            var ctx = getContext("2d");
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "lightblue";
+            ctx.beginPath();
+            ctx.moveTo(plu[0], plu[1]);
+            ctx.lineTo(pld[0], pld[1]);
+            ctx.moveTo(pru[0], pru[1]);
+            ctx.lineTo(prd[0], prd[1]);
+            ctx.stroke();
+        }
+    }
 
     Rectangle {
         width: 15;
@@ -73,6 +92,20 @@ Rectangle {
         y += dy;
         r += dr;
     }
+    // 按照当前agv坐标判断所在index
+    function updateAgvGridIndex(grid) {
+        var length = grid.mapGrid.cellWidth;
+        var x = rect.x + rect.width / 2;    // 取到AGV的中心坐标
+        var y = rect.y + rect.height / 2;
+        console.log("updateAgvGridIndex: " + rect.x + " " + rect.y
+                    + " " + rect.width / 2 + " " + rect.height / 2);
+        gridIndex = (parseInt(y / length)) * grid.columns + parseInt(x / length);
+        console.log("updateAgvGridIndex: " + x + " " + y
+                    + " " + parseInt(y / length) + " " + grid.columns);
+        gridX = parseInt(x) % length;
+        gridY = parseInt(y) % length;
+        return;
+    }
     // set agv position
     function agvSetPosition(i, x, y, r) {
         gridIndex = i;
@@ -80,7 +113,7 @@ Rectangle {
         gridY = y;
         rect.r = r;
     }
-    // 坐标转换[x, y]
+    // 坐标转换[x, y], 将相对于AGV Model中心点的坐标，转换为相对于grid坐标
     function agvCoordinateTransformation(x, y) {
         var point = [0, 0];
         var rad = - Math.PI * r / 180;
@@ -88,14 +121,13 @@ Rectangle {
         point[1] = x * Math.sin(rad) + y * Math.cos(rad);
         point[0] = x * Math.cos(rad) - y * Math.sin(rad);
         // 再做偏移变换
-        point[0] += rect.x;
-        point[1] += rect.y;
+        point[0] += rect.x + rect.width / 2;
+        point[1] += rect.y + rect.height / 2;
         return point;
     }
 
     // 返回磁传感器位置[[x1, y1], [x2, y2]], 线段坐标相对于mapGrid
     function agvGetMagSensor(sta) {
-        var magArr = [];
         var p1 = [0, 0], p2 = [0, 0];
         if (sta == 1) {
             // 前行
@@ -112,10 +144,8 @@ Rectangle {
         }
         p1 = agvCoordinateTransformation(p1[0], p1[1]);
         p2 = agvCoordinateTransformation(p2[0], p2[1]);
-        magArr[0] = p1;
-        magArr[1] = p2;
-        console.log("agv MagSensor: " + magArr[0] + " -> " + magArr[1])
-        return magArr;
+        console.log("agv MagSensor: " + p1 + " -> " + p2);
+        return { type : 0, p1 : { x : p1[0], y : p1[1] }, p2 : { x : p2[0], y : p2[1] }};
     }
     //返回AGV方向，direction x正方向为1, y正方向为2, x负方向为-1, y负方向为-2;
     function getAgvDirection(r) {
@@ -124,11 +154,11 @@ Rectangle {
         if (((r >= 360 - angle) && (r < 360)) || ((r >= 0) && (r <= angle))) {
             direction = 1;
         } else if ((r >= 90 - angle) && (r <= 90  + angle)) {
-            direction = 2;
+            direction = -2;
         } else if ((r >= 180 - angle) && (r <= 180 + angle)) {
             direction = -1;
         } else if ((r >= 90 - angle) && (r <= 90 + angle)) {
-            direction = -2;
+            direction = 2;
         }
         return direction;
     }
@@ -520,6 +550,7 @@ Rectangle {
             if (line == false) {
                 console.log("lines connect err. ");
             }
+            line = lineAdd(line);
             return line;
         }
         // 当前item不存在弧线
@@ -531,7 +562,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line);
             return line;
         }
         // y正方向
@@ -542,7 +575,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line);
             return line;
         }
         // 存在直线和弧线的情况下，按照分支情况走曲线
@@ -565,7 +600,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line);
             return line;
         }
         // 存在直线和弧线的情况下，按照分支情况走曲线
@@ -610,7 +647,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line, null);
             return line;
         }
         // 当前item不存在弧线
@@ -622,7 +661,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line, null);
             return line;
         }
         // x正方向
@@ -636,7 +677,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line);
             return line;
         }
         // 存在直线和弧线的情况下，按照分支情况走曲线
@@ -660,7 +703,9 @@ Rectangle {
             line = linesConnect(line1, line2);
             if (line == false) {
                 console.log("lines connect err. ");
+                return false;
             }
+            line = lineAdd(line);
             return line;
         }
         // 存在直线和弧线的情况下，按照分支情况走曲线
@@ -718,8 +763,8 @@ Rectangle {
             return item;
         }
     }
-
     // sta 为目标动作
+    // 得到地磁曲线
     function getMagCurve(sta, turn) {
         var r = rect.r;
         var grid = parent.parent;
@@ -729,39 +774,40 @@ Rectangle {
             console.log("off track. direction == 0");
             return false;
         }
+        console.log("getMagCurve agv dir " + direction);
         direction = getAgvMoveDirection(sta, direction);
         if (direction == 0) {
             console.log("getAgvMoveDirection failed.");
             return false;
         }
-       console.log("getMagCurve agv move dir " + direction)
+        console.log("getMagCurve agv move dir " + direction);
         if (direction == 1) {
             var nextItem = itemRight(gridIndex, grid);
             if (nextItem == null) {
                 return false;
             } else {
-                getLines(item, nextItem, sta, turn, direction, true);
+                return getLines(item, nextItem, sta, turn, direction, true);
             }
         } if (direction == -1) {
             nextItem = itemLeft(gridIndex, grid);
             if (nextItem == null) {
                 return false;
             } else {
-                getLines(item, nextItem, sta, turn, direction, true);
+                return getLines(item, nextItem, sta, turn, direction, true);
             }
         } if (direction == 2) {
             nextItem = itemDown(gridIndex, grid);
             if (nextItem == null) {
                 return false;
             } else {
-                getLines(item, nextItem, sta, turn, direction, false);
+                return getLines(item, nextItem, sta, turn, direction, false);
             }
         } if (direction == -2) {
             nextItem = itemUp(gridIndex, grid);
             if (nextItem == null) {
                 return false;
             } else {
-                getLines(item, nextItem, sta, turn, direction, false);
+                return getLines(item, nextItem, sta, turn, direction, false);
             }
         }
     }
@@ -824,6 +870,7 @@ Rectangle {
     }
     // 求圆和线段的交点，参考http://thecodeway.com/blog/?p=932
     function segmentArcIntr(p1, p2, c0, r, sa, ea) {
+        var p;
         var x2 = p2.x;
         var x1 = p1.x;
         var y1 = p1.y;
@@ -856,12 +903,20 @@ Rectangle {
             x = x1 + (x2 - x1) * u2;
             y = y1 + (y2 - y1) * u2;
             console.log("存在一个交点 u2 (" + x + ", " + y + ")");
-            return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
+            if (pointIsAtArc(x, y, c0.x, c0.y, sa, ea) == true) {
+                return { x: x , y: y }
+            }
+            return false;
+            //return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
         } else if (u1 < 1 && u1 > 0) {
             x = x1 + (x2 - x1) * u1;
             y = y1 + (y2 - y1) * u1;
             console.log("存在一个交点 u1 (" + x + ", " + y + ")");
-            return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
+            if (pointIsAtArc(x, y, c0.x, c0.y, sa, ea) == true) {
+                return { x: x , y: y }
+            }
+            return false;
+            //return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
         } else if (u1 < 1 && u1 > 0 && u2 < 1 && u2 > 0) {
             console.log("存在两个交点");
             x = x1 + (x2 - x1) * u1;
@@ -873,13 +928,16 @@ Rectangle {
             x = x1 + (x2 - x1) * u2;
             y = y1 + (y2 - y1) * u2;
             console.log("一个交点 u2 (" + x + ", " + y + ")");
-            return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
+            if (pointIsAtArc(x, y, c0.x, c0.y, sa, ea) == true) {
+                return { x: x , y: y }
+            }
+            return false;
+            //return pointIsAtArc(x, y, c0.x, c0.y, sa, ea);
         } else {
             console.log("segmentArcIntr Bug: can not reach");
             return false;
         }
     }
-
     // 判断两曲线是否有交点，cv1 直线，cv2 直线/曲线
     // 线段cv定义 { type: 0, p1: {x: 0, y: 0}, p2: {x: 0, y: 0} }
     // 弧线cv定义 { type: 1, center: {x: 0, y: 0}, r: 100, startAngle: PI, endAngle: PI / 2 }
@@ -891,9 +949,11 @@ Rectangle {
             return false;
         }
         if (cv1.type == 0 && cv2.type == 0) {
+            console.log("curveIsCross two lines")
             return segmentsIntr(cv1.p1, cv1.p2, cv2.p1, cv2.p2);
         }
         if (cv1.type == 0 && cv2.type == 1) {
+            console.log("curveIsCross lines & arc")
             return segmentArcIntr(cv1.p1, cv1.p2, cv2.center, cv2.r, cv2.startAngle, cv2.endAngle);
         }
         return false;
@@ -939,6 +999,83 @@ Rectangle {
         }
         return false;
     }
+    // agv移动距离 返回值为偏移量
+    function agvMoveTo(sp, direction, type) {
+        var magCv;
+        var x = 0, y = 0, r = 0;
+
+        //var sp = infos.v;
+        // 当agv沿直线运行时
+        if (type == 0) {
+            if (direction == 1) {
+                x = calDeltaDistance(sp);
+                x = calDeltaDistance(sp);
+            } else if (direction == -1) {
+                x = -calDeltaDistance(sp);
+                x = -calDeltaDistance(sp);
+            } else if (direction == 2) {
+                y = calDeltaDistance(sp);
+                y = calDeltaDistance(sp);
+            } else if (direction == -2) {
+                y = -calDeltaDistance(sp);
+                y = -calDeltaDistance(sp);
+            } else {
+                x = 0;
+                y = 0;
+            }
+            return { x : x, y : y, r : r };
+        }
+    }
+
+    function crossTestLine(sta, turn) {
+        var r = rect.r;
+        var cv, crossPoint;
+        var i;
+        var direction = getAgvDirection(r);
+        if (direction == 0) {
+            console.log("off track. direction == 0");
+            return false;
+        }
+        direction = getAgvMoveDirection(sta, direction);
+        if (direction == 0) {
+            console.log("getAgvMoveDirection failed.");
+            return false;
+        }
+        // 得到磁导航曲线
+        var magCv = agvGetMagSensor(sta);
+        // 得到磁条曲线
+        cv = getMagCurve(sta, turn);
+        console.log("cv.length = " + cv.length);
+        if (cv == false) {
+            console.log("get curve failed. ");
+            return false;
+        }
+        // 判断AGV是否在磁条上
+        for (i = 0; i < cv.length; i++) {
+            console.log("check curve corss...");
+            printLine(magCv);
+            printLine(cv[i]);
+            crossPoint = curveIsCross(magCv, cv[i]);
+            console.log("crossPoint " + crossPoint.x + " " + crossPoint.y)
+            if (crossPoint != false) {
+                break;
+            }
+            console.log("curve " + i + " Is not Cross")
+        }
+        if (i == cv.length) {
+            console.log("agv 脱磁");
+            return false;
+        }
+        var type = cv[i].type;
+        var agvTo = agvMoveTo(turn, direction, type);
+        console.log("agvMoveTo(turn, 1, type): " + turn + " " +  type)
+        agvMove(agvTo.x, agvTo.y, agvTo.r);
+
+        console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
+        updateAgvGridIndex(parent.parent);
+        console.log(gridIndex + " " + gridX + " "  + gridY)
+        // 判断动作，进行移动
+    }
 
     Timer {
         id: agvTimer;
@@ -957,20 +1094,16 @@ Rectangle {
                 return;
             }
             // 只有运动时才有效
-            // 得到磁条曲线
-            cv = getMagCurve(infos.sta, infos.turnto, rect.r);
-            // 判断AGV是否在磁条上
-
-            // 判断动作，进行移动
-
             if (isAgvMove() == false) {
                 return;
             }
             // 得到磁条曲线
-            cv = getMagCurve();
+            cv = getMagCurve(infos.sta, infos.turnto);
             // 判断AGV是否在磁条上
 
             // 判断动作，进行移动
+
+
 
             // 保存移动后的数据
         }

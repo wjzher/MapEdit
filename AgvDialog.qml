@@ -346,7 +346,7 @@ Window {
             mapGrid.addAgvModel(ip);
         }
         onAgvStatusChanged2: {
-            console.log("agv status changed " + ip);
+            //console.log("agv status changed " + ip);
             mapGrid.agvUpdateStatus(ip, status);
         }
     }
@@ -819,7 +819,8 @@ Window {
                         width: 30;
                         text: "test";
                         onClicked: {
-                            mapGrid.agvTestGetMagCurve(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
+                            //mapGrid.agvTestGetMagCurve(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
+                            mapGrid.agvTestGetCross(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
                         }
                     }
                 }
