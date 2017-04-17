@@ -4,7 +4,9 @@ import QtQuick.Controls.Styles 1.2
 
 Rectangle {
     id: root;
-    width: 200;
+    width: 190;
+    height: comboBox.height;
+    color: "transparent";
     property alias index: comboBox.currentIndex;
     Row {
         spacing: 8;
