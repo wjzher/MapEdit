@@ -14,6 +14,9 @@ Window {
     modality: Qt.WindowNoState;
     property alias udpServer: udpServer;
 
+    function getCurrentCardId() {
+        return parseInt(agvPrepos.text);
+    }
     Item {
         focus: true
         Keys.onPressed: {

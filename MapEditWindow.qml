@@ -20,6 +20,11 @@ Window {
     property alias pathList: pathList;
     property alias mapGrid: mapGrid;
 
+    UpdateCardIdDialog {
+        id: updateCardIdDialog;
+        visible: false;
+    }
+
     FileDialog {
         id: fileDialog;
         title: "Please choose a file";
@@ -150,10 +155,69 @@ Window {
                 mapData.setRows(rows);
             }
 
+            function searchNextItem(index) {
+                var nextItem;
+                switch (updateCardIdDialog.direction) {
+                case 0:
+                    nextItem = updateCardIdDialog.agvModel.itemUp(index, mapGrid);
+                    break;
+                case 1:
+                    nextItem = updateCardIdDialog.agvModel.itemDown(index, mapGrid);
+                    break;
+                case 2:
+                    nextItem = updateCardIdDialog.agvModel.itemLeft(index, mapGrid);
+                    break;
+                case 3:
+                    nextItem = updateCardIdDialog.agvModel.itemRight(index, mapGrid);
+                    break;
+                default:
+                    return null;
+                }
+                return nextItem;
+            }
+            function updateMapItemMoveToNext(idx) {
+                var nextItem;
+                while (true) {
+                    nextItem = searchNextItem(idx);
+                    if (nextItem == null) {
+                        break;
+                    }
+                    updateCardIdDialog.currentItem = nextItem;
+                    idx = updateCardIdDialog.currentIndex = mapGrid.mapGrid.indexAt(nextItem.x, nextItem.y);
+                    if (nextItem.isCard == false) {
+                        continue;
+                    }
+                    break;
+                }
+                if (nextItem == null) {
+                    console.log("search next item null. stop!");
+                    updateCardIdDialog.run = false;
+                } else {
+                    console.log("search next item: " + updateCardIdDialog.currentIndex);
+                }
+            }
+
+            function updateMapItemCardId(id) {
+                if (updateCardIdDialog.run == false) {
+                    return;
+                }
+                // set updateCardIdDialog currentIndex card id
+                var idx = updateCardIdDialog.currentIndex;
+                var item = updateCardIdDialog.currentItem;
+                if (item == null) {
+                    return;
+                }
+                console.log("update item " + idx + " id " + id);
+                mapGrid.setItemCardID2(idx, id);
+                // get next updateCardIdDialog currentIndex
+                updateMapItemMoveToNext(idx);
+            }
+
             function updateAgvCardId(ip, lastId, currentId) {
                 var i, item;
                 console.log("updateAgvCardId " + ip + " " + lastId + " " + currentId);
-                cardIDText.text = currentId;    // for auto update Item cardID, only test
+                //cardIDText.text = currentId;    // for auto update Item cardID, only test
+                updateMapItemCardId(currentId);
                 if (lastId > 0) {
                     i = mapData.getItemIndexByCardId(lastId);
                     if (i < 0) {
@@ -1026,6 +1090,20 @@ Window {
                         "YUMStop",
                         "YDMStop"
                     ];
+                }
+                Button {
+                    id: updateDialogButton;
+                    anchors.left: repeatItemTypeCombo.right;
+                    anchors.leftMargin: 2;
+                    anchors.top: repeatItemTypeCombo.top;
+                    text: updateCardIdDialog.visible ? "Hide" : "Show";
+                    onClicked: {
+                        if (updateCardIdDialog.visible) {
+                            updateCardIdDialog.hide();
+                        } else {
+                            updateCardIdDialog.show();
+                        }
+                    }
                 }
                 TextField {
                     id: repeatStartText;
