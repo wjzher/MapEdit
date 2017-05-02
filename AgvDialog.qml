@@ -381,7 +381,14 @@ Window {
 
                         model: ListModel {
                             id: model;
+                            ListElement {
+                                text: "192.168.2.xx";
+                            }
                         }
+                        Component.onCompleted: {
+                            mapGrid.addAgvModel("192.168.2.xx");
+                        }
+
                         onCurrentIndexChanged: {
                             if (model.get(currentIndex) == null) {
                                 return;

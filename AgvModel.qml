@@ -23,6 +23,13 @@ Rectangle {
     property string agvStatus: "";
     property var speedVal: [0.178, 0.318, 0.444, 0.530, 0.628];
     rotation: 360 - r;
+
+    transform: Rotation {
+        id: trans;
+        origin.x: 0;
+        origin.y: 0;
+        angle: 0;
+    }
     Text {
         id: agvText;
         anchors.centerIn: parent;
@@ -106,6 +113,12 @@ Rectangle {
         gridY = parseInt(y) % length;
         return;
     }
+    // 坐标转换index
+    function coordinateTransIndex(grid, x, y) {
+        var index = grid.mapGrid.indexAt(x, y);
+        console.log("圆心坐标转换index: " + index);
+        return index;
+    }
     // set agv position
     function agvSetPosition(i, x, y, r) {
         gridIndex = i;
@@ -153,7 +166,7 @@ Rectangle {
         var angle = 45;
         if (((r >= 360 - angle) && (r < 360)) || ((r >= 0) && (r <= angle))) {
             direction = 1;
-        } else if ((r >= 90 - angle) && (r <= 90  + angle)) {
+        } else if ((r >= 270 - angle) && (r <= 270  + angle)) {
             direction = -2;
         } else if ((r >= 180 - angle) && (r <= 180 + angle)) {
             direction = -1;
@@ -253,11 +266,22 @@ Rectangle {
     }
     //返回当前格子内与x轴平行的直线的线段
     function getXLineCurve(item) {
-        var line;
+        var line, line1, line2;
         if (isXLineExist(item) == true) {
-            line = { type : 0, p1 : { x : 0, y : item.length / 2 },
+            if (item.cutRightDown == true) {
+                line1 = { type : 0, p1 : { x : 0, y : item.length / 2 },
+                    p2 : { x : item.length / 2, y : item.length / 2 } };
+            } else if (item.cutLeftUp == true) {
+            line1 = { type : 0, p1 : { x : item.length / 2, y : item.length / 2 },
                 p2 : { x : item.length, y : item.length / 2 } };
-            curveTransformation(line, item);
+                line2 = arcLineCurve(item);
+            } else {
+                line1 = { type : 0, p1 : { x : 0, y : item.length / 2 },
+                    p2 : { x : item.length, y : item.length / 2 } };
+                line2 = arcLineCurve(item);
+            }
+            curveTransformation(line1, item);
+            line = lineAdd(line1, line2);
             return line;
         } else {
             console.log("warning: without XlineCure");
@@ -267,9 +291,17 @@ Rectangle {
     //返回当前格子内与y轴平行的直线的线段
     function getYLineCurve(item) {
         var line;
-        if (isYLineExist(item) == true) {
-            line = { type : 0, p1 : { x : item.length / 2, y : 0 },
-                p2 : { x : item.length / 2, y : item.length } };
+        if (isXLineExist(item) == true) {
+            if (item.cutRightDown == true) {
+                line = { type : 0, p1 : { x : item.length / 2, y : 0 },
+                    p2 : { x : item.length / 2, y : item.length / 2} };
+            } else if (item.cutLeftUp == true) {
+                line = { type : 0, p1 : { x : item.length / 2, y : item.length / 2 },
+                    p2 : { x : item.length / 2, y : item.length } };
+            } else {
+                line = { type : 0, p1 : { x : item.length / 2, y : 0 },
+                    p2 : { x : item.length / 2, y : item.length } };
+            }
             curveTransformation(line, item);
             return line;
         } else {
@@ -341,6 +373,41 @@ Rectangle {
             }
         }
     }
+    function onlyArcLineCurve(item, dir) {
+        var line;
+        var grid = parent.parent;
+        var circle = arcLineCurve(item);
+        var index = coordinateTransIndex(grid, circle.center.x, circle.center.y);
+        if ((item.isArc == MapItemType.ArcYLU) || (item.isArc == MapItemType.ArcXRD)) {
+            if ((dir == 2) || (dir == -1)) {
+                line = _getHalfLineCurve(grid.itemAt(index - 2 * grid.columns), true, false);
+            } else if ((dir == -2) || (dir == 1)) {
+                line = _getHalfLineCurve(grid.itemAt(index + 2), false, false);
+            } return line;
+        }
+        if ((item.isArc == MapItemType.ArcYRU) || (item.isArc == MapItemType.ArcXLD)) {
+            if (dir > 0) {
+                line = _getHalfLineCurve(grid.itemAt(index - 2 * grid.columns), true, true);
+            } else if (dir < 0) {
+                line = _getHalfLineCurve(grid.itemAt(index - 2), false, false);
+            } return line;
+        }
+        if ((item.isArc == MapItemType.ArcYRD) || (item.isArc == MapItemType.ArcXLU)) {
+            if ((dir == 2) || (dir == -1)) {
+                line = _getHalfLineCurve(grid.itemAt(index - 2), false, true);
+            } else if ((dir == -2) || (dir == 1)) {
+                line = _getHalfLineCurve(grid.itemAt(index + 2 * grid.columns), true, true);
+            } return line;
+        }
+        if ((item.isArc == MapItemType.ArcYLD) || (item.isArc == MapItemType.ArcXRU)) {
+            if (dir > 0) {
+                line = _getHalfLineCurve(grid.itemAt(index + 2), false, true);
+            } else if (dir < 0) {
+                line = _getHalfLineCurve(grid.itemAt(index + 2 * grid.columns), true, false);
+            } return line;
+        }
+    }
+
     function arcLineCurve(item) {
         var grid = parent.parent;
         var center = arcCenterTransformation(item);
@@ -524,9 +591,21 @@ Rectangle {
     function getYLines(item, nextItem, sta, turn, isPositive) {
         var r = rect.r;
         var line1, line2, line;
+        // 当前item只存在弧线不存在直线，AGV在弧上
         if (isYLineExist(item) == false) {
             console.log("warning: without isYLineExist");
-            return false;
+            if (isXLineExist(item) == false) {
+                if (isArcLineExist(item) == true) {
+                    line1 = arcLineCurve(item);
+                    console.log("agv onlyarcLineCurve.  y line1: ")
+                    printLine(line1);
+                    line2 = onlyArcLineCurve(item, isPositive);
+                    console.log("agv onlyarcLineCurve.  y line2: ")
+                    printLine(line2);
+                    line = lineAdd(line1, line2);
+                    return line;
+                } return false;
+            } return false;
         }
         // check cutLeft or cutRight
         // 有半条线和弧，朝弧方向运动
@@ -553,6 +632,19 @@ Rectangle {
             line = lineAdd(line);
             return line;
         }
+//        // 当前item只存在弧线不存在直线，AGV在弧上
+//        if ((isXLineExist(item) == false) && (isYLineExist(item) == false)) {
+//            if (isArcLineExist(item) == true) {
+//                line1 = arcLineCurve(item);
+//                console.log("agv onlyarcLineCurve.  line1: ")
+//                printLine(line1);
+//                line2 = onlyArcLineCurve(item, isPositive);
+//                console.log("agv onlyarcLineCurve.  line2: ")
+//                printLine(line2);
+//                line = lineAdd(line1, line2);
+//                return line;
+//            }
+//        }
         // 当前item不存在弧线
         if (item.isArc == false) {
             printLine(getYLineCurve(item));
@@ -622,9 +714,21 @@ Rectangle {
     function getXLines(item, nextItem, sta, turn, isPositive) {
         var r = rect.r;
         var line1, line2, line;
+        // 当前item只存在弧线不存在直线，AGV在弧上
         if (isXLineExist(item) == false) {
             console.log("warning: without isXLineExist");
-            return false;
+            if (isYLineExist(item) == false) {
+                if (isArcLineExist(item) == true) {
+                    line1 = arcLineCurve(item);
+                    console.log("agv onlyarcLineCurve.  x line1: ")
+                    printLine(line1);
+                    line2 = onlyArcLineCurve(item, isPositive);
+                    console.log("agv onlyarcLineCurve.  x line2: ")
+                    printLine(line2);
+                    line = lineAdd(line1, line2);
+                    return line;
+                } return false;
+            } return false;
         }
         // check cutLeft or cutRight
         // 有半条线和弧，朝弧方向运动
@@ -652,6 +756,17 @@ Rectangle {
             line = lineAdd(line, null);
             return line;
         }
+//        // 当前item只存在弧线不存在直线，AGV在弧上
+//        if ((isXLineExist(item) == false) && (isYLineExist(item) == false)) {
+//            if (isArcLineExist(item) == true) {
+//                line1 = arcLineCurve(item);
+//                printLine(line1);
+//                line2 = onlyArcLineCurve(item, isPositive);
+//                printLine(line2);
+//                line = lineAdd(line1, line2);
+//                return line;
+//            }
+//        }
         // 当前item不存在弧线
         if (item.isArc == false) {;
             printLine(getXLineCurve(item));
@@ -999,8 +1114,77 @@ Rectangle {
         }
         return false;
     }
+    function agvCurveMove(dir, cv) {
+        var grid = parent.parent;
+        var radius = 100;
+        var a = 10 * Math.PI;
+        var x = 0, y = 0, r = 0;
+        var m = Math.sin(a / radius);
+        var n = Math.cos(a / radius);
+        var index = coordinateTransIndex(grid, cv.x, cv.y);
+        var t;
+        var item = grid.itemAt(gridIndex);
+        t = getActualArcType(item);
+        if (t == MapItemType.ArcXRD || t == MapItemType.ArcYLU) {
+            if (dir == 1 || dir == -2) {
+                x = radius * m;
+                y = radius - radius * n;
+                r = - a / radius;
+            } else if (dir == -1 || dir ==2) {
+                x = -(radius * m);
+                y = -(radius - radius * n);
+                r = a / radius;
+            }
+            console.log("ArcXRD  ArcYLU  dir = " + dir);
+        } else if (t == MapItemType.ArcXRU || t == MapItemType.ArcYLD) {
+            if (dir == 1 || dir == 2) {
+                x = radius * m;
+                y = -(radius - radius * n);
+                r =  a / radius;
+            } else if (dir == -1 || dir == -2) {
+                x = -(radius * m);
+                y = radius - radius * n;
+                r = - a / radius;
+            }
+            console.log("ArcXRU  ArcYRU  dir = " + dir);
+        } else if (t == MapItemType.ArcYRD || t == MapItemType.ArcXLU) {
+            if (dir == 1 || dir == -2) {
+                x = radius * m;
+                y = radius - radius * n;
+                r = a / radius;
+            } else if (dir == -1 || dir == 2) {
+                x = -(radius * m);
+                y = - (radius - radius * n);
+                r = - (a / radius);
+            }
+            console.log("ArcYRD  ArcXLU  dir = " + dir)
+        } else if (t == MapItemType.ArcYRU || t == MapItemType.ArcXLD) {
+            if (dir == -1 || dir == -2) {
+                x = - (radius * m);
+                y = radius - radius * n;
+                r = a / radius;
+            } else if (dir == 1 || dir == 2) {
+                x = radius * m;
+                y = - (radius - radius * n);
+                r = - (a / radius);
+            }
+            console.log("ArcYRU  ArcXLD  dir = " + dir)
+        } else {
+            x = 0;
+            y = 0;
+            r = 0;
+        }
+        //r = r / 2 / Math.PI * 360;
+        console.log("agvCurveMove x y r: " + x + " " + y + " " + r);
+        trans.origin.x = 15;
+        trans.origin.y = 29;
+        trans.angle +=  -(r / 2 / Math.PI * 360)
+        r = 0;
+        return { x : x, y : y, r : r };
+    }
+
     // agv移动距离 返回值为偏移量
-    function agvMoveTo(sp, direction, type) {
+    function agvMoveTo(sp, direction, type, cv) {
         var magCv;
         var x = 0, y = 0, r = 0;
 
@@ -1024,6 +1208,8 @@ Rectangle {
                 y = 0;
             }
             return { x : x, y : y, r : r };
+        } else if (type == 1) {
+           return agvCurveMove(direction, cv);
         }
     }
 
@@ -1067,7 +1253,7 @@ Rectangle {
             return false;
         }
         var type = cv[i].type;
-        var agvTo = agvMoveTo(turn, direction, type);
+        var agvTo = agvMoveTo(turn, direction, type, cv[i]);
         console.log("agvMoveTo(turn, 1, type): " + turn + " " +  type)
         agvMove(agvTo.x, agvTo.y, agvTo.r);
 
