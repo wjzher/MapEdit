@@ -22,14 +22,22 @@ Rectangle {
     property int magLength: 20;
     property string agvStatus: "";
     property var speedVal: [0.178, 0.318, 0.444, 0.530, 0.628];
+//    property int pointRotation: 360 - r;
     rotation: 360 - r;
-
-    transform: Rotation {
-        id: trans;
-        origin.x: 0;
-        origin.y: 0;
-        angle: 0;
-    }
+//    property double orx: 0.0;
+//    property double ory: 0.0;
+//    property double orAngle: 0.0;
+//    onRChanged: {
+//        rect.orx = rect.width / 2;
+//        rect.ory = rect.height / 2;
+//        rect.orAngle = 360 - r;
+//        console.log("set r = " + rect.orx + " " + rect.ory + " " + rect.orAngle);
+//    }
+//    transform: Rotation {
+//        origin.x: rect.orx;
+//        origin.y: rect.ory;
+//        angle: rect.orAngle;
+//    }
     Text {
         id: agvText;
         anchors.centerIn: parent;
@@ -164,13 +172,13 @@ Rectangle {
     function getAgvDirection(r) {
         var direction = 0;
         var angle = 45;
-        if (((r >= 360 - angle) && (r < 360)) || ((r >= 0) && (r <= angle))) {
+        if (((r >= 360 - angle) && (r < 360)) || ((r <= 0) && (r >= -angle)) || ((r >= 0) && (r <= angle))) {
             direction = 1;
-        } else if ((r >= 270 - angle) && (r <= 270  + angle)) {
+        } else if (((r >= 270 - angle) && (r <= 270  + angle)) || ((r >= -135) && (r <= -45))) {
             direction = -2;
-        } else if ((r >= 180 - angle) && (r <= 180 + angle)) {
+        } else if (((r >= 180 - angle) && (r <= 180 + angle))  || ((r >= -225) && (r <= -135))) {
             direction = -1;
-        } else if ((r >= 90 - angle) && (r <= 90 + angle)) {
+        } else if (((r >= 90 - angle) && (r <= 90 + angle))  || ((r >= -315) && (r <= -225))){
             direction = 2;
         }
         return direction;
@@ -1118,55 +1126,89 @@ Rectangle {
         var grid = parent.parent;
         var radius = 100;
         var a = 10 * Math.PI;
+        var center, rot;
         var x = 0, y = 0, r = 0;
         var m = Math.sin(a / radius);
         var n = Math.cos(a / radius);
         var index = coordinateTransIndex(grid, cv.x, cv.y);
         var t;
         var item = grid.itemAt(gridIndex);
+        var agvCenterX = rect.x + rect.width / 2;
+        var agvCenterY = rect.y + rect.height / 2;
         t = getActualArcType(item);
+        center = arcCenterTransformation(item);
         if (t == MapItemType.ArcXRD || t == MapItemType.ArcYLU) {
             if (dir == 1 || dir == -2) {
-                x = radius * m;
-                y = radius - radius * n;
-                r = - a / radius;
+                //rot = rotationAngle(center.x, center.y - 100, agvCenterX, agvCenterY);
+                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
+//                x = radius * m;
+//                y = radius - radius * n;
+                x = rot.x2;
+                y = rot.y2;
+                rect.r  = 0;
+                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX + x, agvCenterY + y);
+                r = -(rot.angle);
+                //r = - a / radius;
             } else if (dir == -1 || dir ==2) {
-                x = -(radius * m);
-                y = -(radius - radius * n);
-                r = a / radius;
+                rot = rotationAngle(center.x, center.y - 100, agvCenterX, agvCenterY);
+//                x = -(radius * m);
+//                y = -(radius - radius * n);
+                x = rot.x1;
+                y = rot.y1;
+                rect.r  = 0;
+                r =  rotationAngle(center.x + 100, center.y, agvCenterX - x, agvCenterY - y);
+                //r = a / radius;
             }
             console.log("ArcXRD  ArcYLU  dir = " + dir);
         } else if (t == MapItemType.ArcXRU || t == MapItemType.ArcYLD) {
             if (dir == 1 || dir == 2) {
-                x = radius * m;
-                y = -(radius - radius * n);
-                r =  a / radius;
+//                x = radius * m;
+//                y = -(radius - radius * n);
+//                r = rotationAngle(center.x, center.y + 100, agvCenterX + x, agvCenterY - y);
+                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
+                x = rot.x2;
+                y = -rot.y2;
+                rect.r  = 0;
+                rot = rotationAngle(center.x, center.y + 100, agvCenterX + x, agvCenterY - y);
+                r = (rot.angle);
+                //r =  a / radius;
             } else if (dir == -1 || dir == -2) {
-                x = -(radius * m);
-                y = radius - radius * n;
-                r = - a / radius;
+//                x = -(radius * m);
+//                y = radius - radius * n;
+//                r = - rotationAngle(center.x + 100, center.y, agvCenterX - x, agvCenterY + y);
+                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
+                x = -rot.x1;
+                y = rot.y1;
+                rect.r  = 0;
+                rot = rotationAngle(center.x, center.y + 100, agvCenterX - x, agvCenterY + y);
+                r = -(rot.angle);
+                //r = - a / radius;
             }
             console.log("ArcXRU  ArcYRU  dir = " + dir);
         } else if (t == MapItemType.ArcYRD || t == MapItemType.ArcXLU) {
             if (dir == 1 || dir == -2) {
                 x = radius * m;
                 y = radius - radius * n;
-                r = a / radius;
+                r = rotationAngle(center.x - 100, center.y, agvCenterX + x, agvCenterY + y);
+                //r = a / radius;
             } else if (dir == -1 || dir == 2) {
                 x = -(radius * m);
                 y = - (radius - radius * n);
-                r = - (a / radius);
+                r = - rotationAngle(center.x, center.y + 100, agvCenterX -x, agvCenterY - y);
+                //r = - (a / radius);
             }
             console.log("ArcYRD  ArcXLU  dir = " + dir)
         } else if (t == MapItemType.ArcYRU || t == MapItemType.ArcXLD) {
             if (dir == -1 || dir == -2) {
                 x = - (radius * m);
                 y = radius - radius * n;
-                r = a / radius;
+                r =  rotationAngle(center.x, center.y - 100, agvCenterX - x, agvCenterY + y);
+                //r = a / radius;
             } else if (dir == 1 || dir == 2) {
                 x = radius * m;
                 y = - (radius - radius * n);
-                r = - (a / radius);
+                r = - rotationAngle(center.x - 100, center.y, agvCenterX + x, agvCenterY -y);
+                //r = - (a / radius);
             }
             console.log("ArcYRU  ArcXLD  dir = " + dir)
         } else {
@@ -1176,11 +1218,82 @@ Rectangle {
         }
         //r = r / 2 / Math.PI * 360;
         console.log("agvCurveMove x y r: " + x + " " + y + " " + r);
-        trans.origin.x = 15;
-        trans.origin.y = 29;
-        trans.angle +=  -(r / 2 / Math.PI * 360)
-        r = 0;
+//        rect.orx = 7;
+//        rect.ory = 29;
+//        rect.orAngle -= r;
+        //console.log("trans x111 = " + rect.orx + " " + rect.ory + " " + rect.orAngle);
         return { x : x, y : y, r : r };
+    }
+    function zeroXY(a) {
+        var x, y;
+        var radius = 100;
+        var m = Math.sin(a / radius);
+        var n = Math.cos(a / radius);
+        x = radius * m;
+        y = radius - radius * n;
+        return {x: x, y: y};
+    }
+    function rotationAngle(x1, y1, x2, y2) {
+        var l,zero;          // AGV中心距离磁导航长度
+        var cenX = rect.x + rect.width / 2;    // 取到AGV的中心坐标
+        var cenY = rect.y + rect.height / 2;
+        var grid = parent.parent;
+        var item = grid.itemAt(gridIndex);
+        var center = arcCenterTransformation(item);
+        //var x1, y1;     // 圆弧顶点坐标
+        //var x2, y2;     // AGV中心与圆的交点坐标
+        //var a, b;       // 圆心
+        var r = 100;    //半径
+        var arc = 10 * Math.PI;       //每次所走弧长
+        var t;                     // AGV需要旋转角度
+        var p, q;
+        var c1, a1, d1, e1, f1, m1, n1, l1, t1;
+        var xx1, yy1, xx2, yy2;
+        l = 2 * r * Math.sin(arc / r / 2);
+        console.log("l = " + l);
+        //世界坐标转换成小坐标
+        x1 = x1 - center.x;
+        y1 = y1 - center.y;
+        x2 = x2 - center.x;
+        y2 = y2 - center.y;
+        cenX = cenX - center.x;
+        cenY = cenY - center.y;
+        console.log("x = " + x1 + "  y = " + y1);
+        c1 = l * l - x1 * x1 - y1 * y1;
+        a1 = r * r;
+        d1 = (a1 -c1) / 2;
+        if ((x1 == 0)) {
+            zero = zeroXY(arc);
+            xx1 = zero.x;
+            xx2 = zero.x;
+            yy1 = zero.y;
+            yy2 = zero.y;
+        } else {
+            e1 = d1 / x1;
+            console.log("e1 = " + e1);
+            f1 = y1 / x1;
+            m1 = f1 * f1 + 1;
+            n1 = 2 * e1 * f1;
+            l1 = e1 * e1 - a1;
+            t1 = Math.sqrt(n1 * n1 - 4 * m1 * l1);
+            if (t1 < 0) {
+                return false;
+            }
+            console.log("l = " + l + "  c1 = " + c1 + " a1 = " + a1 + "  d1 = " + d1);
+            yy1 = (n1 + t1) / (2 * m1);
+            yy2 = (n1 - t1) / (2 * m1);
+            xx1 = Math.abs( Math.sqrt(a1 - yy1 * yy1));
+            xx2 = Math.abs( Math.sqrt(a1 - yy2 * yy2));
+            console.log("centerx = " + cenX + " " + cenY + " " + xx2+ " " + yy2);
+            xx2 = Math.abs(xx2 - cenX) ;
+            yy2 = Math.abs(yy2 - cenY);
+            console.log("centerx = " + cenX + " " + cenY + " " + xx2+ " " + yy2);
+        }
+        p = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) / r;
+        t = p + arc / r / 2;
+        t = t / 2 / Math.PI * 360;
+        console.log("xx1 = " + xx1 + "  xx2 = " + xx2 + " yy1 = " + yy1 + "  yy2 = " + yy2 + " t = " + t);
+        return { x1: xx1 , y1: yy1, x2: xx2, y2: yy2, angle: t};
     }
 
     // agv移动距离 返回值为偏移量
@@ -1218,6 +1331,7 @@ Rectangle {
         var cv, crossPoint;
         var i;
         var direction = getAgvDirection(r);
+        console.log("r = " + r)
         if (direction == 0) {
             console.log("off track. direction == 0");
             return false;
