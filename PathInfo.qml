@@ -68,6 +68,8 @@ Rectangle {
                     if ((m.act == 3) || (m.act == 4)) {
                         actProperty.speedValue = listView.jsonspeed(m);
                         actProperty.turnValue = listView.jsonturn(m);
+                    } if ((m.act == 9) || (m.act == 10)) {
+                        actProperty.speedValue = listView.jsonspeed(m);
                     } if ((m.act == 7) || (m.act == 8)) {
                         actProperty.rotValue = listView.jsonrot(m);
                     } if (m.act == 17) {
@@ -308,20 +310,26 @@ Rectangle {
             } if (m == 4) {
                 p = actCombo.model[3];
                 return p;
-            } if (m == 7) {
+            } if (m == 9) {
                 p = actCombo.model[4];
                 return p;
-            } if (m == 8) {
+            } if (m == 10) {
                 p = actCombo.model[5];
                 return p;
-            } if (m == 17) {
+            } if (m == 7) {
                 p = actCombo.model[6];
                 return p;
-            } if (m == 20) {
+            } if (m == 8) {
                 p = actCombo.model[7];
                 return p;
-            } if (m == 21) {
+            } if (m == 17) {
                 p = actCombo.model[8];
+                return p;
+            } if (m == 20) {
+                p = actCombo.model[9];
+                return p;
+            } if (m == 21) {
+                p = actCombo.model[10];
                 return p;
             } else {
                 return "";
@@ -345,7 +353,11 @@ Rectangle {
                     return "";
                 }
                 return p;
-            } if ((m.act == 7) || (m.act == 8)) {
+            } if ((m.act == 9) || (m.act == 10)) {
+                p = "v:"+actProperty.modelV[m.v];
+                return p;
+            }
+            if ((m.act == 7) || (m.act == 8)) {
                 if (m.rot == 90) {
                     p =  "rot:"+actProperty.modelR[0];
                     return p;
@@ -372,9 +384,9 @@ Rectangle {
                 } return p;
             } if (m.act == 21) {
                 if (m.val == 2) {
-                    p = "lf:"+actProperty.modelRL[0];
+                    p = "charge:"+actProperty.modelRL[0];
                 } if (m.val == 4) {
-                    p = "lf:"+actProperty.modelRL[1];
+                    p = "charge:"+actProperty.modelRL[1];
                 } return p;
             } else {
                 return "";
@@ -386,14 +398,16 @@ Rectangle {
                 p = 1;
             } if ((m.act == 3) || (m.act == 4)) {
                 p = m.act - 1;
+            } if ((m.act == 9) || (m.act == 10)) {
+                p = m.act - 5;
             } if ((m.act == 7) || (m.act == 8)) {
-                p = m.act - 3;
+                p = m.act - 1;
             } if (m.act == 17) {
-                p = 6;
-            } if (m.act == 20) {
-                p = 7;
-            } if (m.act == 21) {
                 p = 8;
+            } if (m.act == 20) {
+                p = 9;
+            } if (m.act == 21) {
+                p = 10;
             } return p;
         }
         function jsonspeed(m) {

@@ -28,10 +28,10 @@ Window {
                 mbButton.clickedCallBack();
                 break;
             case Qt.Key_Left:
-                rccButton.clickedCallBack();
+                leftMoveButton.clickedCallBack();
                 break;
             case Qt.Key_Right:
-                rcButton.clickedCallBack();
+                rightMoveButton.clickedCallBack();
                 break;
             case Qt.Key_Equal:
                 rotateview.clickedCallBack();
@@ -47,6 +47,12 @@ Window {
                 break;
             case Qt.Key_End:
                 esButton.clickedCallBack();
+                break;
+            case Qt.Key_Q:
+                rcButton.clickedCallBack();
+                break;
+            case Qt.Key_W:
+                rccButton.clickedCallBack();
                 break;
             case Qt.Key_R:
                 rightButton.clickedCallBack();
@@ -100,6 +106,14 @@ Window {
             var v = paramJson("mb " + speed);
             sendCommand(cmdInf, v);
         }
+        function cmdMl(speed) {
+            var v = paramJson("ml " + speed);
+            sendCommand(cmdInf, v);
+        }
+        function cmdMr(speed) {
+            var v = paramJson("mr " + speed);
+            sendCommand(cmdInf, v);
+        }
         function cmdStop() {
             var v = paramJson("s");
             sendCommand(cmdInf, v);
@@ -108,12 +122,12 @@ Window {
             var v = paramJson("a");
             sendCommand(cmdInf, v);
         }
-        function cmdMl() {
-            var v = paramJson("ml");
+        function cmdTl() {
+            var v = paramJson("tl");
             sendCommand(cmdInf, v);
         }
-        function cmdMr() {
-            var v = paramJson("mr");
+        function cmdTr() {
+            var v = paramJson("tr");
             sendCommand(cmdInf, v);
         }
         function cmdRc() {
@@ -172,6 +186,7 @@ Window {
             var json = JSON.parse(status);
             var m = json.infos;
             var n = json.alarm;
+            console.log("agvShowStatus = " + m.sta);
             switch (m.sta) {
             case 0:
                 agvActive.text = "⊖"
@@ -182,6 +197,12 @@ Window {
             case 2:
                 agvActive.text = "↓"
                 break;
+            case 3:
+                agvActive.text = "←"
+                break;
+            case 4:
+                agvActive.text = "→"
+                break;
             case 5:
                 agvActive.text = "↻"
                 break;
@@ -191,6 +212,14 @@ Window {
             case 7:
                 agvActive.text = "⚠"
                 break;
+            case 8:
+                agvActive.text = "T"
+                break;
+            case 9:
+                agvActive.text = "t"
+                break;
+            default:
+                break;
             }
             switch (m.turnto) {
             case 1:
@@ -199,22 +228,29 @@ Window {
             case 2:
                 agvBranch.text = "↱"
                 break;
+            default:
+                break;
             }
             switch (m.v) {
+            case 0:
+                agvSpeed.text = "0档";
+                break;
             case 1:
-                agvSpeed.text = "1档"
+                agvSpeed.text = "1档";
                 break;
             case 2:
                 agvSpeed.text = "2档";
                 break;
-            case 2:
+            case 3:
                 agvSpeed.text = "3档";
                 break;
-            case 2:
+            case 4:
                 agvSpeed.text = "4档";
                 break;
-            case 2:
+            case 5:
                 agvSpeed.text = "5档";
+                break;
+            default:
                 break;
             }
             switch (m.liftsta) {
@@ -225,6 +261,8 @@ Window {
             case 2:
                 bottomlift.opacity = 1;
                 toplift.opacity = 0;
+                break;
+            default:
                 break;
             }
             switch (m.bz[0]) {
@@ -244,6 +282,8 @@ Window {
                     oaButton.onOff = 0;
                 }
                 break;
+            default:
+                break;
             }
             switch (m.charge) {
             case 0:
@@ -261,6 +301,8 @@ Window {
                 if (initFlag == 0) {
                     csButton.onOff = 1;
                 }
+                break;
+            default:
                 break;
             }
             agvVoltage.text = m.voltage + "v";
@@ -319,8 +361,8 @@ Window {
         }
 
         onAgvStatusChanged: {
-//            console.log("status changed " + inf + " " + status);
-            switch (inf) {
+            console.log("status changed " + inf + " " + status);
+            switch (parseInt(inf)) {
             case 20000:
                 agvInfo.text = "AGV运动命令应答";
                 break;
@@ -337,6 +379,7 @@ Window {
                 agvInfo.text = "AGV运动应答";
                 break;
             case 5001:
+                console.log("5001 ...");
                 agvShowStatus(status);
                 initFlag = 1;
                 break;
@@ -401,7 +444,7 @@ Window {
                         spacing: 4;
                         FlatButton {
                             id: speedview;
-                            property int dir: 0;    // 0 front 1 back
+                            property int dir: 0;    // 0 front 1 back  2 left  3 right
                             text: "0";
                             font.pointSize: 12;
                             toolTipText: qsTr("下发速度");
@@ -416,8 +459,16 @@ Window {
                                 } else {
                                     if (dir == 0) {
                                         udpServer.cmdMf(text);
-                                    } else {
+                                        console.log("dir = " + dir);
+                                    } else if (dir == 1) {
                                         udpServer.cmdMb(text);
+                                        console.log("dir = " + dir);
+                                    } else if (dir == 2) {
+                                        udpServer.cmdMl(text);
+                                        console.log("dir = " + dir);
+                                    } else if (dir == 3) {
+                                        udpServer.cmdMr(text);
+                                        console.log("dir = " + dir);
                                     }
                                 }
                             }
@@ -429,8 +480,10 @@ Window {
                                         dir = 0;
                                         move();
                                     }
+                                } else if (dir == 2 || dir == 3) {
+                                        return 0;
                                 } else {
-                                    if (speedview.text > 0) {
+                                    if(speedview.text > 0) {
                                         speedview.text--;
                                         if (speedview.text == 0) {
                                             dir = 0;
@@ -446,11 +499,51 @@ Window {
                                         dir = 1;
                                         move();
                                     }
-                                } else {
+                                } else if (dir == 2 || dir == 3) {
+                                    return 0;
+                                }else {
                                     if (speedview.text > 0) {
                                         speedview.text--;
                                         if (speedview.text == 0) {
                                             dir = 1;
+                                        }
+                                        move();
+                                    }
+                                }
+                            }
+                            function left(){
+                                if (dir == 2 || speedview.text == 0) {
+                                    if (speedview.text < 5) {
+                                        speedview.text++;
+                                        dir = 2;
+                                        move();
+                                    }
+                                } else if (dir == 0 || dir == 1) {
+                                    return 0;
+                                } else {
+                                    if (speedview.text > 0) {
+                                        speedview.text--;
+                                        if (speedview.text == 0) {
+                                            dir = 2;
+                                        }
+                                        move();
+                                    }
+                                }
+                            }
+                            function right(){
+                                if (dir == 3 || speedview.text == 0) {
+                                    if (speedview.text < 5) {
+                                        speedview.text++;
+                                        dir = 3;
+                                        move();
+                                    }
+                                } else if (dir == 0 || dir == 1) {
+                                    return 0;
+                                } else {
+                                    if (speedview.text > 0) {
+                                        speedview.text--;
+                                        if (speedview.text == 0) {
+                                            dir = 3;
                                         }
                                         move();
                                     }
@@ -481,7 +574,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
-                            toolTipText: qsTr("顺时针旋转 Key_Right");
+                            toolTipText: qsTr("顺时针旋转 Key_Q");
                         }
                         FlatButton {
                             id: stopButton;
@@ -542,7 +635,7 @@ Window {
                             onClicked: {
                                 clickedCallBack();
                             }
-                            toolTipText: qsTr("逆时针旋转 Key_Left");
+                            toolTipText: qsTr("逆时针旋转 Key_W");
                         }
                         FlatButton {
                             id: astopButton;
@@ -564,7 +657,7 @@ Window {
                         spacing: 4;
                         FlatButton {
                             id: lfupButton;
-                            text: "↑";
+                            text: "U";
                             width: lfdButton.width;
                             function clickedCallBack() {
                                 udpServer.cmdLiftUp();
@@ -613,20 +706,32 @@ Window {
                             text: "↰";
                             width: lfdButton.width;
                             function clickedCallBack() {
-                                udpServer.cmdMl();
+                                udpServer.cmdTl();
                             }
                             onClicked: {
                                 clickedCallBack();
                             }
                             toolTipText: qsTr("左分支 L");
                         }
+                        FlatButton {
+                            id: leftMoveButton;
+                            text: "←";
+                            width: lfdButton.width;
+                            function clickedCallBack(){
+                                speedview.left();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("左移 Key_left");
+                        }
                     }
                     Row {
                         spacing: 4;
                         FlatButton {
                             id: lfdButton;
-                            text: "↓";
-                            width: 48;
+                            text: "D";
+                            width: mfButton.width;
                             function clickedCallBack() {
                                 udpServer.cmdLiftDown();
                             }
@@ -675,12 +780,24 @@ Window {
                             text: "↱";
                             width: lfdButton.width;
                             function clickedCallBack() {
-                                udpServer.cmdMr();
+                                udpServer.cmdTr();
                             }
                             onClicked: {
                                 clickedCallBack();
                             }
                             toolTipText: qsTr("右分支 R");
+                        }
+                        FlatButton {
+                            id: rightMoveButton;
+                            text: "→";
+                            width: lfdButton.width;
+                            function clickedCallBack(){
+                                speedview.right();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("右移 Key_right");
                         }
 
                     }

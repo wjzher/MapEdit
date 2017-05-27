@@ -26,7 +26,7 @@ Rectangle{
         Rectangle {
             id: speedRect;
             width: 80;
-            visible: (type == 2 || type == 3 ? true : false);
+            visible: (type == 2 || type == 3 || type == 4 || type == 5 ? true : false);
             Row {
                 spacing: 8;
                 Text {
@@ -74,7 +74,7 @@ Rectangle{
     Rectangle {
         id: rotRect;
         width: 180;
-        visible: (type == 4 || type == 5 ? true : false);
+        visible: (type == 6 || type == 7 ? true : false);
         Row {
             spacing: 8;
             Text {
@@ -95,7 +95,7 @@ Rectangle{
     Rectangle {
         id: platformRect;
         width: 180;
-        visible: (type == 6 ? true : false);
+        visible: (type == 8 ? true : false);
         Row {
             spacing: 8;
             Text {
@@ -115,7 +115,7 @@ Rectangle{
     Rectangle {
         id: bzRect;
         width: 180;
-        visible: (type == 7 ? true : false);
+        visible: (type == 9 ? true : false);
         Row {
             spacing: 8;
             Text {
@@ -137,7 +137,7 @@ Rectangle{
             width: 100;
             anchors.left: parent.left
             anchors.leftMargin: 2
-            visible: (type == 8 ? true : false);
+            visible: (type == 10 ? true : false);
             Row {
                 spacing: 5;
                 Text {

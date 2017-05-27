@@ -7,7 +7,7 @@ Rectangle {
     width: 150;
     property alias index: comboBox.currentIndex;
     property alias model: comboBox.model;
-    property var actJsonVal: [0,2,3,4,7,8,17,20,21];
+    property var actJsonVal: [0,2,3,4,9,10,7,8,17,20,21];
     Row {
         spacing: 8;
         Text {
@@ -22,6 +22,8 @@ Rectangle {
                 "精确停止",
                 "前行",
                 "后退",
+                "左移",
+                "右移",
                 "顺时针旋转",
                 "逆时针旋转",
                 "平台动作",

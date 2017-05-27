@@ -16,7 +16,7 @@ Window {
     height: 640;
     id: rootItem;
     color: "#EEEEEE";
-    title: qsTr("南开太阳AGV地图运行仿真系统");
+    title: qsTr("华创求实--AGV地图运行仿真系统");
     property alias pathList: pathList;
     property alias mapGrid: mapGrid;
 
@@ -1297,6 +1297,7 @@ Window {
                     id: pathSetId;
                     anchors.left: actCombo.right;
                     anchors.leftMargin: 4;
+
                     text: "";
                     color: "blue";
                 }
@@ -1347,21 +1348,27 @@ Window {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
+                        v += "\"v\":" + actProperty.speedValue;
+                        v += "}";
+                    } if ((actCombo.index == 6) || (actCombo.index == 7)) {
+                        v =  "{";
+                        v += "\"id\":\"" + id + "\",";
+                        v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"rot\":" + actProperty.rotJsonVal[actProperty.rotValue];
                         v += "}";
-                    } if (actCombo.index == 6) {
+                    } if (actCombo.index == 8) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"val\":" + actProperty.platJsonVal[actProperty.platValue];
                         v += "}";
-                    } if (actCombo.index == 7) {
+                    } if (actCombo.index == 9) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"bz\":" + actProperty.oaJsonVal[actProperty.oaValue];
                         v += "}";
-                    } if (actCombo.index == 8) {
+                    } if (actCombo.index == 10) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
@@ -1395,15 +1402,22 @@ Window {
                         return p;
                     }
                     if (actCombo.index == 4 || actCombo.index == 5) {
+                        p = "v:"+actProperty.modelV[actProperty.speedValue];
+                        return p;
+                    }
+                    if (actCombo.index == 6 || actCombo.index == 7) {
                         p = "rot:"+actProperty.modelR[actProperty.rotValue];
                         return p;
-                    } if (actCombo.index == 6) {
+                    }
+                    if (actCombo.index == 8) {
                         p = "lf:"+actProperty.modelP[actProperty.platValue];
                         return p;
-                    } if (actCombo.index == 7) {
+                    }
+                    if (actCombo.index == 9) {
                         p = "oa:"+actProperty.modelB[actProperty.oaValue];
                         return p;
-                    } if (actCombo.index == 8) {
+                    }
+                    if (actCombo.index == 10) {
                         p = "charge:"+actProperty.modelC[actProperty.chargeValue] + ",relay:" + actProperty.modelRL[actProperty.relayValue];
                         return p;
                     } else {
