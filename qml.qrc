@@ -15,5 +15,6 @@
         <file>FlatButton.qml</file>
         <file>MapEditWindow.qml</file>
         <file>AgvModel.qml</file>
+        <file>UpdateCardIdDialog.qml</file>
     </qresource>
 </RCC>

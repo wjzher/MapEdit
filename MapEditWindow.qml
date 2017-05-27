@@ -16,9 +16,14 @@ Window {
     height: 640;
     id: rootItem;
     color: "#EEEEEE";
-    title: qsTr("南开太阳AGV地图运行仿真系统");
+    title: qsTr("华创求实--AGV地图运行仿真系统");
     property alias pathList: pathList;
     property alias mapGrid: mapGrid;
+
+    UpdateCardIdDialog {
+        id: updateCardIdDialog;
+        visible: false;
+    }
 
     FileDialog {
         id: fileDialog;
@@ -150,9 +155,69 @@ Window {
                 mapData.setRows(rows);
             }
 
+            function searchNextItem(index) {
+                var nextItem;
+                switch (updateCardIdDialog.direction) {
+                case 0:
+                    nextItem = updateCardIdDialog.agvModel.itemUp(index, mapGrid);
+                    break;
+                case 1:
+                    nextItem = updateCardIdDialog.agvModel.itemDown(index, mapGrid);
+                    break;
+                case 2:
+                    nextItem = updateCardIdDialog.agvModel.itemLeft(index, mapGrid);
+                    break;
+                case 3:
+                    nextItem = updateCardIdDialog.agvModel.itemRight(index, mapGrid);
+                    break;
+                default:
+                    return null;
+                }
+                return nextItem;
+            }
+            function updateMapItemMoveToNext(idx) {
+                var nextItem;
+                while (true) {
+                    nextItem = searchNextItem(idx);
+                    if (nextItem == null) {
+                        break;
+                    }
+                    updateCardIdDialog.currentItem = nextItem;
+                    idx = updateCardIdDialog.currentIndex = mapGrid.mapGrid.indexAt(nextItem.x, nextItem.y);
+                    if (nextItem.isCard == false) {
+                        continue;
+                    }
+                    break;
+                }
+                if (nextItem == null) {
+                    console.log("search next item null. stop!");
+                    updateCardIdDialog.run = false;
+                } else {
+                    console.log("search next item: " + updateCardIdDialog.currentIndex);
+                }
+            }
+
+            function updateMapItemCardId(id) {
+                if (updateCardIdDialog.run == false) {
+                    return;
+                }
+                // set updateCardIdDialog currentIndex card id
+                var idx = updateCardIdDialog.currentIndex;
+                var item = updateCardIdDialog.currentItem;
+                if (item == null) {
+                    return;
+                }
+                console.log("update item " + idx + " id " + id);
+                mapGrid.setItemCardID2(idx, id);
+                // get next updateCardIdDialog currentIndex
+                updateMapItemMoveToNext(idx);
+            }
+
             function updateAgvCardId(ip, lastId, currentId) {
                 var i, item;
                 console.log("updateAgvCardId " + ip + " " + lastId + " " + currentId);
+                //cardIDText.text = currentId;    // for auto update Item cardID, only test
+                updateMapItemCardId(currentId);
                 if (lastId > 0) {
                     i = mapData.getItemIndexByCardId(lastId);
                     if (i < 0) {
@@ -191,6 +256,12 @@ Window {
                 mapData.setItemType(mapGrid.mapGrid.currentIndex, type);
                 setGridFocus();
             }
+            function setItemType2(index, type) {
+                var item = mapGrid.itemAt(index);
+                item.type = type;
+                mapData.setItemType(index, type);
+                setGridFocus();
+            }
             function setItemIsCard(isCard) {
                 mapGrid.mapGrid.currentItem.cardPos[0] = Number(cardIDPosX.text);
                 mapGrid.mapGrid.currentItem.cardPos[1] = Number(cardIDPosY.text);
@@ -202,11 +273,25 @@ Window {
                                        mapGrid.mapGrid.currentItem.cardPos);
                 setGridFocus();
             }
+            function setItemIsCard2(index, isCard) {
+                var item = mapGrid.itemAt(index);
+                item.cardPos[0] = Number(cardIDPosX.text);
+                item.cardPos[1] = Number(cardIDPosY.text);
+                item.isCard = isCard;
+                mapData.setItemCardId(index, item.isCard, item.cardID);
+                mapData.setItemCardPos(index, item.cardPos);
+                setGridFocus();
+            }
             function setItemCardID(id) {
                 mapGrid.mapGrid.currentItem.cardID = Number(id);
                 mapData.setItemCardId(mapGrid.mapGrid.currentIndex,
                                       mapGrid.mapGrid.currentItem.isCard,
                                       mapGrid.mapGrid.currentItem.cardID);
+            }
+            function setItemCardID2(index, id) {
+                var item = mapGrid.itemAt(index);
+                item.cardID = Number(id);
+                mapData.setItemCardId(index, item.isCard, item.cardID);
             }
             function setItemCardPosX(x) {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
@@ -216,12 +301,28 @@ Window {
                                        mapGrid.mapGrid.currentItem.cardPos);
                 setGridFocus();
             }
+            function setItemCardPosX2(index, x) {
+                var item = mapGrid.itemAt(index);
+                var pos = item.cardPos;
+                pos[0] = x;
+                item.cardPos = pos;
+                mapData.setItemCardPos(index,item.cardPos);
+                setGridFocus();
+            }
             function setItemCardPosY(x) {
                 var pos = mapGrid.mapGrid.currentItem.cardPos;
                 pos[1] = x;
                 mapGrid.mapGrid.currentItem.cardPos = pos;
                 mapData.setItemCardPos(mapGrid.mapGrid.currentIndex,
                                        mapGrid.mapGrid.currentItem.cardPos);
+                setGridFocus();
+            }
+            function setItemCardPosY2(index, x) {
+                var item = mapGrid.itemAt(index);
+                var pos = item.cardPos;
+                pos[1] = x;
+                item.cardPos = pos;
+                mapData.setItemCardPos(index, item.cardPos);
                 setGridFocus();
             }
             function posAdd(pos, x, y) {
@@ -703,7 +804,7 @@ Window {
                 id: mapItemSettingsGroup;
                 title: "Item Settings";
                 width: 280;
-                height: 162;
+                height: 216;
                 ExclusiveGroup {
                     id: itemTypeGroup;
                 }
@@ -956,7 +1057,225 @@ Window {
                     checked: false;
                     onCheckedChanged: mapGrid.setItemCutRightDown(checked);
                 }
+                // repeat settings
+                ComboBox {
+                    id: repeatSelectCombo;
+                    width: 80;
+                    anchors.top: arcCombo.bottom;
+                    anchors.topMargin: 4;
+                    model: [
+                        "行方式",
+                        "列方式",
+                        "行列式"
+                    ];
+                }
+                ComboBox {
+                    id: repeatItemTypeCombo;
+                    width: 80;
+                    anchors.top: repeatSelectCombo.top;
+                    anchors.left: repeatSelectCombo.right;
+                    anchors.leftMargin: 4;
+//                    anchors.topMargin: 4;
+                    model: [
+                        "NULL",
+                        "XLine",
+                        "YLine",
+                        "Cross",
+                        "XLStop",
+                        "XRStop",
+                        "YUStop",
+                        "YDStop",
+                        "XLMStop",
+                        "XRMStop",
+                        "YUMStop",
+                        "YDMStop"
+                    ];
+                }
+                Button {
+                    id: updateDialogButton;
+                    anchors.left: repeatItemTypeCombo.right;
+                    anchors.leftMargin: 2;
+                    anchors.top: repeatItemTypeCombo.top;
+                    text: updateCardIdDialog.visible ? "Hide" : "Show";
+                    onClicked: {
+                        if (updateCardIdDialog.visible) {
+                            updateCardIdDialog.hide();
+                        } else {
+                            updateCardIdDialog.show();
+                        }
+                    }
+                }
+                TextField {
+                    id: repeatStartText;
+//                    anchors.left: repeatItemTypeCombo.right;
+//                    anchors.leftMargin: 4;
+                    anchors.top: repeatSelectCombo.bottom;
+                    anchors.topMargin: 4;
+                    width: 40;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    placeholderText: qsTr("起始");
+//                    text: "0";
+                    validator: IntValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                TextField {
+                    id: repeatEndText;
+                    anchors.left: repeatStartText.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: repeatStartText.top;
+//                    anchors.topMargin: 2;
+                    width: 40;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    placeholderText: qsTr("结束");
+//                    text: "0";
+                    validator: IntValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                TextField {
+                    id: repeatRowsIntervalText;
+                    anchors.left: repeatEndText.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: repeatStartText.top;
+//                    anchors.topMargin: 2;
+                    width: 60;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    placeholderText: qsTr("行间隔");
+//                    text: "0";
+                    validator: IntValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                TextField {
+                    id: repeatColumnsIntervalText;
+                    anchors.left: repeatRowsIntervalText.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: repeatStartText.top;
+                    width: 60;
+                    height: 20;
+                    selectByMouse: true;
+                    textColor: "green";
+                    placeholderText: qsTr("列间隔");
+//                    text: "0";
+                    validator: IntValidator {
+                    }
+                    onFocusChanged: {
+                        if (focus) {
+                            selectAll();
+                        }
+                    }
+                }
+                Button {
+                    id: insertRepeatItemButton;
+                    text: "Insert";
+                    anchors.left: repeatColumnsIntervalText.right;
+                    anchors.leftMargin: 4;
+                    anchors.top: repeatStartText.top;
+                    width: 60;
+                    height: repeatStartText.height;
+                    onClicked: {
+                        if (repeatSelectCombo.currentIndex == 0) {
+                            insertRepeatRows(parseInt(repeatStartText.text), parseInt(repeatEndText.text),
+                                             parseInt(repeatRowsIntervalText.text), parseInt(repeatColumnsIntervalText.text));
+                        } else if (repeatSelectCombo.currentIndex == 1) {
+                            insertRepeatColumns(parseInt(repeatStartText.text), parseInt(repeatEndText.text),
+                                                parseInt(repeatRowsIntervalText.text), parseInt(repeatColumnsIntervalText.text));
+                        } else {
+                            insertRepeatRowColumns(parseInt(repeatStartText.text), parseInt(repeatEndText.text),
+                                                   parseInt(repeatRowsIntervalText.text))
+                        }
+
+                    }
+                    function isCardAction(index) {
+                        mapGrid.setItemCardID2(index, cardIDText.text);
+                        mapGrid.setItemCardPosX2(index, Number(cardIDPosX.text));
+                        mapGrid.setItemCardPosY2(index, Number(cardIDPosY.text));
+                        mapGrid.setItemIsCard2(index, cardCheck.checked);
+                    }
+                    function insertRepeatRows(startItem, endItem, rowsInterval, columnsInterval) {
+                        var i;
+                        var j;
+                        var col = mapGrid.columns;
+                        j = parseInt(startItem / col);    // 所在行
+                        var s = startItem % col;            // 行开始位置
+                        for (i = startItem; i <= endItem; i += rowsInterval) {
+                            console.log("now i = " + i + " j = " + j + " " + col * (j + 1));
+                            if (i >= col * (j + 1)) {
+                                // 如果当前行已经满，则跳到下一行的开始位置
+                                j = j + columnsInterval;
+                                i = s + col * j;
+                                if (i > endItem) {
+                                    break;
+                                }
+                            }
+                            mapGrid.setItemType2(parseInt(i), repeatItemTypeCombo.currentIndex);
+                            isCardAction(parseInt(i));
+                        }
+                    }
+                    function insertRepeatColumns(startItem, endItem, rowsInterval, columnsInterval) {
+                        var i;
+                        var j;
+                        var col = mapGrid.columns;
+                        var row = parseInt(endItem / col);
+                        if (endItem % col) {
+                            row += 1;
+                        }
+                        console.log("row = " + row + " " + (row) * col);
+                        j = parseInt(startItem % col);  // 所在列
+                        for(i = startItem; i < endItem; ) {
+                            console.log("now i = " + i + " j = " + j + " " + (row) * col + j);
+                            mapGrid.setItemType2(parseInt(i), repeatItemTypeCombo.currentIndex);
+                            isCardAction(parseInt(i));
+                            i = i + columnsInterval * col;
+                            if (i >= (row) * col + j){
+                                // 如果当前列已经满，则跳到下一列的开始位置
+                                j = j + rowsInterval;
+                                i = startItem - startItem % col + j;
+                                if (i > endItem) {
+                                    break;
+                                }
+                            }
+                            console.log("i = " + i);
+                            console.log("j = " + j);
+                        }
+                    }
+                    function insertRepeatRowColumns(startItem, endItem, rowsInterval) {
+                        var i;
+                        var j;
+                        for (i = startItem; i <= endItem; i += rowsInterval) {
+                            mapGrid.setItemType2(parseInt(i), repeatItemTypeCombo.currentIndex);
+                            isCardAction(parseInt(i));
+                        }
+                    }
+                }
             }
+//            GroupBox {
+//                id: repeatSettingsGroup;
+//                title: "Repeat Settings";
+//                width: 280;
+//                height: 90;
+
+//            }
+
             GroupBox {
                 id: pathSettingsGroup;
                 title: "Path Settings";
@@ -978,6 +1297,7 @@ Window {
                     id: pathSetId;
                     anchors.left: actCombo.right;
                     anchors.leftMargin: 4;
+
                     text: "";
                     color: "blue";
                 }
@@ -1028,21 +1348,27 @@ Window {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
+                        v += "\"v\":" + actProperty.speedValue;
+                        v += "}";
+                    } if ((actCombo.index == 6) || (actCombo.index == 7)) {
+                        v =  "{";
+                        v += "\"id\":\"" + id + "\",";
+                        v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"rot\":" + actProperty.rotJsonVal[actProperty.rotValue];
                         v += "}";
-                    } if (actCombo.index == 6) {
+                    } if (actCombo.index == 8) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"val\":" + actProperty.platJsonVal[actProperty.platValue];
                         v += "}";
-                    } if (actCombo.index == 7) {
+                    } if (actCombo.index == 9) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
                         v += "\"bz\":" + actProperty.oaJsonVal[actProperty.oaValue];
                         v += "}";
-                    } if (actCombo.index == 8) {
+                    } if (actCombo.index == 10) {
                         v =  "{";
                         v += "\"id\":\"" + id + "\",";
                         v += "\"act\":" + actCombo.actJsonVal[actCombo.index]  + ",";
@@ -1076,15 +1402,22 @@ Window {
                         return p;
                     }
                     if (actCombo.index == 4 || actCombo.index == 5) {
+                        p = "v:"+actProperty.modelV[actProperty.speedValue];
+                        return p;
+                    }
+                    if (actCombo.index == 6 || actCombo.index == 7) {
                         p = "rot:"+actProperty.modelR[actProperty.rotValue];
                         return p;
-                    } if (actCombo.index == 6) {
+                    }
+                    if (actCombo.index == 8) {
                         p = "lf:"+actProperty.modelP[actProperty.platValue];
                         return p;
-                    } if (actCombo.index == 7) {
+                    }
+                    if (actCombo.index == 9) {
                         p = "oa:"+actProperty.modelB[actProperty.oaValue];
                         return p;
-                    } if (actCombo.index == 8) {
+                    }
+                    if (actCombo.index == 10) {
                         p = "charge:"+actProperty.modelC[actProperty.chargeValue] + ",relay:" + actProperty.modelRL[actProperty.relayValue];
                         return p;
                     } else {
@@ -1131,7 +1464,7 @@ Window {
                 id: pathList;
                 width: 280;
                 height: mapGrid.height - globalSettingsGroup.height
-                        - mapItemSettingsGroup.height
+                        - mapItemSettingsGroup.height/* - repeatSettingsGroup.height*/
                         - pathSettingsGroup.height - 12;
             }
 
