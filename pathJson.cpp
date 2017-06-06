@@ -117,8 +117,7 @@ void PathJson::modifyItem(int index, QVariant var)
         qDebug() << "modifyItem empty";
         return;
     }
-    QJsonValue pathVal(pathObj);
-    m_pathArray[index] = pathVal;
+    m_pathArray[index] = QJsonValue(pathObj);
     qDebug() << m_pathArray;
     return;
 }

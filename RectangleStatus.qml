@@ -7,6 +7,7 @@ Rectangle {
     property alias text: rectangleText.text;
     property alias color: root.color;
     property alias font: rectangleText.font.pointSize;
+    property alias colortext: rectangleText.color;
     color: "#EEEEEE";
     border.color: "lightsteelblue";
     radius: 4;

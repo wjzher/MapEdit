@@ -70,6 +70,9 @@ Window {
             case Qt.Key_U:
                 lfupButton.clickedCallBack();
                 break;
+            case Qt.Key_M:
+                lfmButton.clickedCallBack();
+                break;
             case Qt.Key_D:
                 lfdButton.clickedCallBack();
                 break;
@@ -158,6 +161,10 @@ Window {
             var v = paramJson("lf 1");
             sendCommand(cmdInf, v);
         }
+        function cmdLiftMid() {
+            var v = paramJson("lf 2");
+            sendCommand(cmdInf, v);
+        }
         function cmdLiftDown() {
             var v = paramJson("lf 0");
             sendCommand(cmdInf, v);
@@ -182,92 +189,112 @@ Window {
             var v = paramAgvId();
             sendCommand(1003, v);
         }
+        function initActView() {
+            stopButton.color = "transparent";
+            mfButton.color = "transparent";
+            mbButton.color = "transparent";
+            leftMoveButton.color = "transparent";
+            rightMoveButton.color = "transparent";
+            rcButton.color = "transparent";
+            rccButton.color = "transparent";
+            astopButton.color = "transparent";
+            astopButton.text = "T";
+        }
         function agvShowStatus(status) {
             var json = JSON.parse(status);
             var m = json.infos;
             var n = json.alarm;
             console.log("agvShowStatus = " + m.sta);
+            initActView();
             switch (m.sta) {
             case 0:
-                agvActive.text = "⊖"
+                stopButton.color = "aquamarine";
                 break;
             case 1:
-                agvActive.text = "↑"
+                mfButton.color = "aquamarine"
                 break;
             case 2:
-                agvActive.text = "↓"
+                mbButton.color = "aquamarine"
                 break;
             case 3:
-                agvActive.text = "←"
+                leftMoveButton.color = "aquamarine"
                 break;
             case 4:
-                agvActive.text = "→"
+                rightMoveButton.color = "aquamarine"
                 break;
             case 5:
-                agvActive.text = "↻"
+                rcButton.color = "aquamarine";
                 break;
             case 6:
-                agvActive.text = "↺"
+                rccButton.color = "aquamarine";
                 break;
             case 7:
                 agvActive.text = "⚠"
                 break;
             case 8:
-                agvActive.text = "T"
+                astopButton.text = "T"
+                astopButton.color = "aquamarine"
                 break;
             case 9:
-                agvActive.text = "t"
+                astopButton.text = "t"
+                astopButton.color = "aquamarine"
                 break;
             default:
                 break;
             }
             switch (m.turnto) {
             case 1:
-                agvBranch.text = "↰"
+                leftButton.color = "aquamarine"
+                rightButton.color = "transparent"
                 break;
             case 2:
-                agvBranch.text = "↱"
+                leftButton.color = "transparent"
+                rightButton.color = "aquamarine"
                 break;
             default:
                 break;
             }
+            if ((m.sta == 1) || (m.sta == 2) || (m.sta == 3)  || (m.sta == 4)) {
             switch (m.v) {
             case 0:
-                agvSpeed.text = "0档";
+                speedview.text = "0";
                 break;
             case 1:
-                agvSpeed.text = "1档";
+                speedview.text = "1";
                 break;
             case 2:
-                agvSpeed.text = "2档";
+                speedview.text = "2";
                 break;
             case 3:
-                agvSpeed.text = "3档";
+                speedview.text = "3";
                 break;
             case 4:
-                agvSpeed.text = "4档";
+                speedview.text = "4";
                 break;
             case 5:
-                agvSpeed.text = "5档";
+                speedview.text = "5";
                 break;
             default:
                 break;
+            }
+            } else {
+                speedview.text = "0";
             }
             switch (m.liftsta) {
             case 1:
-                toplift.opacity = 1;
-                bottomlift.opacity = 0;
+                lfupButton.color = "aquamarine"
+                lfdButton.color = "transparent"
                 break
             case 2:
-                bottomlift.opacity = 1;
-                toplift.opacity = 0;
+                lfdButton.color = "aquamarine"
+                lfupButton.color = "transparent"
                 break;
             default:
                 break;
             }
             switch (m.bz[0]) {
             case 0:
-                oaview.color = "aquamarine";
+                //oaview.color = "aquamarine";
                 oaButton.color = "aquamarine";
                 oaButton.oa = 0;
                 if (initFlag == 0) {
@@ -275,7 +302,7 @@ Window {
                 }
                 break
             case 1:
-                oaview.color = "#EEEEEE";
+                //oaview.color = "#EEEEEE";
                 oaButton.color = "transparent";
                 oaButton.oa = 1;
                 if (initFlag == 0) {
@@ -287,7 +314,7 @@ Window {
             }
             switch (m.charge) {
             case 0:
-                csview.color = "#EEEEEE";
+                //csview.color = "#EEEEEE";
                 csButton.color = "transparent";
                 csButton.cs = 0;
                 if (initFlag == 0) {
@@ -295,7 +322,7 @@ Window {
                 }
                 break
             case 1:
-                csview.color = "aquamarine";
+                //csview.color = "aquamarine";
                 csButton.color = "aquamarine"
                 csButton.cs = 0;
                 if (initFlag == 0) {
@@ -308,6 +335,21 @@ Window {
             agvVoltage.text = m.voltage + "v";
             agvPrepos.text = m.prepos;
             agvNextpose.text = m.nextpos;
+            if (n.far) {
+                farView.color = "aquamarine";
+            } else {
+                farView.color = "#EEEEEE";
+            }
+            if (n.near) {
+                nearView.color = "aquamarine";
+            } else {
+                nearView.color = "#EEEEEE";
+            }
+            if (n.touch) {
+                machView.color = "aquamarine";
+            } else {
+                machView.color = "#EEEEEE";
+            }
             if (!n.dc) {
                 dcNomal.color = "aquamarine";
                 dcAlarm.color = "#EEEEEE";
@@ -349,6 +391,41 @@ Window {
             } else {
                 rotateAlarm.color = "red";
                 rotateNomal.color = "#EEEEEE";
+            }
+            if (!n.lowpower) {
+                lowPowerNomal.color = "aquamarine";
+                lowPowerAlarm.color = "#EEEEEE";
+            } else {
+                lowPowerAlarm.color = "red";
+                lowPowerNomal.color = "#EEEEEE";
+            }
+            if (!n.roller) {
+                rollerNomal.color = "aquamarine";
+                rollerAlarm.color = "#EEEEEE";
+            } else {
+                rollerAlarm.color = "red";
+                rollerNomal.color = "#EEEEEE";
+            }
+            if (!n.inside) {
+                masterCtrNomal.color = "aquamarine";
+                masterCtrAlarm.color = "#EEEEEE";
+            } else {
+                masterCtrAlarm.color = "red";
+                masterCtrNomal.color = "#EEEEEE";
+            }
+            if (!n.emergency) {
+                estopNomal.color = "aquamarine";
+                estopAlarm.color = "#EEEEEE";
+            } else {
+                estopAlarm.color = "red";
+                estopNomal.color = "#EEEEEE";
+            }
+            if (!n.netbreak) {
+                netInterruptNomal.color = "aquamarine";
+                netInterruptAlarm.color = "#EEEEEE";
+            } else {
+                netInterruptAlarm.color = "red";
+                netInterruptNomal.color = "#EEEEEE";
             }
         }
         function cmdLoadPath() {
@@ -406,7 +483,7 @@ Window {
             id: agvConsole;
             title: "agv console";
             height: root.height - 12;
-            width: 180;
+            width: 290;
             Column{
                 spacing: 10
                 Row {
@@ -427,12 +504,12 @@ Window {
 
                         model: ListModel {
                             id: model;
-                            ListElement {
-                                text: "192.168.2.xx";
-                            }
-                        }
-                        Component.onCompleted: {
-                            mapGrid.addAgvModel("192.168.2.xx");
+                            //ListElement {
+                               // text: "192.168.2.xx";
+                            //}
+                        //}
+                        //Component.onCompleted: {
+                            //mapGrid.addAgvModel("192.168.2.xx");
                         }
 
                         onCurrentIndexChanged: {
@@ -445,9 +522,9 @@ Window {
                     }
                 }
 
-                Column {
+                Row {
                     spacing: 4;
-                    Row {
+                    Column {
                         spacing: 4;
                         FlatButton {
                             id: speedview;
@@ -569,20 +646,19 @@ Window {
                             toolTipText: qsTr("前行 Key_Up");
                         }
                         FlatButton {
-                            id: rcButton;
-                            text: "↻";
+                            id: mbButton;
+                            text: "↓";
                             function clickedCallBack() {
-                                if (rotateview.text == 90) {
-                                    udpServer.cmdRc();
-                                } else {
-                                    udpServer.cmdRc2();
-                                }
+                                speedview.down();
                             }
                             onClicked: {
                                 clickedCallBack();
                             }
-                            toolTipText: qsTr("顺时针旋转 Key_Q");
+                            toolTipText: qsTr("后退 Key_Down");
                         }
+                    }
+                    Column{
+                        spacing: 4;
                         FlatButton {
                             id: stopButton;
                             text: "■";
@@ -595,8 +671,71 @@ Window {
                             }
                             toolTipText: qsTr("停止 Key_S");
                         }
+                        FlatButton {
+                            id: leftMoveButton;
+                            text: "←";
+                            width: lfdButton.width;
+                            function clickedCallBack(){
+                                speedview.left();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("左移 Key_left");
+                        }
+                        FlatButton {
+                            id: rightMoveButton;
+                            text: "→";
+                            width: lfdButton.width;
+                            function clickedCallBack(){
+                                speedview.right();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("右移 Key_right");
+                        }
                     }
-                    Row {
+                    Column{
+                        spacing: 4;
+                        FlatButton {
+                            id: astopButton;
+                            text: "T";
+                            function clickedCallBack() {
+                                speedview.clear();
+                                udpServer.cmdAStop();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("精确停止 A/space");
+                        }
+                        FlatButton {
+                            id: leftButton;
+                            text: "↰";
+                            width: lfdButton.width;
+                            function clickedCallBack() {
+                                udpServer.cmdTl();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("左分支 L");
+                        }
+                        FlatButton {
+                            id: rightButton;
+                            text: "↱";
+                            width: lfdButton.width;
+                            function clickedCallBack() {
+                                udpServer.cmdTr();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("右分支 R");
+                        }
+                    }
+                    Column{
                         spacing: 4;
                         FlatButton {
                             id: rotateview;
@@ -619,15 +758,19 @@ Window {
                             toolTipText: qsTr("旋转角度 Key_Equal");
                         }
                         FlatButton {
-                            id: mbButton;
-                            text: "↓";
+                            id: rcButton;
+                            text: "↻";
                             function clickedCallBack() {
-                                speedview.down();
+                                if (rotateview.text == 90) {
+                                    udpServer.cmdRc();
+                                } else {
+                                    udpServer.cmdRc2();
+                                }
                             }
                             onClicked: {
                                 clickedCallBack();
                             }
-                            toolTipText: qsTr("后退 Key_Down");
+                            toolTipText: qsTr("顺时针旋转 Key_Q");
                         }
                         FlatButton {
                             id: rccButton;
@@ -644,23 +787,9 @@ Window {
                             }
                             toolTipText: qsTr("逆时针旋转 Key_W");
                         }
-                        FlatButton {
-                            id: astopButton;
-                            text: "T";
-                            function clickedCallBack() {
-                                speedview.clear();
-                                udpServer.cmdAStop();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("精确停止 A/space");
-                        }
                     }
-                }
-                Column {
-                    spacing: 4;
-                    Row {
+
+                    Column{
                         spacing: 4;
                         FlatButton {
                             id: lfupButton;
@@ -674,6 +803,33 @@ Window {
                             }
                             toolTipText: qsTr("升平台 U");
                         }
+                        FlatButton {
+                            id: lfmButton;
+                            text: "M";
+                            width: mfButton.width;
+                            function clickedCallBack() {
+                                udpServer.cmdLiftMid();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("中间平台 M");
+                        }
+                        FlatButton {
+                            id: lfdButton;
+                            text: "D";
+                            width: mfButton.width;
+                            function clickedCallBack() {
+                                udpServer.cmdLiftDown();
+                            }
+                            onClicked: {
+                                clickedCallBack();
+                            }
+                            toolTipText: qsTr("降平台 D");
+                        }
+                    }
+                    Column{
+                        spacing: 4;
                         FlatButton {
                             id: oaButton;
                             text: "OA";
@@ -707,45 +863,6 @@ Window {
                                 clickedCallBack();
                             }
                             toolTipText: qsTr("避障 F1");
-                        }
-                        FlatButton {
-                            id: leftButton;
-                            text: "↰";
-                            width: lfdButton.width;
-                            function clickedCallBack() {
-                                udpServer.cmdTl();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("左分支 L");
-                        }
-                        FlatButton {
-                            id: leftMoveButton;
-                            text: "←";
-                            width: lfdButton.width;
-                            function clickedCallBack(){
-                                speedview.left();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("左移 Key_left");
-                        }
-                    }
-                    Row {
-                        spacing: 4;
-                        FlatButton {
-                            id: lfdButton;
-                            text: "D";
-                            width: mfButton.width;
-                            function clickedCallBack() {
-                                udpServer.cmdLiftDown();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("降平台 D");
                         }
                         FlatButton {
                             id: csButton;
@@ -782,37 +899,37 @@ Window {
                             }
                             toolTipText: qsTr("充电继电器 F2");
                         }
-                        FlatButton {
-                            id: rightButton;
-                            text: "↱";
-                            width: lfdButton.width;
-                            function clickedCallBack() {
-                                udpServer.cmdTr();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("右分支 R");
+                    }
+                    Column {
+                        spacing: 4;
+                        RectangleStatus {
+                            id: farView;
+                            width: mfButton.width;
+                            height: mfButton.height;
+                            text: qsTr("FAR")
+                            colortext: "deeppink";
                         }
-                        FlatButton {
-                            id: rightMoveButton;
-                            text: "→";
-                            width: lfdButton.width;
-                            function clickedCallBack(){
-                                speedview.right();
-                            }
-                            onClicked: {
-                                clickedCallBack();
-                            }
-                            toolTipText: qsTr("右移 Key_right");
+                        RectangleStatus {
+                            id: nearView;
+                            width: mfButton.width;
+                            height: mfButton.height;
+                            text: qsTr("NEAR")
+                            colortext: "deeppink";
                         }
-
+                        RectangleStatus {
+                            id: machView;
+                            width: mfButton.width;
+                            height: mfButton.height;
+                            text: qsTr("MACH")
+                            colortext: "deeppink";
+                        }
                     }
                 }
                 Row {
                     spacing: 4;
                     FlatButton {
                         id: loadButton;
+                        //width: 58;
                         text: "L";
                         function clickedCallBack() {
                             udpServer.cmdLoadPath();
@@ -825,6 +942,7 @@ Window {
                     FlatButton {
                         id: startButton;
                         text: "O";
+                        width: loadButton.width;
                         function clickedCallBack() {
                             udpServer.cmdStart();
                         }
@@ -836,6 +954,7 @@ Window {
                     FlatButton {
                         id: esButton;
                         text: "ES";
+                        width: loadButton.width;
                         function clickedCallBack() {
                             udpServer.cmdEStop();
                         }
@@ -847,6 +966,7 @@ Window {
                     FlatButton {
                         id: delButton;
                         text: "DEL";
+                        width: loadButton.width;
                         function clickedCallBack() {
                             udpServer.cmdDEList();
                         }
@@ -854,6 +974,37 @@ Window {
                             clickedCallBack();
                         }
                         toolTipText: qsTr("删除路径 Delete");
+                    }
+                    Text {
+                        y: 4;
+                        id: agvInfo;
+                        width: agvConsole.width - 4 * delButton.width;
+                        //anchors.top: col1.bottom;
+                        anchors.topMargin: 12;
+                        text: "AGV运动应答";
+                        //font.family: "Helvetica"
+                        font.pointSize: 12;
+                        color: "blue";
+                        focus: true;
+                    }
+                }
+                Row {
+                    spacing: 4;
+                    RectangleStatus{
+                        id: agvVoltage
+                        text: "0 v";
+                        width:54;
+                    }
+                    RectangleStatus{
+                        id: agvPrepos
+                        text: "-1";
+                        width: 94;
+                    }
+
+                    RectangleStatus{
+                        id: agvNextpose;
+                        text: "-1";
+                        width: 94;
                     }
                 }
                 Row {
@@ -953,136 +1104,24 @@ Window {
                 }
             }
         }
-        Row {
-            spacing: 4
-            Row {
-                GroupBox {
-                    id: agvStatus;
-                    title: "agv status";
-                    width: (root.width - agvConsole.width) / 3 + 10 ;
-                    height: agvConsole.height;
-                    Column {
-                        id: col1;
-                        spacing: 4;
-                        Row {
-                            spacing: 4;
-                            RectangleStatus{
-                                id: agvActive;
-                                text: "↑"
-                                width: 45;
-                                font: 18;
-                            }
-                            RectangleStatus{
-                                id: agvSpeed;
-                                text: "1档";
-                                width: 45;
-                            }
-                        }
-                        Row {
-                            spacing: 4;
-                            RectangleStatus{
-                                id: agvBranch
-                                text: "↰"
-                                width: 45;
-                                font: 18;
-                            }
-                            RectangleStatus{
-                                id: agvLeft
-                                width: 45;
-                                font: 18;
-                                Column {
-                                    anchors.top:parent.top;
-                                    anchors.topMargin: 2;
-                                    anchors.left:parent.left;
-                                    anchors.leftMargin: 12;
-                                    spacing: 4
-                                    Rectangle {
-                                        id: toplift;
-                                        width: 20;
-                                        height: 4;
-                                        color: "black"
-                                        opacity: 0;
-                                    }
-                                    Rectangle {
-                                        id: centerlift;
-                                        width: 20;
-                                        height: 4;
-                                        color: "black"
-                                        opacity: 0;
-                                    }
-                                    Rectangle {
-                                        id: bottomlift;
-                                        width: 20;
-                                        height: 4;
-                                        color: "black"
-                                        opacity: 0;
-                                    }
-                                }
-                            }
-                        }
-                        RectangleStatus{
-                            id: agvVoltage
-                            text: "0 v";
-                            width:94;
-                        }
-                        RectangleStatus{
-                            id: agvPrepos
-                            text: "-1";
-                            width: 94;
-                        }
 
-                        RectangleStatus{
-                            id: agvNextpose;
-                            text: "-1";
-                            width: 94;
-                        }
-                        Row {
-                            spacing: 4;
-                            RectangleStatus{
-                                id: oaview;
-                                text: "OA"
-                                width: 45;
-                                font: 16;
-                            }
-                            RectangleStatus{
-                                id: csview;
-                                text: "CS";
-                                width: 45;
-                                font: 16;
-                            }
-                        }
-
-                    }
-                    Text {
-                        id: agvInfo;
-                        width: parent.width;
-                        anchors.top: col1.bottom;
-                        anchors.topMargin: 12;
-                        text: "";
-                        //font.family: "Helvetica"
-                        font.pointSize: 14;
-                        color: "blue";
-                        focus: true;
-                    }
-                }
                 GroupBox {
                     id: agvAlarm;
                     title: "agv alarm";
-                    height: agvStatus.height;
-                    width: root.width - agvConsole.width - agvStatus.width - 20
+                    height: agvConsole.height;
+                    width: root.width - agvConsole.width - 20
                     Column {
                         anchors.topMargin: 20
                         spacing: 4
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("电量报警: ")
+                                text: qsTr("电量报警:     ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
                                 id: elecNomal;
                                 text: "√";
-                                //color: "aquamarine";
                             }
                             RectangleStatus{
                                 id: elecAlarm
@@ -1092,7 +1131,7 @@ Window {
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("丢磁报警: ")
+                                text: qsTr("丢磁报警:     ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
@@ -1108,7 +1147,7 @@ Window {
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("旋转报警: ")
+                                text: qsTr("旋转报警:     ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
@@ -1123,7 +1162,7 @@ Window {
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("平台报警: ")
+                                text: qsTr("平台报警:     ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
@@ -1138,7 +1177,22 @@ Window {
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("电机报警: ")
+                                text: qsTr("低电量停机:   ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                id: lowPowerNomal;
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                id: lowPowerAlarm;
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("驱动电机报警: ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
@@ -1153,7 +1207,7 @@ Window {
                         Row {
                             Text {
                                 y: 6;
-                                text: qsTr("通信报警: ")
+                                text: qsTr("充电通信报警: ")
                                 font.pointSize: 10
                             }
                             RectangleStatus{
@@ -1165,9 +1219,67 @@ Window {
                                 text: "⚠";
                             }
                         }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("滚筒电机报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                id: rollerNomal;
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                id: rollerAlarm;
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("主控通信报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                id: masterCtrNomal;
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                id: masterCtrAlarm;
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("紧急停止报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                id: estopNomal;
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                id: estopAlarm;
+                                text: "⚠";
+                            }
+                        }
+                        Row {
+                            Text {
+                                y: 6;
+                                text: qsTr("网络中断报警: ")
+                                font.pointSize: 10
+                            }
+                            RectangleStatus{
+                                id: netInterruptNomal;
+                                text: "√";
+                            }
+                            RectangleStatus{
+                                id: netInterruptAlarm;
+                                text: "⚠";
+                            }
+                        }
                     }
                 }
-            }
-        }
     }
 }
