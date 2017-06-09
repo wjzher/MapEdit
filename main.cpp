@@ -5,6 +5,7 @@
 #include "mapData.h"
 #include "pathJson.h"
 #include "udpServer.h"
+#include "pycal.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<MapData>("Qt.MapData", 1, 0, "MapData");
     qmlRegisterType<PathJson>("Qt.PathJson", 1, 0, "PathJson");
     qmlRegisterType<UdpServer>("Qt.UdpServer", 1, 0, "UdpServer");
+    qmlRegisterType<PyCal>("Qt.PyCal", 1, 0, "PyCal");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

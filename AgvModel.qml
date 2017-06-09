@@ -1,6 +1,7 @@
 ﻿import QtQuick 2.0
 import Qt.MapItemType 1.0
 import Qt.MapData 1.0
+import Qt.PyCal 1.0
 
 Rectangle {
     id: rect;
@@ -38,6 +39,9 @@ Rectangle {
 //        origin.y: rect.ory;
 //        angle: rect.orAngle;
 //    }
+    PyCal {
+        id: pyCal;
+    }
     Text {
         id: agvText;
         anchors.centerIn: parent;
@@ -137,7 +141,8 @@ Rectangle {
     // 坐标转换[x, y], 将相对于AGV Model中心点的坐标，转换为相对于grid坐标
     function agvCoordinateTransformation(x, y) {
         var point = [0, 0];
-        var rad = - Math.PI * r / 180;
+        var rad = - Math.PI * rect.r / 180;
+        console.log("agvCoordinateTransformation: r = " + rect.r + "rect (" + rect.x + ", " + rect.y + ")");
         // 先做角度变换
         point[1] = x * Math.sin(rad) + y * Math.cos(rad);
         point[0] = x * Math.cos(rad) - y * Math.sin(rad);
@@ -163,8 +168,11 @@ Rectangle {
             p2[0] = -magToCenter;
             p2[1] = -magLength / 2;
         }
+        console.log("1: agv MagSensor: " + p1 + " -> " + p2);
         p1 = agvCoordinateTransformation(p1[0], p1[1]);
+        console.log("2: agv MagSensor: " + p1);
         p2 = agvCoordinateTransformation(p2[0], p2[1]);
+        console.log("3: agv MagSensor: " + p2);
         console.log("agv MagSensor: " + p1 + " -> " + p2);
         return { type : 0, p1 : { x : p1[0], y : p1[1] }, p2 : { x : p2[0], y : p2[1] }};
     }
@@ -1122,93 +1130,81 @@ Rectangle {
         }
         return false;
     }
-    function agvCurveMove(dir, cv) {
+    function agvCurveMove(dir, cv, act) {
         var grid = parent.parent;
         var radius = 100;
         var a = 10 * Math.PI;
         var center, rot;
         var x = 0, y = 0, r = 0;
-        var m = Math.sin(a / radius);
-        var n = Math.cos(a / radius);
-        var index = coordinateTransIndex(grid, cv.x, cv.y);
-        var t;
+        //var index = coordinateTransIndex(grid, cv.x, cv.y);
+        var t, angle;
         var item = grid.itemAt(gridIndex);
         var agvCenterX = rect.x + rect.width / 2;
         var agvCenterY = rect.y + rect.height / 2;
         t = getActualArcType(item);
-        center = arcCenterTransformation(item);
+        //center = arcCenterTransformation(item);
+        //agv得到移动偏移量
+        rot = pycalPoint(agvCenterX, agvCenterY, a, act);
+        x = rot.xx;
+        y = rot.yy;
+        //agv偏移之后的旋转角度
+        rot = pycalPoint(agvCenterX + x, agvCenterY + y, magToCenter, act);
+        angle = rot.angle;
         if (t == MapItemType.ArcXRD || t == MapItemType.ArcYLU) {
             if (dir == 1 || dir == -2) {
-                //rot = rotationAngle(center.x, center.y - 100, agvCenterX, agvCenterY);
-                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
-//                x = radius * m;
-//                y = radius - radius * n;
-                x = rot.x2;
-                y = rot.y2;
-                rect.r  = 0;
-                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX + x, agvCenterY + y);
-                r = -(rot.angle);
-                //r = - a / radius;
-            } else if (dir == -1 || dir ==2) {
-                rot = rotationAngle(center.x, center.y - 100, agvCenterX, agvCenterY);
-//                x = -(radius * m);
-//                y = -(radius - radius * n);
-                x = rot.x1;
-                y = rot.y1;
-                rect.r  = 0;
-                r =  rotationAngle(center.x + 100, center.y, agvCenterX - x, agvCenterY - y);
-                //r = a / radius;
+                if (act == 1) {
+                    r = -angle;
+                } else if (act == 2) {
+                    r = 180 -angle;
+                }
+            } else if (dir == -1 || dir == 2) {
+                if (act == 1) {
+                    r = 90 + (90 - angle);
+                } else if (act == 2) {
+                    r = 270 + (90 - angle);
+                }
             }
-            console.log("ArcXRD  ArcYLU  dir = " + dir);
         } else if (t == MapItemType.ArcXRU || t == MapItemType.ArcYLD) {
             if (dir == 1 || dir == 2) {
-//                x = radius * m;
-//                y = -(radius - radius * n);
-//                r = rotationAngle(center.x, center.y + 100, agvCenterX + x, agvCenterY - y);
-                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
-                x = rot.x2;
-                y = -rot.y2;
-                rect.r  = 0;
-                rot = rotationAngle(center.x, center.y + 100, agvCenterX + x, agvCenterY - y);
-                r = (rot.angle);
-                //r =  a / radius;
+                if (act == 1) {
+                    r = angle;
+                } else if (act == 2) {
+                    r = 180 + angle;
+                }
             } else if (dir == -1 || dir == -2) {
-//                x = -(radius * m);
-//                y = radius - radius * n;
-//                r = - rotationAngle(center.x + 100, center.y, agvCenterX - x, agvCenterY + y);
-                rot = rotationAngle(agvCenterX, agvCenterY, agvCenterX, agvCenterY);
-                x = -rot.x1;
-                y = rot.y1;
-                rect.r  = 0;
-                rot = rotationAngle(center.x, center.y + 100, agvCenterX - x, agvCenterY + y);
-                r = -(rot.angle);
-                //r = - a / radius;
+                if (act == 1) {
+                    r = 270 - (90 - angle);
+                } else if (act == 2) {
+                    r = 90 - (90 - angle);
+                }
             }
-            console.log("ArcXRU  ArcYRU  dir = " + dir);
         } else if (t == MapItemType.ArcYRD || t == MapItemType.ArcXLU) {
             if (dir == 1 || dir == -2) {
-                x = radius * m;
-                y = radius - radius * n;
-                r = rotationAngle(center.x - 100, center.y, agvCenterX + x, agvCenterY + y);
-                //r = a / radius;
+                if (act == 1) {
+                    r = 270 + (90 - angle);
+                } else if (act == 2) {
+                    r = 90 + (90 - angle);
+                }
             } else if (dir == -1 || dir == 2) {
-                x = -(radius * m);
-                y = - (radius - radius * n);
-                r = - rotationAngle(center.x, center.y + 100, agvCenterX -x, agvCenterY - y);
-                //r = - (a / radius);
+                if (act == 1) {
+                    r = 180 - angle;
+                } else if (act == 2) {
+                    r = - angle;
+                }
             }
-            console.log("ArcYRD  ArcXLU  dir = " + dir)
         } else if (t == MapItemType.ArcYRU || t == MapItemType.ArcXLD) {
             if (dir == -1 || dir == -2) {
-                x = - (radius * m);
-                y = radius - radius * n;
-                r =  rotationAngle(center.x, center.y - 100, agvCenterX - x, agvCenterY + y);
-                //r = a / radius;
+                if (act == 1) {
+                    r = 180 + angle;
+                } else if (act == 2) {
+                    r = angle;
+                }
             } else if (dir == 1 || dir == 2) {
-                x = radius * m;
-                y = - (radius - radius * n);
-                r = - rotationAngle(center.x - 100, center.y, agvCenterX + x, agvCenterY -y);
-                //r = - (a / radius);
+                if (act == 1) {
+                    r = 90 - (90 - angle);
+                } else if (act == 2) {
+                    r = 270 - (90 - angle);
+                }
             }
             console.log("ArcYRU  ArcXLD  dir = " + dir)
         } else {
@@ -1216,14 +1212,10 @@ Rectangle {
             y = 0;
             r = 0;
         }
-        //r = r / 2 / Math.PI * 360;
         console.log("agvCurveMove x y r: " + x + " " + y + " " + r);
-//        rect.orx = 7;
-//        rect.ory = 29;
-//        rect.orAngle -= r;
-        //console.log("trans x111 = " + rect.orx + " " + rect.ory + " " + rect.orAngle);
         return { x : x, y : y, r : r };
     }
+    //弧长为a时，xy值得变化
     function zeroXY(a) {
         var x, y;
         var radius = 100;
@@ -1232,6 +1224,152 @@ Rectangle {
         x = radius * m;
         y = radius - radius * n;
         return {x: x, y: y};
+    }
+    function minAB(a, b) {
+        if (a < b) {
+            return a;
+        } else if (a > b) {
+            return b;
+        } else {
+            console.log(" a = b. ->false")
+            return false;
+        }
+    }
+    //x,y->agv中心 l->弦长  startX, startY->agv初始姿态点
+    function pycalPoint(x, y, l, sta) {
+        var grid = parent.parent;
+        var item = grid.itemAt(gridIndex);
+        var center = arcCenterTransformation(item);
+        var x1, y1, x2, y2, angle, angle1;
+        var xx, yy; //最终返回的需要平移的距离；
+        var mag1x, mag1y, mag2x, mag2y, magCx, magCy;
+        var line1, line2;
+        var compare;
+        var magCv = agvGetMagSensor(sta);
+        mag1x = magCv.p1.x;
+        mag1y = magCv.p1.y;
+        mag2x = magCv.p2.x;
+        mag2y = magCv.p2.y;
+        console.log("传感器两个点初始值 = " + mag1x + " " + mag1y + " " + mag2x + " " + mag2y);
+        //磁导航传感器中心
+        magCx = (mag1x + mag2x) / 2;
+        magCy = (mag1y + mag2y) / 2;
+        //坐标转换
+        x = x - center.x;
+        y = y - center.y;
+        console.log("magC初始值 = " + magCx + " " + magCy);
+        magCx = magCx - center.x;
+        magCy = magCy - center.y;
+        //计算交点
+        var pycal = [x, y, l];
+        pycal = pyCal.callCircle2(pycal);
+        console.log(pycal);
+        //与圆分别有两个交点
+        x1 = pycal[0];
+        y1 = pycal[1];
+        x2 = pycal[2];
+        y2 = pycal[3];
+        //计算两点和磁导航中心之间的分别直线距离进行比较
+        line1 = Math.sqrt((x1 - magCx) * (x1 - magCx) + (y1 - magCy) * (y1 - magCy));
+        line2 = Math.sqrt((x2 - magCx) * (x2 - magCx) + (y2 - magCy) * (y2 - magCy));
+        console.log("magC = " + magCx + " " + magCy);
+        console.log("line = " + line1 + " " + line2);
+        //对两个交点进行判断取舍
+        compare = minAB(line1, line2);
+        if(compare == line1) {
+            xx = x1;
+            yy = y1;
+        } else if (compare == line2) {
+            xx = x2;
+            yy = y2;
+        } else {
+            return false;
+        }
+        angle = Math.atan(Math.abs(yy - y) / Math.abs(xx - x));
+        console.log( "求出点的坐标和agv中心坐标1 = " + xx + " " + yy + " " + x + " " + y);
+        angle = angle / 2 / Math.PI * 360;
+        console.log( "angle1 ====== " + angle);
+
+        //算出agv移动到相交点时的偏移
+        xx = xx - x;
+        yy = yy - y;
+        return { xx: xx , yy: yy, angle: angle};
+
+    }
+    //x,y->agv中心 l->弦长  startX, startY->agv初始姿态点
+    function magSensorCenter(x, y, l) {
+        //var l = magToCenter;
+        var grid = parent.parent;
+        var item = grid.itemAt(gridIndex);
+        var center = arcCenterTransformation(item);
+        var centerX = rect.x + rect.width / 2;
+        var centerY = rect.y + rect.height / 2;
+        var r = 100;   //半径
+        var x1, x2, y1, y2;    //已知弦长的下一个与圆的交点
+        var zero;
+        var m, n, p, q, t, t1, angle, angle1;
+        x = x - center.x;
+        y = y - center.y;
+        centerX = centerX - center.x;
+        centerY = centerY - center.y;
+        console.log("agv中心值 x = " + x + "  y = " + y);
+        if ((y == 0)) {
+            zero = zeroXY(l);
+            x1 = zero.x;
+            x2 = zero.x;
+            y1 = zero.y;
+            y2 = zero.y;
+            console.log("if y == 0   x1 = " + x1 + "  x2 = " + x2 + " y1 = " + y1 + "  y2 = " + y2);
+            return { x1: x1 , y1: y1, x2: x2, y2: y2};
+        }
+        m = r * r - l * l / 2;
+        n = 1 + (x * x) / (y * y);
+        p = (2 * m * x) / (y * y);
+        q = (m * m) / (y * y) - r * r;
+        t = p * p - 4 * n * q;
+        if (t < 0) {
+            console.log("t < 0  false");
+            return false;
+        }
+        if (t == 0) {
+            x1 = x2 = p / (2 * n);
+            y1 = y2 = Math.abs( Math.sqrt(r * r - x1 * x1));
+            console.log("x1 = " + x1 + "  x2 = " + x2 + " y1 = " + y1 + "  y2 = " + y2);
+            return { x1: x1 , y1: y1, x2: x2, y2: y2};
+        }
+        t1 = Math.sqrt(t);
+        //求出相交点坐标
+        x1 = (p + t1) / (2 * n);
+        x2 = (p - t1) / (2 * n);
+        y1 = Math.abs( Math.sqrt(r * r - x1 * x1));
+        y2 = Math.abs( Math.sqrt(r * r - x2 * x2));
+        //angle = Math.sqrt((startX - x1) * (startX - x1) + (startY - y1) * (startY - y1)) / r;
+        //angle = Math.asin(Math.abs(y1 - y) / l);
+        //angle = angle / 2 / Math.PI * 360;
+        console.log("交点坐标 x1 = " + x1 + "  x2 = " + x2 + " y1 = " + y1 + "  y2 = " + y2);
+
+        angle = Math.atan(Math.abs(y1 - Math.abs(y)) / Math.abs(x1 - Math.abs(x)));
+        console.log( "求出点的坐标和agv中心坐标1 = " + y1 + " " + y + " " + x1 + " " + x);
+        //console.log(" Math.atan1 = " + Math.abs(y1 - Math.abs(y)) + " " + Math.abs(x1 - Math.abs(centerX)))
+        angle = angle / 2 / Math.PI * 360;
+        console.log( "angle1 ====== " + angle);
+
+
+        angle1 = Math.atan(Math.abs(y2 - Math.abs(y)) / Math.abs(x2 - Math.abs(x)));
+        console.log( "求出点的坐标和agv中心坐标2 = " + y2 + " " + y + " " + x2 + " " + x);
+        //console.log(" Math.atan2 = " + Math.abs(y2 - Math.abs(y)) + " " + Math.abs(x2 - Math.abs(centerX)))
+        angle1 = angle1 / 2 / Math.PI * 360;
+        console.log( "angle2 ====== " + angle1);
+
+        //算出agv移动到相交点时的偏移
+        x1 = Math.abs(Math.abs(x1) - Math.abs(x));
+        x2 = Math.abs(Math.abs(x2) - Math.abs(x));
+        y1 = Math.abs(Math.abs(y1) - Math.abs(y));
+        y2 = Math.abs(Math.abs(y2) - Math.abs(y));
+
+
+        console.log("偏移量  x1 = " + x1 + "  x2 = " + x2 + " y1 = " + y1 + "  y2 = " + y2);
+        return { x1: x1 , y1: y1, x2: x2, y2: y2, angle: angle, angle1: angle1};
     }
     function rotationAngle(x1, y1, x2, y2) {
         var l,zero;          // AGV中心距离磁导航长度
@@ -1268,6 +1406,12 @@ Rectangle {
             xx2 = zero.x;
             yy1 = zero.y;
             yy2 = zero.y;
+        } else if ((y1 == 0)) {
+            zero = zeroXY(arc);
+            xx1 = zero.y;
+            xx2 = zero.y;
+            yy1 = zero.x;
+            yy2 = zero.x;
         } else {
             e1 = d1 / x1;
             console.log("e1 = " + e1);
@@ -1297,7 +1441,7 @@ Rectangle {
     }
 
     // agv移动距离 返回值为偏移量
-    function agvMoveTo(sp, direction, type, cv) {
+    function agvMoveTo(sp, act, direction, type, cv) {
         var magCv;
         var x = 0, y = 0, r = 0;
 
@@ -1322,7 +1466,7 @@ Rectangle {
             }
             return { x : x, y : y, r : r };
         } else if (type == 1) {
-           return agvCurveMove(direction, cv);
+           return agvCurveMove(direction, cv, act);
         }
     }
 
@@ -1367,8 +1511,9 @@ Rectangle {
             return false;
         }
         var type = cv[i].type;
-        var agvTo = agvMoveTo(turn, direction, type, cv[i]);
+        var agvTo = agvMoveTo(turn, sta, direction, type, cv[i]);
         console.log("agvMoveTo(turn, 1, type): " + turn + " " +  type)
+        rect.r = 0;
         agvMove(agvTo.x, agvTo.y, agvTo.r);
 
         console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
