@@ -15,7 +15,7 @@ Rectangle {
     //    property alias arcPathAnimation: arcPathAnimation;
     property alias text: agvText.text;
     property int gridIndex: 0;     // AGV所在格子
-    property int gridX: 0;          // 格子里AGV的坐标X
+    property int gridX: 0;          // 格子里AGV的坐标X, 相对于scale 1.0的情况
     property int gridY: 0;          // 格子里AGV的坐标Y
     property int r: 0;              // AGV角度, 逆时针
     property bool initFlag: false;       // 标记是否初始化成功
@@ -24,22 +24,22 @@ Rectangle {
     property string agvStatus: "";
     property var speedVal: [0.178, 0.318, 0.444, 0.530, 0.628];
     property var dstRot: 0;
-//    property int pointRotation: 360 - r;
+    //    property int pointRotation: 360 - r;
     rotation: 360 - r;
-//    property double orx: 0.0;
-//    property double ory: 0.0;
-//    property double orAngle: 0.0;
-//    onRChanged: {
-//        rect.orx = rect.width / 2;
-//        rect.ory = rect.height / 2;
-//        rect.orAngle = 360 - r;
-//        console.log("set r = " + rect.orx + " " + rect.ory + " " + rect.orAngle);
-//    }
-//    transform: Rotation {
-//        origin.x: rect.orx;
-//        origin.y: rect.ory;
-//        angle: rect.orAngle;
-//    }
+    //    property double orx: 0.0;
+    //    property double ory: 0.0;
+    //    property double orAngle: 0.0;
+    //    onRChanged: {
+    //        rect.orx = rect.width / 2;
+    //        rect.ory = rect.height / 2;
+    //        rect.orAngle = 360 - r;
+    //        console.log("set r = " + rect.orx + " " + rect.ory + " " + rect.orAngle);
+    //    }
+    //    transform: Rotation {
+    //        origin.x: rect.orx;
+    //        origin.y: rect.ory;
+    //        angle: rect.orAngle;
+    //    }
     PyCal {
         id: pyCal;
     }
@@ -108,9 +108,9 @@ Rectangle {
     }
     // agv move
     function agvMove(dx, dy, dr) {
-        x += dx;
-        y += dy;
-        r += dr;
+        rect.x += dx * scale;
+        rect.y += dy * scale;
+        rect.r += dr;
     }
     // 按照当前agv坐标判断所在index
     function updateAgvGridIndex(grid) {
@@ -122,8 +122,10 @@ Rectangle {
         gridIndex = (parseInt(y / length)) * grid.columns + parseInt(x / length);
         console.log("updateAgvGridIndex: " + x + " " + y
                     + " " + parseInt(y / length) + " " + grid.columns);
-        gridX = parseInt(x) % length;
-        gridY = parseInt(y) % length;
+        console.log("updateAgvGridIndex: length = " + length);
+        gridX = (parseInt(x) % length) / scale;
+        gridY = (parseInt(y) % length) / scale;
+        console.log("updateAgvGridIndex:" + "(" + gridX + ", " + gridY + ")" + " " + gridIndex)
         return;
     }
     // 坐标转换index
@@ -250,8 +252,11 @@ Rectangle {
     function linesConnect(l1, l2) {
         var a = [[l1.p1, l2.p1], [l1.p2, l2.p1], [l1.p1, l2.p2], [l1.p2, l2.p2]];
         var i;
+        console.log("linesConnect " + a + " " + 4 * scale);
         for (i = 0; i < a.length; i++) {
-            if (calPointDiff(a[i][0], a[i][1]) < 4) {
+            var diff = calPointDiff(a[i][0], a[i][1]);
+            console.log("diff " + i + " " + diff);
+            if (diff < 4 * scale) {
                 break;
             }
         }
@@ -284,16 +289,10 @@ Rectangle {
     function getXLineCurve(item) {
         var line, line1, line2;
         if (isXLineExist(item) == true) {
-            //if (item.cutRightDown == true) {
-                //line = { type : 0, p1 : { x : 0, y : item.length / 2 },
-                //    p2 : { x : item.length / 2, y : item.length / 2 } };
-            //} else if (item.cutLeftUp == true) {
-            //line = { type : 0, p1 : { x : item.length / 2, y : item.length / 2 },
-             //   p2 : { x : item.length, y : item.length / 2 } };
-           // } else {
-                line = { type : 0, p1 : { x : 0, y : item.length / 2 },
-                    p2 : { x : item.length, y : item.length / 2 } };
-            //}
+            line = { type : 0, p1 : { x : 0, y : item.length * scale / 2 },
+                p2 : { x : item.length * scale, y : item.length * scale / 2 } };
+            console.log("getXLineCurve:");
+            printLine(line);
             curveTransformation(line, item);
             console.log("getXNegativeArcOrLine  get line." );
             return line;
@@ -306,16 +305,8 @@ Rectangle {
     function getYLineCurve(item) {
         var line;
         if (isYLineExist(item) == true) {
-//            if (item.cutRightDown == true) {
-//                line = { type : 0, p1 : { x : item.length / 2, y : 0 },
-//                    p2 : { x : item.length / 2, y : item.length / 2} };
-//            } else if (item.cutLeftUp == true) {
-//                line = { type : 0, p1 : { x : item.length / 2, y : item.length / 2 },
-//                    p2 : { x : item.length / 2, y : item.length } };
-//            } else {
-                line = { type : 0, p1 : { x : item.length / 2, y : 0 },
-                    p2 : { x : item.length / 2, y : item.length } };
-            //}
+            line = { type : 0, p1 : { x : item.length * scale / 2, y : 0 },
+                p2 : { x : item.length * scale / 2, y : item.length * scale } };
             curveTransformation(line, item);
             return line;
         } else {
@@ -625,7 +616,7 @@ Rectangle {
                 }
             } else {
                 if (t ==  MapItemType.ArcYRD || t == MapItemType.ArcYLD
-                         || t == MapItemType.ArcXRU || t == MapItemType.ArcXLU) {
+                        || t == MapItemType.ArcXRU || t == MapItemType.ArcXLU) {
                     return true;
                 } else {
                     return false;
@@ -694,7 +685,7 @@ Rectangle {
     function getYLines(item, nextItem, sta, turn, isPositive) {
         var r = rect.r;
         var line1, line2, line3, line;
-       //判断agv是否处在正在旋转过程中
+        //判断agv是否处在正在旋转过程中
         if ((isXLineExist(item) != false) && (isArcLineExist(item) == true)) {
             line1 = arcLineCurve(item);
             line2 = onlyArcLineCurve(item, isPositive);
@@ -1525,7 +1516,7 @@ Rectangle {
             console.log("x,y,r = " + Online.x + " " + Online.y + " " + Online.r);
             return {x: Online.x, y: Online.y, r: Online.r};
         } else if (type == 1) {
-           return agvCurveMove(direction, cv, act);
+            return agvCurveMove(direction, cv, act);
         }
     }
     //旋转到平移的角度转换
@@ -1717,7 +1708,7 @@ Rectangle {
                     console.log("rotation1 = " + r);
                     return r;
                 }
-        } else {
+            } else {
                 r = 0;
             }
             return r;
@@ -1730,48 +1721,48 @@ Rectangle {
         var direction = getAgvDirection(r);
         console.log("r = " + r)
         if (sta != 3) {
-        if (direction == 0) {
-            console.log("off track. direction == 0");
-            return false;
-        }
-        direction = getAgvMoveDirection(sta, direction);
-        if (direction == 0) {
-            console.log("getAgvMoveDirection failed.");
-            return false;
-        }
-        // 得到磁导航曲线
-        var magCv = agvGetMagSensor(sta);
-        // 得到磁条曲线
-        cv = getMagCurve(sta, turn);
-        console.log("cv.length = " + cv.length);
-        if (cv == false) {
-            console.log("get curve failed. ");
-            return false;
-        }
-        // 判断AGV是否在磁条上
-        for (i = 0; i < cv.length; i++) {
-            console.log("check curve corss...");
-            printLine(magCv);
-            printLine(cv[i]);
-            crossPoint = curveIsCross(magCv, cv[i]);
-            console.log("crossPoint " + crossPoint.x + " " + crossPoint.y)
-            if (crossPoint != false) {
-                break;
+            if (direction == 0) {
+                console.log("off track. direction == 0");
+                return false;
             }
-            console.log("curve " + i + " Is not Cross")
-        }
-        if (i == cv.length) {
-            console.log("agv 脱磁");
-            return false;
-        }
-        var type = cv[i].type;
-        var agvTo = agvMoveTo(turn, sta, direction, type, cv[i]);
-        console.log("agvMoveTo(turn, 1, type): " + turn + " " +  type);
-        rect.r = 0;
+            direction = getAgvMoveDirection(sta, direction);
+            if (direction == 0) {
+                console.log("getAgvMoveDirection failed.");
+                return false;
+            }
+            // 得到磁导航曲线
+            var magCv = agvGetMagSensor(sta);
+            // 得到磁条曲线
+            cv = getMagCurve(sta, turn);
+            console.log("cv.length = " + cv.length);
+            if (cv == false) {
+                console.log("get curve failed. ");
+                return false;
+            }
+            // 判断AGV是否在磁条上
+            for (i = 0; i < cv.length; i++) {
+                console.log("check curve corss...");
+                printLine(magCv);
+                printLine(cv[i]);
+                crossPoint = curveIsCross(magCv, cv[i]);
+                console.log("crossPoint " + crossPoint.x + " " + crossPoint.y)
+                if (crossPoint != false) {
+                    break;
+                }
+                console.log("curve " + i + " Is not Cross")
+            }
+            if (i == cv.length) {
+                console.log("agv 脱磁");
+                return false;
+            }
+            var type = cv[i].type;
+            var agvTo = agvMoveTo(turn, sta, direction, type, cv[i]);
+            console.log("agvMoveTo(turn, 1, type): " + turn + " " +  type);
+            rect.r = 0;
 
-        agvMove(agvTo.x, agvTo.y, agvTo.r);
-        console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
-        console.log("agv current center = " + rect.x + rect.width / 2 + " " + rect.y + rect.width / 2);
+            agvMove(agvTo.x, agvTo.y, agvTo.r);
+            console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
+            console.log("agv current center = " + rect.x + " " + rect.width / 2 + " " + rect.y + " " + rect.width / 2);
         } else {
             r = crossRotation(sta, turn);
             //agvMove(0, 0, r);
