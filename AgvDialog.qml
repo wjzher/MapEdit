@@ -1098,6 +1098,11 @@ Window {
                         text: "test";
                         onClicked: {
                             //mapGrid.agvTestGetMagCurve(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
+                            console.log("
+
+
+
+");
                             mapGrid.agvTestGetCross(agvipCombobox.currentText, Number(agvAct.text), Number(agvTurn.text));
                         }
                     }
