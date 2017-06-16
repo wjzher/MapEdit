@@ -7,6 +7,7 @@ import QtQuick.Layouts 1.1
 import Qt.MapData 1.0
 import QtQuick.Dialogs 1.2
 import Qt.UdpServer 1.0
+import Qt.PyCal 1.0
 
 Window {
     visible: true;
@@ -19,6 +20,10 @@ Window {
     title: qsTr("华创求实--AGV地图运行仿真系统");
     property alias pathList: pathList;
     property alias mapGrid: mapGrid;
+
+    PyCal {
+        id: pyCal;
+    }
 
     UpdateCardIdDialog {
         id: updateCardIdDialog;

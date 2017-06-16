@@ -1,7 +1,6 @@
 ﻿import QtQuick 2.0
 import Qt.MapItemType 1.0
 import Qt.MapData 1.0
-import Qt.PyCal 1.0
 
 Rectangle {
     id: rect;
@@ -23,7 +22,7 @@ Rectangle {
     property int magLength: 20;
     property string agvStatus: "";
     property var speedVal: [0.178, 0.318, 0.444, 0.530, 0.628];
-    property var dstRot: 0;
+    property double dstRot: 0;
     //    property int pointRotation: 360 - r;
     rotation: 360 - r;
     //    property double orx: 0.0;
@@ -40,9 +39,6 @@ Rectangle {
     //        origin.y: rect.ory;
     //        angle: rect.orAngle;
     //    }
-    PyCal {
-        id: pyCal;
-    }
     Text {
         id: agvText;
         anchors.centerIn: parent;
@@ -106,6 +102,28 @@ Rectangle {
         }
         return line;
     }
+    // 得到scale 1.0的X坐标
+    function getOriginX() {
+        var grid = parent.parent;
+        var tmp = (((rect.gridIndex % grid.columns)
+                    * grid.gridLength)
+                   - rect.width / 2 + rect.gridX);
+        return tmp;
+    }
+    // 得到scale 1.0的Y坐标
+    function getOriginY() {
+        var grid = parent.parent;
+        var tmp = parseInt(rect.gridIndex / grid.columns)
+                * grid.gridLength
+                - rect.height / 2 + rect.gridY;
+        return tmp;
+    }
+    function itemGetOriginX(item) {
+        return item.x / rect.scale;
+    }
+    function itemGetOriginY(item) {
+        return item.y / rect.scale;
+    }
     // agv move
     function agvMove(dx, dy, dr) {
         rect.x += dx * scale;
@@ -115,6 +133,7 @@ Rectangle {
     // 按照当前agv坐标判断所在index
     function updateAgvGridIndex(grid) {
         var length = grid.mapGrid.cellWidth;
+        // 中心点的坐标需要加width一半的偏移，不管scale是否为1
         var x = rect.x + rect.width / 2;    // 取到AGV的中心坐标
         var y = rect.y + rect.height / 2;
         console.log("updateAgvGridIndex: " + rect.x + " " + rect.y
@@ -149,8 +168,9 @@ Rectangle {
         point[1] = x * Math.sin(rad) + y * Math.cos(rad);
         point[0] = x * Math.cos(rad) - y * Math.sin(rad);
         // 再做偏移变换
-        point[0] += rect.x + rect.width / 2;
-        point[1] += rect.y + rect.height / 2;
+        point[0] += rect.getOriginX() + rect.width / 2;
+        point[1] += rect.getOriginY() + rect.height / 2;
+        console.log("agvCoordinateTransformation: " + "[" + rect.x + ", " + rect.y + "]" + ", h: " + rect.height + " w: " + rect.width)
         return point;
     }
 
@@ -252,11 +272,11 @@ Rectangle {
     function linesConnect(l1, l2) {
         var a = [[l1.p1, l2.p1], [l1.p2, l2.p1], [l1.p1, l2.p2], [l1.p2, l2.p2]];
         var i;
-        console.log("linesConnect " + a + " " + 4 * scale);
+        console.log("linesConnect " + a);
         for (i = 0; i < a.length; i++) {
             var diff = calPointDiff(a[i][0], a[i][1]);
             console.log("diff " + i + " " + diff);
-            if (diff < 4 * scale) {
+            if (diff < 4) {
                 break;
             }
         }
@@ -289,8 +309,8 @@ Rectangle {
     function getXLineCurve(item) {
         var line, line1, line2;
         if (isXLineExist(item) == true) {
-            line = { type : 0, p1 : { x : 0, y : item.length * scale / 2 },
-                p2 : { x : item.length * scale, y : item.length * scale / 2 } };
+            line = { type : 0, p1 : { x : 0, y : item.length / 2 },
+                p2 : { x : item.length, y : item.length / 2 } };
             console.log("getXLineCurve:");
             printLine(line);
             curveTransformation(line, item);
@@ -451,11 +471,11 @@ Rectangle {
     }
     //圆心坐标转换
     function  arcCenterTransformation(item) {
-        return { x : item.x + item.arcParam[0], y : item.y + item.arcParam[1] };
+        return { x : itemGetOriginX(item) + item.arcParam[0], y : itemGetOriginY(item) + item.arcParam[1] };
     }
     //坐标转换
     function transformation(p, item) {
-        return { x : item.x + p.x, y : item.y + p.y };
+        return { x : itemGetOriginX(item) + p.x, y : itemGetOriginY(item) + p.y };
     }
     // 单个曲线坐标转换
     function curveTransformation(line, item) {
@@ -643,8 +663,8 @@ Rectangle {
         var agvCenter, magC;
         var line1, line2, line;
         //agv中心坐标
-        var agvCenterX = rect.x + rect.width / 2;
-        var agvCenterY = rect.y + rect.height / 2;
+        var agvCenterX = rect.getOriginX() + rect.width / 2;
+        var agvCenterY = rect.getOriginY() + rect.height / 2;
         mag1x = magCv.p1.x;
         mag1y = magCv.p1.y;
         mag2x = magCv.p2.x;
@@ -1206,16 +1226,20 @@ Rectangle {
         //var index = coordinateTransIndex(grid, cv.x, cv.y);
         var t, angle;
         var item = grid.itemAt(gridIndex);
-        var agvCenterX = rect.x + rect.width / 2;
-        var agvCenterY = rect.y + rect.height / 2;
+        var agvCenterX = rect.getOriginX() + rect.width / 2;
+        var agvCenterY = rect.getOriginY() + rect.height / 2;
         t = getActualArcType(item);
         //center = arcCenterTransformation(item);
         //agv得到移动偏移量
+        console.log("agvCurveMove xy = " + agvCenterX + " " + agvCenterY);
         rot = pycalPoint(agvCenterX, agvCenterY, a, act);
         x = rot.xx;
         y = rot.yy;
+        console.log("rot 1 xy = " + x + " " + y);
         //agv偏移之后的旋转角度
         rot = pycalPoint(agvCenterX + x, agvCenterY + y, magToCenter, act);
+
+        console.log("rot 2 xy = " + agvCenterX + x + " " + agvCenterY + y);
         angle = rot.angle;
         if (t == MapItemType.ArcXRD || t == MapItemType.ArcYLU) {
             if (dir == 1 || dir == -2) {
@@ -1329,6 +1353,7 @@ Rectangle {
         magCy = magCy - center.y;
         //计算交点
         var pycal = [x, y, l];
+        console.log("pycal x y l : " + x + " " + y + " " + l);
         pycal = pyCal.callCircle2(pycal);
         console.log(pycal);
         //与圆分别有两个交点
@@ -1336,6 +1361,7 @@ Rectangle {
         y1 = pycal[1];
         x2 = pycal[2];
         y2 = pycal[3];
+        console.log("pycal = " + "(" + x1 + "，" + y1 + ")"  + "(" + x2 + "，" + y2 + ")" );
         //计算两点和磁导航中心之间的分别直线距离进行比较
         line1 = Math.sqrt((x1 - magCx) * (x1 - magCx) + (y1 - magCy) * (y1 - magCy));
         line2 = Math.sqrt((x2 - magCx) * (x2 - magCx) + (y2 - magCy) * (y2 - magCy));
@@ -1368,8 +1394,8 @@ Rectangle {
         var grid = parent.parent;
         var item = grid.itemAt(gridIndex);
         var center = arcCenterTransformation(item);
-        var centerX = rect.x + rect.width / 2;
-        var centerY = rect.y + rect.height / 2;
+        var centerX = rect.getOriginX() + rect.width / 2;
+        var centerY = rect.getOriginY() + rect.height / 2;
         var r = 100;   //半径
         var x1, x2, y1, y2;    //已知弦长的下一个与圆的交点
         var zero;
@@ -1439,8 +1465,8 @@ Rectangle {
     }
     function rotationAngle(x1, y1, x2, y2) {
         var l,zero;          // AGV中心距离磁导航长度
-        var cenX = rect.x + rect.width / 2;    // 取到AGV的中心坐标
-        var cenY = rect.y + rect.height / 2;
+        var cenX = rect.getOriginX() + rect.width / 2;    // 取到AGV的中心坐标
+        var cenY = rect.getOriginY() + rect.height / 2;
         var grid = parent.parent;
         var item = grid.itemAt(gridIndex);
         var center = arcCenterTransformation(item);
@@ -1615,8 +1641,8 @@ Rectangle {
         var grid = parent.parent;
         var index, indexX, indexY;
         var item = grid.itemAt(gridIndex);
-        var agvCenterX = rect.x + rect.width / 2;
-        var agvCenterY = rect.y + rect.height / 2;
+        var agvCenterX = rect.getOriginX() + rect.width / 2;
+        var agvCenterY = rect.getOriginY() + rect.height / 2;
         var mag1x, mag1y, mag2x, mag2y, magCx, magCy;
         var x, y, r, rot;
         var a = 5 * Math.PI;

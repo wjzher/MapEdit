@@ -209,9 +209,21 @@ Rectangle {
     }
     function agvUpdate(i) {
         var agv = agvModels[i];
-        agv.x = ((agv.gridIndex % columns) * mapGrid.cellWidth) - agv.width / 2 + agv.gridX * agv.scale;
-        agv.y = parseInt(agv.gridIndex / columns) * mapGrid.cellHeight - agv.height / 2 + agv.gridY * agv.scale;
-        console.log("agv update: col " + columns + " w " + mapGrid.cellWidth + " gridx " + agv.gridX + " " + agv.x);
+        var ix = agv.gridIndex % columns;
+        var iy = parseInt(agv.gridIndex / columns);
+        // agv model 存在scale时的计算方法
+        // 在scale = 1情况下计算agv中心点的坐标
+        // 将agv的中心点进行scale缩放
+        // 由agv的中心点找到左上角的点，此时要用rect.width进行偏移
+        // 原因是agv的缩放是由系统完成，而非程序计算得到
+        console.log("agvUpdate (" + agv.gridIndex + "): ix = " + ix + ", iy = " + iy);
+        agv.x = ix * root.gridLength + agv.gridX;
+        agv.x *= agv.scale;
+        agv.x -= agv.width / 2;
+        agv.y = iy * root.gridLength + agv.gridY;
+        agv.y *= agv.scale;
+        agv.y -= agv.height / 2;
+        console.log("agv update: col " + columns + " w " + mapGrid.cellWidth + " gridx " + agv.gridX + " agv.x " + agv.x);
         console.log("idx " + agv.gridIndex + " agv.y " + agv.y + " agv.width " + agv.width + " agv.height " + agv.height);
         console.log("agv scale: " + agv.scale);
     }
