@@ -149,7 +149,12 @@ Rectangle {
     }
     // 坐标转换index
     function coordinateTransIndex(grid, x, y) {
-        var index = grid.mapGrid.indexAt(x, y);
+        //var index = grid.mapGrid.indexAt(x, y);
+        var length = grid.gridLength;
+        var indexRow = parseInt(x / length);
+        var indexCol = parseInt(y / length);
+        var index = indexCol * grid.columns + indexRow;
+        console.log("coordinateTransIndex: length indexRow indexCol " + length + " " + indexRow + " " +indexCol);
         console.log("圆心坐标转换index: " + index);
         return index;
     }
@@ -190,11 +195,8 @@ Rectangle {
             p2[0] = -magToCenter;
             p2[1] = -magLength / 2;
         }
-        //console.log("1: agv MagSensor: " + p1 + " -> " + p2);
         p1 = agvCoordinateTransformation(p1[0], p1[1]);
-        //console.log("2: agv MagSensor: " + p1);
         p2 = agvCoordinateTransformation(p2[0], p2[1]);
-        //console.log("3: agv MagSensor: " + p2);
         console.log("agv MagSensor: " + p1 + " -> " + p2);
         return { type : 0, p1 : { x : p1[0], y : p1[1] }, p2 : { x : p2[0], y : p2[1] }};
     }
@@ -325,8 +327,8 @@ Rectangle {
     function getYLineCurve(item) {
         var line;
         if (isYLineExist(item) == true) {
-            line = { type : 0, p1 : { x : item.length * scale / 2, y : 0 },
-                p2 : { x : item.length * scale / 2, y : item.length * scale } };
+            line = { type : 0, p1 : { x : item.length / 2, y : 0 },
+                p2 : { x : item.length / 2, y : item.length } };
             curveTransformation(line, item);
             return line;
         } else {
@@ -475,7 +477,7 @@ Rectangle {
     }
     //坐标转换
     function transformation(p, item) {
-        return { x : itemGetOriginX(item) + p.x, y : itemGetOriginY(item) + p.y };
+       return { x : itemGetOriginX(item) + p.x, y : itemGetOriginY(item) + p.y };
     }
     // 单个曲线坐标转换
     function curveTransformation(line, item) {
@@ -783,6 +785,7 @@ Rectangle {
             line1 = arcLineCurve(item);
             printLine(line1);
             line2 = onlyArcLineCurve(item, isPositive);
+            printLine(line2);
             line = lineAdd(line1, line2);
             console.log("存在直线和弧线的情况下，按照分支情况走直线  2;");
             return line;
