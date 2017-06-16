@@ -1326,6 +1326,67 @@ Rectangle {
             return false;
         }
     }
+    function calXCircle2(by, r, l) {
+        var cy;
+        if (by > 0) {
+            cy = by - l * l / 2 / r;
+        } else {
+            cy = by + l * l / 2 / r;
+        }
+        var cxx = r * r - cy * cy;
+        var cx1 = -Math.sqrt(cxx);
+        var cx2 = -cx1;
+        return [cx1, cy, cx2, cy];
+    }
+
+    function calYCircle2(bx, r, l) {
+        var cx;
+        if (bx > 0) {
+            cx = bx - l * l / 2 / r;
+        } else {
+            cx = bx + l * l / 2 / r;
+        }
+        var cyy = r * r - cx * cx;
+        var cy1 = -Math.sqrt(cyy);
+        var cy2 = -cy1;
+        return [cx, cy1, cx, cy2];
+    }
+
+    function calCircle2(x0, y0, l) {
+        var ax = 0;
+        var ay = 0;
+        var bx = x0;
+        var by = y0;
+        var ab = Math.sqrt(Math.pow(ax - bx, 2) + Math.pow(ay - by, 2));
+        var ac = 100;
+        var bc = l;
+        console.log(ab + " " + ac + " " + bc)
+        var L = ab;
+        var K1, K2, X0, Y0, R;
+        var cx1, cx2, cy1, cy2;
+        if (bx == ax || by == ay) {
+            if (bx == ax) {
+                return calXCircle2(by, ab, l);
+            } else {
+                return calYCircle2(bx, ab, l);
+            }
+        } else {
+            K1 = (by - ay) / (bx - ax);
+            K2 = -1 / K1;
+        }
+
+        X0 = ax + (bx - ax) * (Math.pow(ac, 2) - Math.pow(bc, 2) + Math.pow(L, 2)) / (2 * Math.pow(L, 2));
+        Y0 = ay + K1 * (X0 - ax);
+
+        R = Math.pow(ac, 2) - Math.pow((X0 - ax), 2) - Math.pow((Y0 - ay), 2);
+
+        //则要求点C1(cx1,cy1),C2(cx2,cy2)的坐标为
+        cx1 = X0 - Math.sqrt(R / (1 + Math.pow(K2, 2)));
+        cy1 = Y0 + K2 * (cx1 - X0);
+        cx2 = X0 + Math.sqrt(R / (1 + Math.pow(K2, 2)));
+        cy2 = Y0 + K2 * (cx2 - X0);
+        return [cx1, cy1, cx2, cy2];
+    }
     //x,y->agv中心 l->弦长  startX, startY->agv初始姿态点
     function pycalPoint(x, y, l, sta) {
         var grid = parent.parent;
@@ -1352,9 +1413,9 @@ Rectangle {
         magCx = magCx - center.x;
         magCy = magCy - center.y;
         //计算交点
-        var pycal = [x, y, l];
+        var pycal;
         console.log("pycal x y l : " + x + " " + y + " " + l);
-        pycal = pyCal.callCircle2(pycal);
+        pycal = calCircle2(x, y, l);
         console.log(pycal);
         //与圆分别有两个交点
         x1 = pycal[0];
