@@ -276,6 +276,15 @@ void MapData::setItemCutRightDown(int index, bool isChecked)
     return;
 }
 
+void MapData::setItemCutMagStop(int index, bool isChecked)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        item->cutMagStop = isChecked;
+    }
+    return;
+}
+
 void MapData::setItemIsNeighbour(int index, bool isNeighbour)
 {
     MapItem *item = getMapItem(index);
@@ -385,6 +394,15 @@ bool MapData::getItemCutRightDown(int index)
     return false;
 }
 
+bool MapData::getItemCutMagStop(int index)
+{
+    MapItem *item = getMapItem(index);
+    if (item) {
+        return item->cutMagStop;
+    }
+    return false;
+}
+
 int MapData::saveMapData(QString str)
 {
     QFile file(str);
@@ -404,6 +422,7 @@ int MapData::saveMapData(QString str)
         itemObj["isArc"] = m_items[i].isArc;
         itemObj["cutLeftUp"] = m_items[i].cutLeftUp;
         itemObj["cutRightDown"] = m_items[i].cutRightDown;
+        itemObj["cutMagStop"] = m_items[i].cutMagStop;
         itemObj["isNeighbour"] = m_items[i].isNeighbour;
         {
             QJsonArray posArray;
@@ -533,6 +552,9 @@ int MapData::loadMapData(QString str)
         }
         if (itemObj["cutRightDown"].isBool()) {
             mItem->cutRightDown = itemObj["cutRightDown"].toBool();
+        }
+        if (itemObj["cutMagStop"].isBool()) {
+            mItem->cutMagStop = itemObj["cutMagStop"].toBool();
         }
     }
     return 0;

@@ -18,6 +18,7 @@ struct MapItem {
     bool isNeighbour;
     bool cutLeftUp;     // 是否去掉左/上半条线
     bool cutRightDown;  // 是否去掉右/下半条线
+    bool cutMagStop;  // 是否去掉精确停止时多余的线段
 };
 
 class MapData : public QObject
@@ -36,6 +37,7 @@ public:
     Q_INVOKABLE void setItemType(int index, int type);
     Q_INVOKABLE void setItemCutLeftUp(int index, bool isChecked);
     Q_INVOKABLE void setItemCutRightDown(int index, bool isChecked);
+    Q_INVOKABLE void setItemCutMagStop(int index, bool isChecked);
     Q_INVOKABLE void setItemIsNeighbour(int index, bool isNeighbour);
     Q_INVOKABLE int getItemCardId(int index);
     Q_INVOKABLE bool getItemIsCard(int index);
@@ -46,6 +48,7 @@ public:
     Q_INVOKABLE int getItemType(int index);
     Q_INVOKABLE bool getItemCutLeftUp(int index);
     Q_INVOKABLE bool getItemCutRightDown(int index);
+    Q_INVOKABLE bool getItemCutMagStop(int index);
     Q_INVOKABLE int saveMapData(QString str);
     Q_INVOKABLE int loadMapData(QString str);
     Q_INVOKABLE void initItems();

@@ -43,6 +43,7 @@ Window {
                 mapData.setItemIsNeighbour(i, item.isNeighbour);
                 mapData.setItemCutLeftUp(i, item.cutLeftUp);
                 mapData.setItemCutRightDown(i, item.cutRightDown);
+                mapData.setItemCutMagStop(i, item.cutMagStop);
             }
             console.log("save Map Data.");
             mapData.saveMapData(mapFilePath.text);
@@ -59,7 +60,8 @@ Window {
                 item.isArc = mapData.getItemIsArc(i);
                 item.isNeighbour = mapData.getItemIsNeighbour(i);
                 item.cutLeftUp = mapData.getItemCutLeftUp(i);
-                item.cutRightDown = mapData.getItemCutRightDown(i)
+                item.cutRightDown = mapData.getItemCutRightDown(i);
+                item.cutMagStop = mapData.getItemCutMagStop(i);
                 if (item.isArc != MapItemType.ArcNULL && item.isNeighbour == false) {
                     mapGrid.updateItemArc(i, item, item.isArc);
                 }
@@ -249,6 +251,11 @@ Window {
             function setItemCutRightDown(v) {
                 mapGrid.mapGrid.currentItem.cutRightDown = v;
                 mapData.setItemCutRightDown(mapGrid.mapGrid.currentIndex, v);
+                setGridFocus();
+            }
+            function setItemCutMagStop(v) {
+                mapGrid.mapGrid.currentItem.cutMagStop = v;
+                mapData.setItemCutMagStop(mapGrid.mapGrid.currentIndex, v);
                 setGridFocus();
             }
             function setItemType(type) {
@@ -602,6 +609,7 @@ Window {
                 arcCombo.index = item.isArc;
                 cutLeftUpCheck.checked = item.cutLeftUp;
                 cutRightDownCheck.checked = item.cutRightDown;
+                cutMagStopCheck.checked = item.cutMagStop;
                 setGridFocus();
             }
             onCurrentIndexChanged: {
@@ -1028,7 +1036,7 @@ Window {
                 }
                 ArcCombo {
                     id: arcCombo;
-                    width: 150;
+                    width: 120;
                     anchors.top: cardCheck.bottom;
                     anchors.topMargin: 8;
                     index: MapItemType.ArcNULL;
@@ -1056,6 +1064,16 @@ Window {
                     text: "CRD";
                     checked: false;
                     onCheckedChanged: mapGrid.setItemCutRightDown(checked);
+                }
+                CheckBox {
+                    id: cutMagStopCheck;
+                    anchors.top: arcCombo.top;
+                    anchors.topMargin: 4;
+                    anchors.left: cutRightDownCheck.right;
+                    anchors.leftMargin: 8;
+                    text: "CMS";
+                    checked: false;
+                    onCheckedChanged: mapGrid.setItemCutMagStop(checked);
                 }
                 // repeat settings
                 ComboBox {

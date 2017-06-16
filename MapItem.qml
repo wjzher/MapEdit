@@ -15,6 +15,7 @@ Rectangle {
     property bool isNeighbour: false;
     property bool cutLeftUp: false;
     property bool cutRightDown: false;
+    property bool cutMagStop: false;
     property alias agvIpText: agvIpText.text;
     signal clicked;
     width: length;
@@ -30,6 +31,7 @@ Rectangle {
     onAgvIpTextChanged: rePaint();
     onCutLeftUpChanged: rePaint();
     onCutRightDownChanged: rePaint();
+    onCutMagStopChanged: rePaint();
     Canvas {
         id: canvas;
         anchors.fill: parent;
@@ -104,29 +106,49 @@ Rectangle {
                 ctx.stroke();
                 break;
             case MapItemType.MapItemXLMStop:
-                ctx.moveTo(0, height / 2);
-                ctx.lineTo(width, height / 2);
+                if (cutMagStop == false) {
+                    ctx.moveTo(0, height / 2);
+                    ctx.lineTo(width, height / 2);
+                } else {
+                    ctx.moveTo(0, height / 2);
+                    ctx.lineTo(ctx.lineWidth / 2 + width / divMStopLine, height / 2);
+                }
                 ctx.moveTo(ctx.lineWidth / 2 + width / divMStopLine, height / 2 - width / divStopLine / 2);
                 ctx.lineTo(ctx.lineWidth / 2 + width / divMStopLine, height / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemXRMStop:
-                ctx.moveTo(0, height / 2);
-                ctx.lineTo(width, height / 2);
+                if (cutMagStop == false) {
+                    ctx.moveTo(0, height / 2);
+                    ctx.lineTo(width, height / 2);
+                } else {
+                    ctx.moveTo(width - ctx.lineWidth / 2 - width / divMStopLine, height / 2);
+                    ctx.lineTo(width, height / 2);
+                }
                 ctx.moveTo(width - ctx.lineWidth / 2 - width / divMStopLine, height / 2 - width / divStopLine / 2);
                 ctx.lineTo(width - ctx.lineWidth / 2 - width / divMStopLine, height / 2 + width / divStopLine / 2);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYUMStop:
-                ctx.moveTo(width / 2, 0);
-                ctx.lineTo(width / 2, height);
+                if (cutMagStop == false) {
+                    ctx.moveTo(width / 2, 0);
+                    ctx.lineTo(width / 2, height);
+                } else {
+                    ctx.moveTo(width / 2, 0);
+                    ctx.lineTo(width / 2, ctx.lineWidth / 2 + width / divMStopLine);
+                }
                 ctx.moveTo(width / 2 - width / divStopLine / 2, ctx.lineWidth / 2 + width / divMStopLine);
                 ctx.lineTo(width / 2 + width / divStopLine / 2, ctx.lineWidth / 2 + width / divMStopLine);
                 ctx.stroke();
                 break;
             case MapItemType.MapItemYDMStop:
-                ctx.moveTo(width / 2, 0);
-                ctx.lineTo(width / 2, height);
+                if (cutMagStop == false) {
+                    ctx.moveTo(width / 2, 0);
+                    ctx.lineTo(width / 2, height);
+                } else {
+                    ctx.moveTo(width / 2, width - ctx.lineWidth / 2 - width / divMStopLine);
+                    ctx.lineTo(width / 2, height);
+                }
                 ctx.moveTo(width / 2 - width / divStopLine / 2, width - ctx.lineWidth / 2 - width / divMStopLine);
                 ctx.lineTo(width / 2 + width / divStopLine / 2, width - ctx.lineWidth / 2 - width / divMStopLine);
                 ctx.stroke();
