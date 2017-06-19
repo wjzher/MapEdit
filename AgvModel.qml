@@ -648,10 +648,17 @@ Rectangle {
     }
     // item -> this item; nextItem -> next item; isX: 1 X, 0 Y
     function getLines(item, nextItem, sta, turn, isPositive, isX) {
+        var magStop = magStopLine(item, nextItem);
+        var line;
+        //agv停止
+        if (magStop == 0) {
+            return 0;
+        } else {
         if (isX) {
             return getXLines(item, nextItem, sta, turn, isPositive);
         } else {
             return getYLines(item, nextItem, sta, turn, isPositive);
+        }
         }
     }
     //确定agv在圆弧上
@@ -1601,9 +1608,16 @@ Rectangle {
         var magCv;
         var x = 0, y = 0, r = 0;
         var Online;
+        var magSp; //精确停止agv行走速度
         if (type == 0) {
+            //精确停止时
+            if (act == 5) {
+                Online = agvCenterOnline(type, direction, act, magSp);
+                return {x: Online.x, y: Online.y, r: Online.r};
+            } else {
             Online = agvCenterOnline(type, direction, act, sp);
             console.log("x,y,r = " + Online.x + " " + Online.y + " " + Online.r);
+            }
             return {x: Online.x, y: Online.y, r: Online.r};
         } else if (type == 1) {
             return agvCurveMove(direction, cv, act);
@@ -1804,13 +1818,62 @@ Rectangle {
             return r;
         }
     }
+    //精确停止
+    function magStopLine(item, nextItem) {
+        var agvCenterX = rect.getOriginX() + rect.width / 2;
+        var agvCenterY = rect.getOriginY() + rect.height / 2;
+        var gridX, gridY;
+        var magLength = 18;
+        gridX = (gridIndex % grid.columns) * grid.gridLength + grid.gridLength / 2;
+        gridY = parseInt(gridIndex / grid.columns) * grid.gridLength + grid.gridLength / 2;
+        if (nextItem.type == MapItemType.MapItemYUMStop
+                || nextItem.type == MapItemType.MapItemYDMStop
+                || nextItem.type == MapItemType.MapItemXUMStop
+                || nextItem.type == MapItemType.MapItemXDMStop) {
+            if (agvCenterX == gridX && agvCenterY == gridY) {
+                return 0;  //agv停止
+            } else {
+                return 1;
+            }
+        } else if (item.type == MapItemType.MapItemYDStop) {
+            if (agvCenterX == gridX && agvCenterY == gridY - magLength) {
+                return 0;  //agv停止
+            } else {
+                return 1;
+            }
+        } else if (item.type == MapItemType.MapItemYUStop) {
+            if (agvCenterX == gridX && agvCenterY == gridY  + magLength) {
+                return 0;  //agv停止
+            } else {
+                return 1;
+            }
+        } else if (item.type == MapItemType.MapItemXLStop) {
+            if (agvCenterX == gridX + magLength && agvCenterY == gridY) {
+                return 0;  //agv停止
+            } else {
+                return 1;
+            }
+        } else if (item.type == MapItemType.MapItemXRStop) {
+            if (agvCenterX == gridX - magLength&& agvCenterY == gridY) {
+                return 0;  //agv停止
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    //agv停止
+    function agvStop() {
+        agvMove(0, 0, 0);
+    }
+    //sta 1->前行  2->后退  3->旋转  5->精确停止  6->停止
     function crossTestLine(sta, turn) {
         var r = rect.r;
         var cv, crossPoint;
         var i;
         var direction = getAgvDirection(r);
         console.log("r = " + r)
-        if (sta != 3) {
+        if (sta == 1 || sta == 2 || sta == 5) {
             if (direction == 0) {
                 console.log("off track. direction == 0");
                 return false;
@@ -1825,6 +1888,10 @@ Rectangle {
             // 得到磁条曲线
             cv = getMagCurve(sta, turn);
             console.log("cv.length = " + cv.length);
+            if (cv == 0) {
+                agvStop();
+                return 0;
+            }
             if (cv == false) {
                 console.log("get curve failed. ");
                 return false;
@@ -1853,9 +1920,11 @@ Rectangle {
             agvMove(agvTo.x, agvTo.y, agvTo.r);
             console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
             console.log("agv current center = " + rect.x + " " + rect.width / 2 + " " + rect.y + " " + rect.width / 2);
-        } else {
+        } else if(sta == 3){
             r = crossRotation(sta, turn);
             //agvMove(0, 0, r);
+        } else if (sta == 6) {
+            agvStop();
         }
         updateAgvGridIndex(parent.parent);
         console.log(gridIndex + " " + gridX + " "  + gridY)

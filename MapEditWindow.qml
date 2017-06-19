@@ -378,6 +378,7 @@ Window {
             }
 
             function updateNeighbour(rows, cols, dx, dy, t, pos) {
+                var startIndex = calIndex(rows, cols);
                 var neighbour = calNeighbour(rows, cols, dx, dy);
                 console.log("neighbour " + rows + " " + cols + " " + neighbour);
                 var p = [];
@@ -393,6 +394,10 @@ Window {
                                        item.isArc, item.neighbourPos);
                     mapData.setItemIsNeighbour(neighbour,
                                                item.isNeighbour);
+                    //如果dx,dy绝对值同时等于2的时候，记录起始点
+                    if(Math.abs(dx) == 2 && Math.abs(dy) == 2) {
+                        item.arcStartIndex = startIndex;
+                    }
                 }
             }
             function clearNeighbour(rows, cols) {
