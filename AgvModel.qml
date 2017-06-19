@@ -18,6 +18,7 @@ Rectangle {
     property int gridY: 0;          // 格子里AGV的坐标Y
     property int r: 0;              // AGV角度, 逆时针
     property bool initFlag: false;       // 标记是否初始化成功
+    property int lrMagToCenter: 26;
     property int magToCenter: 43;
     property int magLength: 20;
     property string agvStatus: "";
@@ -179,7 +180,7 @@ Rectangle {
         return point;
     }
 
-    // 返回磁传感器位置[[x1, y1], [x2, y2]], 线段坐标相对于mapGrid
+    // 前后行->返回磁传感器位置[[x1, y1], [x2, y2]], 线段坐标相对于mapGrid
     function agvGetMagSensor(sta) {
         var p1 = [0, 0], p2 = [0, 0];
         if (sta == 1) {
@@ -188,12 +189,24 @@ Rectangle {
             p1[1] = magLength / 2;
             p2[0] = magToCenter;
             p2[1] = -magLength / 2;
-        } else {
+        } else if(sta == 2){
             // 后退
             p1[0] = -magToCenter;
             p1[1] = magLength / 2;
             p2[0] = -magToCenter;
             p2[1] = -magLength / 2;
+        } else if(sta == 4){
+            // 后退
+            p1[0] = -magLength / 2;
+            p1[1] = lrMagToCenter;
+            p2[0] = magLength / 2;
+            p2[1] = lrMagToCenter;
+        } else if(sta == 3){
+            // 后退
+            p1[0] = -magLength / 2;
+            p1[1] = -lrMagToCenter;
+            p2[0] = magLength / 2;
+            p2[1] = -lrMagToCenter;
         }
         p1 = agvCoordinateTransformation(p1[0], p1[1]);
         p2 = agvCoordinateTransformation(p2[0], p2[1]);
@@ -225,6 +238,14 @@ Rectangle {
             return 2;
         } else if (((dir == -2) && (sta == 1)) || ((dir == 2) && (sta == 2))) {
             return -2;
+        } else if (((dir == 1) && (sta == 3)) || ((dir == -1) && (sta == 4))) {
+            return 2;
+        } else if (((dir == 2) && (sta == 3)) || ((dir == -2) && (sta == 4))) {
+            return -1;
+        } else if (((dir == -1) && (sta == 3)) || ((dir == 1) && (sta == 4))) {
+            return -2;
+        } else if (((dir == -2) && (sta == 3)) || ((dir == 2) && (sta == 4))) {
+            return 1;
         } else {
             return 0;
         }
@@ -274,10 +295,8 @@ Rectangle {
     function linesConnect(l1, l2) {
         var a = [[l1.p1, l2.p1], [l1.p2, l2.p1], [l1.p1, l2.p2], [l1.p2, l2.p2]];
         var i;
-        console.log("linesConnect " + a);
         for (i = 0; i < a.length; i++) {
             var diff = calPointDiff(a[i][0], a[i][1]);
-            console.log("diff " + i + " " + diff);
             if (diff < 4) {
                 break;
             }
@@ -477,7 +496,7 @@ Rectangle {
     }
     //坐标转换
     function transformation(p, item) {
-       return { x : itemGetOriginX(item) + p.x, y : itemGetOriginY(item) + p.y };
+        return { x : itemGetOriginX(item) + p.x, y : itemGetOriginY(item) + p.y };
     }
     // 单个曲线坐标转换
     function curveTransformation(line, item) {
@@ -648,17 +667,20 @@ Rectangle {
     }
     // item -> this item; nextItem -> next item; isX: 1 X, 0 Y
     function getLines(item, nextItem, sta, turn, isPositive, isX) {
-        var magStop = magStopLine(item, nextItem);
+        var magStop;
         var line;
+        if (sta == 8) {
+            magStop = magStopLine(item, nextItem);
+        }
         //agv停止
         if (magStop == 0) {
             return 0;
         } else {
-        if (isX) {
-            return getXLines(item, nextItem, sta, turn, isPositive);
-        } else {
-            return getYLines(item, nextItem, sta, turn, isPositive);
-        }
+            if (isX) {
+                return getXLines(item, nextItem, sta, turn, isPositive);
+            } else {
+                return getYLines(item, nextItem, sta, turn, isPositive);
+            }
         }
     }
     //确定agv在圆弧上
@@ -1011,32 +1033,21 @@ Rectangle {
         console.log("getMagCurve agv move dir " + direction);
         if (direction == 1) {
             var nextItem = itemRight(gridIndex, grid);
-            if (nextItem == null) {
-                return false;
-            } else {
-                return getLines(item, nextItem, sta, turn, direction, true);
-            }
-        } if (direction == -1) {
+            var isX = true;
+        } else if (direction == -1) {
             nextItem = itemLeft(gridIndex, grid);
-            if (nextItem == null) {
-                return false;
-            } else {
-                return getLines(item, nextItem, sta, turn, direction, true);
-            }
-        } if (direction == 2) {
+            isX = true;
+        } else if (direction == 2) {
             nextItem = itemUp(gridIndex, grid);
-            if (nextItem == null) {
-                return false;
-            } else {
-                return getLines(item, nextItem, sta, turn, direction, false);
-            }
-        } if (direction == -2) {
+            isX = false;
+        } else if (direction == -2) {
             nextItem = itemDown(gridIndex, grid);
-            if (nextItem == null) {
-                return false;
-            } else {
-                return getLines(item, nextItem, sta, turn, direction, false);
-            }
+            isX = false;
+        }
+        if (nextItem == null) {
+            return false;
+        } else {
+            return getLines(item, nextItem, sta, turn, direction, isX);
         }
     }
     function segmentsIntr(a, b, c, d) {
@@ -1611,12 +1622,12 @@ Rectangle {
         var magSp; //精确停止agv行走速度
         if (type == 0) {
             //精确停止时
-            if (act == 5) {
+            if (act == 8) {
                 Online = agvCenterOnline(type, direction, act, magSp);
                 return {x: Online.x, y: Online.y, r: Online.r};
             } else {
-            Online = agvCenterOnline(type, direction, act, sp);
-            console.log("x,y,r = " + Online.x + " " + Online.y + " " + Online.r);
+                Online = agvCenterOnline(type, direction, act, sp);
+                console.log("x,y,r = " + Online.x + " " + Online.y + " " + Online.r);
             }
             return {x: Online.x, y: Online.y, r: Online.r};
         } else if (type == 1) {
@@ -1789,37 +1800,41 @@ Rectangle {
         var rotation1 = 8;
         var grid = parent.parent;
         var item = grid.itemAt(gridIndex);
-        var line;
+        var step = rect.r;
         //var rr;
         // agv原地旋转
-        if (sta == 3) {
+        if (sta == 5) {
             console.log("sta = " + sta)
             if(item.type == MapItemType.MapItemCross) {
-                if (turn == 2) {
-                    r += rotation1;
-                    console.log("rotation = " + r);
-                    dstRot += rotation1;
-                    console.log("dstRot = " + dstRot);
-                } else if(turn == 1) {
-                    r -= rotation1;
-                    console.log("rotation = " + r);
-                    dstRot += rotation1;
-                    console.log("dstRot = " + dstRot);
+                //顺时针
+                if (turn == 1) {
+                    step -= rotation1;
+                } else if(turn == 2) {
+                    step += rotation1;
                 }
-                if ((dstRot >= (90 - rotation1)) || dstRot == 90){
-                    r += 90 - dstRot;
-                    dstRot = 0;
-                    console.log("rotation1 = " + r);
-                    return r;
+                if (dstRot < (90 - rotation1)) {
+                        rect.r = step;
+                        console.log("rotation = " + rect.r);
+                        dstRot += rotation1;
+                        console.log("dstRot = " + dstRot);
+                } else if (dstRot >= 90) {
+                } else {
+                    if (turn == 1) {
+                        rect.r -= 90 - dstRot;
+                    } else if(turn == 2) {
+                        rect.r += 90 - dstRot;
+                    }
+                    step = 0;
+                    dstRot = 90;
+                    console.log("rotation1 = " + rect.r);
                 }
-            } else {
-                r = 0;
             }
-            return r;
+            return rect.r;
         }
     }
     //精确停止
     function magStopLine(item, nextItem) {
+        var grid = parent.parent;
         var agvCenterX = rect.getOriginX() + rect.width / 2;
         var agvCenterY = rect.getOriginY() + rect.height / 2;
         var gridX, gridY;
@@ -1866,14 +1881,14 @@ Rectangle {
     function agvStop() {
         agvMove(0, 0, 0);
     }
-    //sta 1->前行  2->后退  3->旋转  5->精确停止  6->停止
+    //sta 1->前行  2->后退  3->左行  4->右行  5->旋转  8->精确停止  0->停止
     function crossTestLine(sta, turn) {
         var r = rect.r;
         var cv, crossPoint;
         var i;
         var direction = getAgvDirection(r);
         console.log("r = " + r)
-        if (sta == 1 || sta == 2 || sta == 5) {
+        if (sta == 1 || sta == 2 || sta == 3 || sta == 4 || sta == 8) {
             if (direction == 0) {
                 console.log("off track. direction == 0");
                 return false;
@@ -1920,10 +1935,10 @@ Rectangle {
             agvMove(agvTo.x, agvTo.y, agvTo.r);
             console.log("agvTo.x, agvTo.y, agvTo.r: " + agvTo.x + " " + agvTo.y + " " + agvTo.r)
             console.log("agv current center = " + rect.x + " " + rect.width / 2 + " " + rect.y + " " + rect.width / 2);
-        } else if(sta == 3){
+        } else if(sta == 5){
             r = crossRotation(sta, turn);
             //agvMove(0, 0, r);
-        } else if (sta == 6) {
+        } else if (sta == 0) {
             agvStop();
         }
         updateAgvGridIndex(parent.parent);
