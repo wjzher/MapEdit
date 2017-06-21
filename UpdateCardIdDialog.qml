@@ -19,6 +19,9 @@ Window {
     AgvModel {
         id: agvModel;
         visible: false;
+        Component.onCompleted: {
+            this.agvTimer.running = false;
+        }
     }
     MessageDialog {
           id: messageDialog

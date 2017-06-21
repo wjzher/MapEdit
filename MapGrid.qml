@@ -240,7 +240,7 @@ Rectangle {
             return;
         }
         agvModels[i].agvStatus = s;
-        //console.log("agvUpdateStatus: " + addr + ", " + s);
+        console.log("agvUpdateStatus: " + addr + ", " + s);
     }
 
     function setAgvModel(addr, index, x, y, r) {
@@ -267,6 +267,6 @@ Rectangle {
             return;
         }
         var agv = agvModels[i];
-        agv.crossTestLine(act, turn);
+        agv.crossTestLine(act, turn, 2);
     }
 }
