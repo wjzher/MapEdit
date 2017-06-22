@@ -1040,7 +1040,7 @@ Rectangle {
         var direction = getAgvDirection(r);
         var item = grid.itemAt(gridIndex);
         if (direction == 0) {
-            console.log("off track. direction == 0");
+            console.log("off track. direction == 0 " + rect.r);
             return false;
         }
         console.log("getMagCurve agv dir " + direction);
@@ -1257,11 +1257,88 @@ Rectangle {
         }
         return false;
     }
+    //传感器中心点坐标  相对于整个坐标系
+    function sensorCenter(sta) {
+        var mag1x, mag1y, mag2x, mag2y, magCx, magCy;
+        var magCv = agvGetMagSensor(sta);
+        //传感器中心点坐标
+        mag1x = magCv.p1.x;
+        mag1y = magCv.p1.y;
+        mag2x = magCv.p2.x;
+        mag2y = magCv.p2.y;
+        magCx = (mag1x + mag2x) / 2;
+        magCy = (mag1y + mag2y) / 2;
+        return {x: magCx, y: magCy};
+    }
+    //agv中心还在直线上 传感器已经到弧上  直线转向弧时 需要旋转的角度
+    function lineToCurve(sta, dir, sp) {
+        var center, sensor;
+        var rot, x, y, angle;
+        var diffx, diffy, diffSensorX, diffSensorY;
+        var angleX, angleY;
+        var grid = parent.parent;
+        var item = grid.itemAt(gridIndex);
+        var agvCenterX = rect.getOriginX() + rect.width / 2;
+        var agvCenterY = rect.getOriginY() + rect.height / 2;
+        center = arcCenterTransformation(item);
+        //转换agv中心相对于圆心的坐标
+        //agvCenterX = agvCenterX - center.x;
+        //agvCenterY = agvCenterY - center.y;
+        //计算出agv传感器和弧的交点
+        rot = pycalPoint(agvCenterX, agvCenterY, magToCenter, sta);
+//        sensor = sensorCenter(sta);
+//        //传感器yu弧的交点 和agv中心的 偏差
+//        diffSensorX = rot.x - agvCenterX;
+//        diffSensorY = rot.y - agvCenterY;
+//        //计算xy轴的旋转角度
+//        angleX = Math.asin(Math.abs(diffSensorY) / magToCenter);
+//        angleY = Math.asin(Math.abs(diffSensorX) / magToCenter);
+        //传感器yu弧的交点 和agv坐标进行比较  来确定agv的方向
+
+        diffx = center.x - agvCenterX;
+        diffy = center.y - agvCenterY;
+        if (dir == 1) {
+            x = calDeltaDistance(sp);
+            y = 0;
+            if (diffy > 0) {
+                angle = -rot.angle;
+                console.log("diffy > 0 = " + angle)
+            } else if(diffy < 0) {
+                angle = rot.angle;
+            }
+        } else if (dir == -1) {
+            x = -calDeltaDistance(sp);
+            y = 0;
+            if (diffy > 0) {
+                angle = 180 + rot.angle;
+            } else if(diffy < 0) {
+                angle = 180 - rot.angle;
+            }
+        } else if (dir == 2) {
+            y = -calDeltaDistance(sp);
+            x = 0;
+            if (diffx > 0) {
+                angle = 90 - rot.angle;
+            } else if(diffy < 0) {
+                angle = 90 + rot.angle;
+            }
+        } else if (dir == -2) {
+            y = calDeltaDistance(sp);
+            x = 0;
+            if (diffx > 0) {
+                angle = 270 + rot.angle;
+            } else if(diffy < 0) {
+                angle = 270 - rot.angle;
+            }
+        }
+        console.log("lineToCurve = " + x + " " + y + " " + angle)
+        return {x: x, y: y, r: angle};
+    }
     function agvCurveMove(dir, cv, act, sp) {
         var grid = parent.parent;
         var radius = 100;
         var a = calDeltaDistance(sp);//5 * Math.PI;
-        var center, rot;
+        var center, rot, lineCurve;
         var x = 0, y = 0, r = 0;
         //var index = coordinateTransIndex(grid, cv.x, cv.y);
         var t, angle;
@@ -1274,6 +1351,12 @@ Rectangle {
         //agv得到移动偏移量
         console.log("agvCurveMove xy = " + agvCenterX + " " + agvCenterY);
         rot = pycalPoint(agvCenterX, agvCenterY, a, act);
+        if (rot == false) {
+            console.log("agvCurveMove: pycalPoint false");
+            // agv中心和圆没有交点，需要直走
+            lineCurve = lineToCurve(act, dir, sp);
+            return { x : lineCurve.x, y : lineCurve.y, r : lineCurve.r };
+        }
         x = rot.xx;
         y = rot.yy;
         console.log("rot 1 xy = " + x + " " + y);
@@ -1405,6 +1488,8 @@ Rectangle {
         var L = ab;
         var K1, K2, X0, Y0, R;
         var cx1, cx2, cy1, cy2;
+
+
         if (bx == ax || by == ay) {
             if (bx == ax) {
                 return calXCircle2(by, ab, l);
@@ -1420,6 +1505,9 @@ Rectangle {
         Y0 = ay + K1 * (X0 - ax);
 
         R = Math.pow(ac, 2) - Math.pow((X0 - ax), 2) - Math.pow((Y0 - ay), 2);
+        if (R < 0) {
+            return null;
+        }
 
         //则要求点C1(cx1,cy1),C2(cx2,cy2)的坐标为
         cx1 = X0 - Math.sqrt(R / (1 + Math.pow(K2, 2)));
@@ -1457,6 +1545,11 @@ Rectangle {
         var pycal;
         console.log("pycal x y l : " + x + " " + y + " " + l);
         pycal = calCircle2(x, y, l);
+        if (pycal == null) {
+            console.log("pycalPoint 没有交点");
+            return false;
+        }
+
         console.log(pycal);
         //与圆分别有两个交点
         x1 = pycal[0];
@@ -2093,7 +2186,7 @@ Rectangle {
     Timer {
         id: agvTimer;
         interval: 100;
-        running: false;
+        running: true;
         repeat: true;
         onTriggered: {
             //var cv;     // 磁条曲线
