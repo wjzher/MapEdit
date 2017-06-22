@@ -267,6 +267,6 @@ Rectangle {
             return;
         }
         var agv = agvModels[i];
-        agv.crossTestLine(act, turn, 2);
+        agv.crossTestLine(act, turn, 1);
     }
 }

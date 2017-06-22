@@ -21,14 +21,16 @@ Rectangle {
     property int lrMagToCenter: 26;
     property int magToCenter: 43;
     property int magLength: 20;
+    property int magMStopLength: 18;
     property string agvStatus: "";
-    property var speedVal: [0.178, 0.318, 0.444, 0.530, 0.628];
+    property var speedVal: [0.09, 0.178, 0.318, 0.444, 0.530, 0.628];
     property double dstRot: 0;
     property alias agvTimer: agvTimer;
     property bool onCurve: false;
     property int lastAct: 0;
     property int astopDir: 0;
-    property int magSp: 1; //精确停止agv行走速度
+    property int magSp: 0; //精确停止agv行走速度
+    property var gridNextItem: null;  // agv运动时下一个item
     //    property int pointRotation: 360 - r;
     rotation: 360 - r;
     //    property double orx: 0.0;
@@ -694,20 +696,10 @@ Rectangle {
     }
     // item -> this item; nextItem -> next item; isX: 1 X, 0 Y
     function getLines(item, nextItem, sta, turn, isPositive, isX) {
-        var magStop;
-        var line;
-        if (sta == 8) {
-            magStop = magStopLine(item, nextItem);
-        }
-        //agv停止
-        if (magStop == 0) {
-            return 0;
+        if (isX) {
+            return getXLines(item, nextItem, sta, turn, isPositive);
         } else {
-            if (isX) {
-                return getXLines(item, nextItem, sta, turn, isPositive);
-            } else {
-                return getYLines(item, nextItem, sta, turn, isPositive);
-            }
+            return getYLines(item, nextItem, sta, turn, isPositive);
         }
     }
     //确定agv在圆弧上
@@ -1074,6 +1066,7 @@ Rectangle {
         if (nextItem == null) {
             return false;
         } else {
+            gridNextItem = nextItem;
             return getLines(item, nextItem, sta, turn, direction, isX);
         }
     }
@@ -1238,10 +1231,9 @@ Rectangle {
 
     // 计算此次行走距离，返回行走距离 点
     function calDeltaDistance(sp) {
-        if (sp > 5 || sp < 1) {
+        if (sp > 5 || sp < 0) {
             return 0;
         }
-        sp -= 1;
         return agvTimer.interval * speedVal[sp] / 1000 * 100;   // cm <=> 点
     }
     // 计算下一个位置
@@ -1265,10 +1257,10 @@ Rectangle {
         }
         return false;
     }
-    function agvCurveMove(dir, cv, act) {
+    function agvCurveMove(dir, cv, act, sp) {
         var grid = parent.parent;
         var radius = 100;
-        var a = 5 * Math.PI;
+        var a = calDeltaDistance(sp);//5 * Math.PI;
         var center, rot;
         var x = 0, y = 0, r = 0;
         //var index = coordinateTransIndex(grid, cv.x, cv.y);
@@ -1651,6 +1643,13 @@ Rectangle {
             //精确停止时
             if (act == 8) {
                 Online = agvCenterOnline(type, direction, act, magSp);
+                var astopStep;
+                astopStep = astopMove(act, direction);
+                if (astopStep != undefined && astopStep != null) {
+                    Online.x = astopStep.x;
+                    Online.y = astopStep.y;
+                }
+                console.log("agvMoveStep x: " + Online.x + ", y: " + Online.y + ", r: " + Online.r);
                 return {x: Online.x, y: Online.y, r: Online.r};
             } else {
                 Online = agvCenterOnline(type, direction, act, sp);
@@ -1658,7 +1657,7 @@ Rectangle {
             }
             return {x: Online.x, y: Online.y, r: Online.r};
         } else if (type == 1) {
-            return agvCurveMove(direction, cv, act);
+            return agvCurveMove(direction, cv, act, sp);
         }
     }
     //旋转到平移的角度转换
@@ -1862,6 +1861,97 @@ Rectangle {
             }
             return rect.r;
     }
+    //agv精确停止时item存在横磁条时 返回运动偏移
+    function astopMove(sta, dir) {
+        var offsetX, offsetY, offsetR;
+        var grid = parent.parent;
+        var sensorItem;
+        var sensorMagx, sensorMagy;
+        var magCx, magCy, magC;
+        var sensorCv = agvGetMagSensor(sta);
+        var sensor1x, sensor1y, sensor2x, sensor2y, sensorCx, sensorCy; //磁导航坐标
+        var sensorIndex;
+        //磁导航传感器两个点坐标
+        sensor1x = sensorCv.p1.x;
+        sensor1y = sensorCv.p1.y;
+        sensor2x = sensorCv.p2.x;
+        sensor2y = sensorCv.p2.y;
+        //磁导航传感器中心
+        sensorCx = (sensor1x + sensor2x) / 2;
+        sensorCy = (sensor1y + sensor2y) / 2;
+        //传感器中心所在index
+        sensorIndex = coordinateTransIndex(grid, sensorCx, sensorCy);
+        //传感器所在item
+        sensorItem = gridNextItem;
+        if (sensorItem.type == MapItemType.MapItemCross) {
+            magCx = grid.gridLength / 2;
+            magCy = grid.gridLength / 2;
+        } else if (sensorItem.type == MapItemType.MapItemXLStop) {
+            magCx = 0;
+            magCy = grid.gridLength / 2;
+        } else if (sensorItem.type == MapItemType.MapItemXRStop) {
+            magCx = grid.gridLength;
+            magCy = grid.gridLength / 2;
+        } else if (sensorItem.type == MapItemType.MapItemYUStop) {
+            magCx = grid.gridLength / 2;
+            magCy = 0;
+        } else if (sensorItem.type == MapItemType.MapItemYDStop) {
+            magCx = grid.gridLength / 2;
+            magCy = grid.gridLength;
+        } else if (sensorItem.type == MapItemType.MapItemXLMStop) {
+            magCx = magMStopLength;
+            magCy = grid.gridLength / 2;
+        } else if (sensorItem.type == MapItemType.MapItemXRMStop) {
+            magCx = grid.gridLength - magMStopLength;
+            magCy = grid.gridLength / 2;
+        } else if (sensorItem.type == MapItemType.MapItemYUMStop) {
+            magCx = grid.gridLength / 2;
+            magCy = magMStopLength;
+        } else if (sensorItem.type == MapItemType.MapItemYDMStop) {
+            magCx = grid.gridLength / 2;
+            magCy = grid.gridLength - magMStopLength;
+        } else {
+            console.log("agv正常精确停止.");
+            return null; // agv正常精确停止
+        }
+        //横磁条中心坐标
+        magC = {x: magCx, y: magCy};
+        //横磁条坐标转换函数
+        magC = transformation(magC, sensorItem);
+
+        sensorMagx = magC.x - sensorCx;
+        sensorMagy = magC.y - sensorCy;
+        console.log("astopsensor mag = " + sensorMagx + " " + sensorMagy)
+        // if magC dir check error, return
+        if (dir == 1) {
+            if (sensorMagx < 0) {
+                return null;
+            }
+        } else if (dir == -1) {
+            if (sensorMagx > 0) {
+                return null;
+            }
+        } else if (dir == 2) {
+            if (sensorMagy > 0) {
+                return null;
+            }
+        } else if (dir == -2) {
+            if (sensorMagy < 0) {
+                return null;
+            }
+        }
+        if (sensorCx == magC.x && sensorCy == magC.y) {
+            console.log("agv 停止.");
+            return { x: 0 , y: 0, r: 0};  //agv停止
+        } else if (Math.abs(magC.x - sensorCx) < calDeltaDistance(magSp)
+                   && Math.abs(magC.y - sensorCy) < calDeltaDistance(magSp)) {
+            offsetX = magC.x - sensorCx;
+            offsetY = magC.y - sensorCy;
+            offsetR = 0;
+            console.log("agv导航和磁条距离小于一次所走距离.");
+            return { x: offsetX , y: offsetY, r: offsetR};
+        }
+    }
     //Agv精确停止
     function magStopLine(item, nextItem) {
         var grid = parent.parent;
@@ -1920,7 +2010,6 @@ Rectangle {
 
     //旋转修正
     function rotationCorrect() {
-        console.log("rotation correct start.");
         if(lastAct == 5) {
             rect.r -= 90 - dstRot;
         } else if(lastAct == 6) {
@@ -2003,7 +2092,7 @@ Rectangle {
 
     Timer {
         id: agvTimer;
-        interval: 1000;
+        interval: 100;
         running: false;
         repeat: true;
         onTriggered: {
