@@ -143,14 +143,17 @@ Rectangle {
         // 中心点的坐标需要加width一半的偏移，不管scale是否为1
         var x = rect.x + rect.width / 2;    // 取到AGV的中心坐标
         var y = rect.y + rect.height / 2;
+        var gx, gy;
         console.log("updateAgvGridIndex: " + rect.x + " " + rect.y
                     + " " + rect.width / 2 + " " + rect.height / 2);
         gridIndex = (parseInt(y / length)) * grid.columns + parseInt(x / length);
         console.log("updateAgvGridIndex: " + x + " " + y
                     + " " + parseInt(y / length) + " " + grid.columns);
         console.log("updateAgvGridIndex: length = " + length);
-        gridX = (parseInt(x) % length) / scale;
-        gridY = (parseInt(y) % length) / scale;
+        gx = (gridIndex % grid.columns) * length;
+        gy = parseInt(gridIndex / grid.columns) * length;
+        gridX = (x - gx)  / scale;
+        gridY = (y - gy)  / scale;
         console.log("updateAgvGridIndex:" + "(" + gridX + ", " + gridY + ")" + " " + gridIndex)
         return;
     }
@@ -799,8 +802,6 @@ Rectangle {
         }
         // 当前item不存在弧线
         if (item.isArc == false) {
-            //printLine(getYLineCurve(item));
-            //printLine(getYLineCurve(nextItem));
             line1 = getYLineCurve(item);
             if (line1 != false) {
                 console.log("item line: ");
@@ -929,10 +930,7 @@ Rectangle {
             return line;
         }
         // 当前item不存在弧线
-        if (item.isArc == false) {;
-            printLine(getXLineCurve(item));
-            printLine(getXLineCurve(nextItem));
-            //line1 = getXLineCurve(item);
+        if (item.isArc == false) {
             line1 = getXLineCurve(item);
             if (line1 != false) {
                 console.log("item line: ");
@@ -1301,6 +1299,7 @@ Rectangle {
         var agvCenterX = rect.getOriginX() + rect.width / 2;
         var agvCenterY = rect.getOriginY() + rect.height / 2;
         center = arcCenterTransformation(item);
+
         //计算出agv传感器与弧有交点时的角度
         rot = pycalPoint(agvCenterX, agvCenterY, magToCenter, sta);
         if (dir == 1) {
@@ -1328,31 +1327,55 @@ Rectangle {
         var x = 0, y = 0, r = 0;
         //var index = coordinateTransIndex(grid, cv.x, cv.y);
         var t, angle;
+        var isOnCurve;
         var item = grid.itemAt(gridIndex);
         var agvCenterX = rect.getOriginX() + rect.width / 2;
         var agvCenterY = rect.getOriginY() + rect.height / 2;
+        var oncurve = arcLineCurve(item);
         onCurve = true;
         t = getActualArcType(item);
-        //center = arcCenterTransformation(item);
-        //agv得到移动偏移量
-        console.log("agvCurveMove xy = " + agvCenterX + " " + agvCenterY);
-        rot = pycalPoint(agvCenterX, agvCenterY, a, act);
-        if (rot == false) {
-            console.log("agvCurveMove: pycalPoint false");
-            // agv中心和圆没有交点，需要直走
+        //判断agv中心是否在所在item四分之一弧上
+        console.log("agvCurveMove 判断agv中心是否在所在item四分之一弧上 " + agvCenterX + " " + agvCenterY);
+        var agvCenterPoint = judgePointOnCurve(agvCenterX, agvCenterY);
+        //agv中心不在弧上
+        if (agvCenterPoint == 0) {
+            //agv中心直行
+            console.log("agvCurveMove agv中心直行.1");
             lineCurve = lineToCurve(act, dir, sp);
-            return { x : lineCurve.x, y : lineCurve.y, r : lineCurve.r };
-        }
-        x = rot.xx;
-        y = rot.yy;
-        console.log("rot 1 xy = " + x + " " + y);
-        //agv偏移之后的旋转角度
-        rot = pycalPoint(agvCenterX + x, agvCenterY + y, magToCenter, act);
+            //判断直行之后的agv中心点是否落在四分之一弧上
+            isOnCurve = choicePointOnCurve(agvCenterX + lineCurve.x, agvCenterY + lineCurve.y,
+                                               dir, item, oncurve, a);
+            //agv中心点落在了四分之一弧区间内
+            if (isOnCurve != false) {
+                console.log("agvCurveMove agv中心落在四分之一弧区间");
+                console.log("agvCurveMove x, y, r = " + isOnCurve.x + " " + isOnCurve.y+ " " + lineCurve.r);
+                rot = pycalPoint(agvCenterX + x, agvCenterY + y, magToCenter, act);
+                return { x : isOnCurve.x, y : isOnCurve.y, r : rot.angle};
+            } else {
+                console.log("agvCurveMove agv中心直行.3");
+                return { x : lineCurve.x, y : lineCurve.y, r : lineCurve.r };
+            }
+        } else if (agvCenterPoint == 1) {
+            console.log("agvCurveMove agv中心到弧上.1");
+            //center = arcCenterTransformation(item);
+            //agv得到移动偏移量
+            console.log("agvCurveMove xy = " + agvCenterX + " " + agvCenterY);
+            rot = pycalPoint(agvCenterX, agvCenterY, a, act);
+            if (rot == false) {
+                console.log("agvCurveMove: pycalPoint false");
+                return { x : 0, y : 0, r : rect.r };
+            }
+            x = rot.xx;
+            y = rot.yy;
+            console.log("rot 1 xy = " + x + " " + y);
+            //agv偏移之后的旋转角度
+            rot = pycalPoint(agvCenterX + x, agvCenterY + y, magToCenter, act);
 
-        console.log("rot 2 xy = " + (agvCenterX + x) + " " + (agvCenterY + y) + ",  " + rot.angle);
-        angle = rot.angle;
-        console.log("agvCurveMove x y r: " + x + " " + y + " " + r);
-        return { x : x, y : y, r : angle };
+            console.log("rot 2 xy = " + (agvCenterX + x) + " " + (agvCenterY + y) + ",  " + rot.angle);
+            angle = rot.angle;
+            console.log("agvCurveMove x y r: " + x + " " + y + " " + r);
+            return { x : x, y : y, r : angle };
+        }
     }
     //弧长为a时，xy值得变化
     function zeroXY(a) {
@@ -1440,6 +1463,71 @@ Rectangle {
         cy2 = Y0 + K2 * (cx2 - X0);
         return [cx1, cy1, cx2, cy2];
     }
+
+    //所在item弧上  知道x求y   x->0,0点为圆心 转换之后的坐标  curve->item的
+    function onItemCurve(x, radius, startAngle, endAngle, dir) {
+        var judge1, judge2;
+        var y1, y2;
+        y1 = Math.sqrt(Math.pow(radius, 2) - Math.pow(x, 2));
+        y2 = -y1;
+        //两个交点分别为(x, y),(x, y2);
+        //判断这两交点是否在startAngle，endAngle所在区间内
+        if (dir == 1 || dir == -1) {
+            console.log("onItemCurve XY = " + x + " " + y1 + " " + y2);
+            judge1 = pointIsAtArc(x, y1, 0, 0, startAngle, endAngle);
+            judge2 = pointIsAtArc(x, y2, 0, 0, startAngle, endAngle);
+        } else if (dir == 2 || dir == -2) {
+            console.log("onItemCurve XY = " + y1 + " " + y2 + " " + x);
+            judge1 = pointIsAtArc(y1, x, 0, 0, startAngle, endAngle);
+            judge2 = pointIsAtArc(y2, x, 0, 0, startAngle, endAngle);
+        }
+        if ((judge1 != false) && (judge2 != false)) {
+            return false;  //两个点都在四分之一所在弧上  基本不存在这种情况
+        } else if (judge1 != false) {
+            return y1;
+        } else if (judge2 != false) {
+            return y2;
+        } else {
+            return false;
+        }
+    }
+    //计算出agv中心从直线到弧上的xy偏移  返回xy偏移
+    function choicePointOnCurve(agvCenterX, agvCenterY, dir, item, oncurve, sp) {
+        var offsetX, offsetY;
+        var radius = 100;
+        var center = arcCenterTransformation(item);
+        console.log("choicePointOnCurve offsetY = 1");
+        if (dir == 1 || dir == -1) {
+            offsetY = onItemCurve(agvCenterX - center.x, radius, oncurve.startAngle, oncurve.endAngle, dir);
+            if (offsetY != false) {
+                //如果x轴负方向  sp为负
+                if (dir == -1) {
+                    sp = -sp;
+                }
+                console.log("choicePointOnCurve offsetY = " + sp + " " + (offsetY + center.y - agvCenterY));
+                return {x: sp, y: offsetY + center.y - agvCenterY};
+            } else {
+                console.log("choicePointOnCurve offsetY false");
+                return false;
+            }
+        } else if (dir == 2 || dir == -2) {
+            offsetX = onItemCurve(agvCenterY - center.y, radius, oncurve.startAngle, oncurve.endAngle, dir);
+            if (offsetX != false) {
+                //如果y轴负方向  sp为负
+                if (dir == 2) {
+                    sp = -sp;
+                }
+                console.log("choicePointOnCurve offsetY = " + (offsetX + center.x - agvCenterX) + " " + sp);
+                return {x: offsetX + center.x - agvCenterX, y: sp};
+            } else {
+                console.log("choicePointOnCurve offsetX false");
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     //x,y->agv中心 l->弦长  startX, startY->agv初始姿态点
     function pycalPoint(x, y, l, sta) {
         var grid = parent.parent;
@@ -1447,7 +1535,6 @@ Rectangle {
         var center = arcCenterTransformation(item);
         var x1, y1, x2, y2, angle;
         var xx, yy; //最终返回的需要平移的距离；
-        var compareX, compareY;
         var mag1x, mag1y, mag2x, mag2y, magCx, magCy;
         var line1, line2;
         var compare;
@@ -1498,20 +1585,9 @@ Rectangle {
         } else {
             return false;
         }
-        //console.log( "求出点的坐标和agv中心坐标1 = " + xx + " " + yy + " " + x + " " + y);
-//        直线走弧的时候  判断到交点在四分之一弧外  agv往弧之外的点移动
-//        compareX = xx + center.x;
-//        compareY = yy + center.y;
-//        console.log("agv中心和圆的交点不在弧上；" + xx + " " + yy)
-//        if (judgePointOnCurve(compareX, compareY) == 0) {
-//            console.log("agv中心和圆的交点不在弧上；")
-//             return false;
-//        }
-
         //算出agv移动到相交点时的偏移
         xx = xx - x;
         yy = yy - y;
-
         angle = Math.atan2(yy, xx);
         console.log("pycalPoint angle1 = " + angle);
         angle = angle / 2 / Math.PI * 360;
@@ -2076,7 +2152,7 @@ Rectangle {
 
     Timer {
         id: agvTimer;
-        interval: 100;
+        interval: 33;
         running: false;
         repeat: true;
         onTriggered: {
