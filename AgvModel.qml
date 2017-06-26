@@ -14,8 +14,8 @@ Rectangle {
     //    property alias arcPathAnimation: arcPathAnimation;
     property alias text: agvText.text;
     property int gridIndex: 0;     // AGV所在格子
-    property int gridX: 0;          // 格子里AGV的坐标X, 相对于scale 1.0的情况
-    property int gridY: 0;          // 格子里AGV的坐标Y
+    property double gridX: 0;          // 格子里AGV的坐标X, 相对于scale 1.0的情况
+    property double gridY: 0;          // 格子里AGV的坐标Y
     property int r: 0;              // AGV角度, 逆时针
     property bool initFlag: false;       // 标记是否初始化成功
     property int lrMagToCenter: 26;
@@ -2082,12 +2082,15 @@ Rectangle {
         agvMove(0, 0, 0);
     }
     //sta 1->前行  2->后退  3->左行  4->右行  5->顺时针旋转 6->逆时针旋转  8->精确停止  0->停止
-    function crossTestLine(sta, turn, speed) {
+    function crossTestLine(sta, turn, speed, far) {
         var r = rect.r;
         var cv, crossPoint;
         var i;
         var direction = getAgvDirection(r);
         console.log("sta = " + sta)
+        if (far == 1) {
+            speed = 0;
+        }
         if (sta == 1 || sta == 2 || sta == 3 || sta == 4 || sta == 8) {
             if (direction == 0) {
                 console.log("off track. direction == 0 " + rect.r);
@@ -2153,7 +2156,7 @@ Rectangle {
     Timer {
         id: agvTimer;
         interval: 33;
-        running: false;
+        running: true;
         repeat: true;
         onTriggered: {
             //var cv;     // 磁条曲线
@@ -2167,11 +2170,15 @@ Rectangle {
             if (alarm == null) {
                 return;
             }
+            if (alarm.near == 1 || alarm.touch == 1) {
+                agvMove(0, 0, 0);
+                return;
+            }
             // 只有运动时才有效
             //            if (isAgvMove(infos) == false) {
             //                return;
             //            }
-            crossTestLine(infos.sta, infos.turnto, infos.v);
+            crossTestLine(infos.sta, infos.turnto, infos.v, alarm.far);
             // 得到磁条曲线
             //cv = getMagCurve(infos.sta, infos.turnto);
             // 判断AGV是否在磁条上
